@@ -3,10 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <netinet/in.h>
+#include <net/if.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #include "socket.h"
 
@@ -89,3 +91,13 @@ int client(int portnr, char buffer[512])
 	return 0;
 }
 
+char *internalhost(){
+	struct ifreq ifr;
+	int sh = socket(AF_INET, SOCK_DGRAM, 0);
+	ifr.ifr_addr.sa_family = AF_INET;
+	strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);
+	ioctl(sh, SIOCGIFADDR, &ifr);
+	close(sh);
+	char *iaddr = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
+	return iaddr;
+}

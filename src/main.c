@@ -10,22 +10,46 @@ void error(const char *msg){
 
 struct nodeinfo{
 	char *hostname;
-	char *localhost;
-	char *remotehost;
+	char *internalhost;
+	char *externalhost;
 //	char *neighbours[2];
 };
 
-struct nodeinfo *createNode(char *hostname, char *localhost, char *remotehost){
+struct nodeinfo *createNode(char *hostname, char *internalhost, char *externalhost){
 	struct nodeinfo *node = malloc(sizeof(struct nodeinfo));
 	node->hostname = strdup(hostname);
-	node->localhost = strdup(localhost);
-	node->remotehost = strdup(remotehost);
+	node->internalhost = strdup(internalhost);
+	node->externalhost = strdup(externalhost);
 	return node;
 }
 
+void print_usage() {
+	printf(	"Usage: daust [options]\n"
+		"	-v, --version		Print the version and exit.\n"
+		"	-h, --help		Print this help and exit.\n\n"
+		"Options: \n"
+		"  -r, --remote			Specify a public facing address for this node."
+	);
+}
+
 int main(){
-	printf("hello world\n");
-	struct nodeinfo *nodeself = createNode("kaas", "is", "baas");
-	printf("nodeself->hostname is %s", nodeself->hostname);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	struct nodeinfo *nodeself = createNode("kaas1", internalhost(), "baas1");
+	free(nodeself);
 	return 0;
 }
