@@ -6,9 +6,9 @@ depcomp
 install-sh
 *.log
 *.m4
+Makefile
 missing
 *.o
-*.so
 *.Po
-Makefile
+*.so
 *.status
