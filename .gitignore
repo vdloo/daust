@@ -1,0 +1,14 @@
+/*.cache
+configure
+daust
+depcomp
+*.in
+install-sh
+*.log
+*.m4
+missing
+*.o
+*.so
+*.Po
+Makefile
+*.status
