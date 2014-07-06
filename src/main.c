@@ -88,6 +88,8 @@ int main(int argc, char *argv[]){
 		}
 		opt = getopt_long( argc, argv, optString, longOpts, &longIndex );
 	}
+	// maybe use this later to do things with arguments without a flag
+	// int i; for(i = optind; i < argc; i++){printf("Do something with: %s\n", argv[i]);}
 
 	struct nodeinfo *nodeself = createNode("kaas1", internalhost(), "baas1");
 	free(nodeself);
