@@ -16,12 +16,15 @@ struct nodeinfo{
 struct nodeinfo *createNode(char *hostname, char *internalhost, char *externalhost){
 	struct nodeinfo *node = malloc(sizeof(struct nodeinfo));
 	node->hostname = strdup(hostname);
+	free(hostname);
 	node->internalhost = strdup(internalhost);
 	node->externalhost = strdup(externalhost);
 	return node;
 }
 
 int init_node(){
-	struct nodeinfo *nodeself = createNode("kaas1", internalhost(), "baas1");
+	struct nodeinfo *nodeself = createNode(hostname(), internalhost(), "baas1");
+	printf("nodeself->hostname is %s\n", nodeself->hostname);
+	printf("nodeself->internalhost is %s\n", nodeself->internalhost);
 	free(nodeself);
 }

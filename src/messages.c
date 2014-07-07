@@ -12,7 +12,7 @@ void print_usage(){
 			"       -h, --help              Print this help and exit.\n\n"
 			"Options: \n"
 			"  -p, --publicfacing           Specify a public facing address for this node.\n"
-			"  -v, --verbose                        More verbose output\n"
+			"  -v, --verbose                More verbose output\n"
 	      );
 }
 

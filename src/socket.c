@@ -90,6 +90,11 @@ int client(int portnr, char buffer[512])
 	close(sockfd);
 	return 0;
 }
+char *hostname(){
+	char *hn = malloc(128 * sizeof(char));
+	gethostname(hn, 128 * sizeof(char));
+	return hn;
+}
 
 char *internalhost(){
 	struct ifreq ifr;
