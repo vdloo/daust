@@ -3,39 +3,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <getopt.h>
-#include "socket.h"
+#include "messages.h"
+#include "init_node.h"
 
 void error(const char *msg){
 	perror(msg);
-}
-
-struct nodeinfo{
-	char *hostname;
-	char *internalhost;
-	char *externalhost;
-//	char *neighbours[2];
-};
-
-struct nodeinfo *createNode(char *hostname, char *internalhost, char *externalhost){
-	struct nodeinfo *node = malloc(sizeof(struct nodeinfo));
-	node->hostname = strdup(hostname);
-	node->internalhost = strdup(internalhost);
-	node->externalhost = strdup(externalhost);
-	return node;
-}
-
-void print_version(){
-	printf("daust 0.1\n");
-}
-
-void print_usage(){
-	printf( "Usage: daust [options]\n"
-		"	-V, --version		Print the version and exit.\n"
-		"	-h, --help		Print this help and exit.\n\n"
-		"Options: \n"
-		"  -p, --publicfacing		Specify a public facing address for this node.\n"
-		"  -v, --verbose			More verbose output\n"
-	);
 }
 
 struct globalArgs_t{
@@ -91,7 +63,6 @@ int main(int argc, char *argv[]){
 	// maybe use this later to do things with arguments without a flag
 	// int i; for(i = optind; i < argc; i++){printf("Do something with: %s\n", argv[i]);}
 
-	struct nodeinfo *nodeself = createNode("kaas1", internalhost(), "baas1");
-	free(nodeself);
+	init_node();
 	return 0;
 }
