@@ -1,5 +1,5 @@
-#ifndef INIT_H
-#define INIT_H
+#ifndef MESSAGES_H
+#define MESSAGES_H
 void print_version();
 void print_usage();
 #endif

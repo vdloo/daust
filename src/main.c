@@ -1,19 +1,16 @@
+/* main.c */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <getopt.h>
+#include "config.h"
 #include "messages.h"
 #include "init_node.h"
 
 void error(const char *msg){
 	perror(msg);
 }
-
-struct globalArgs_t{
-	int verbosity;
-	const char *publicfacing;
-} globalArgs;
 
 static const char *optString = "vp:Vh:";
 
@@ -25,12 +22,16 @@ static const struct option longOpts[] = {
 	{ NULL, no_argument, NULL, 0 }
 };
 
+struct conf *config;
+
 int main(int argc, char *argv[]){
 	int opt 			= 0;
 	int longIndex			= 0;
-	globalArgs.verbosity 		= 0;
-	globalArgs.publicfacing 	= NULL;
-	opt = getopt_long( argc, argv, optString, longOpts, &longIndex );
+	config				= malloc(sizeof(struct conf));
+	config->verbosity 		= 0;
+	config->publicfacing		= malloc(128 * sizeof(char));
+	config->publicfacing 		= NULL;
+	opt = getopt_long(argc, argv, optString, longOpts, &longIndex);
 	while( opt != -1 ) {
 		switch(opt) {
 			case 'v':
@@ -39,11 +40,11 @@ int main(int argc, char *argv[]){
 				break;
 
 			case 'p':
-				globalArgs.publicfacing = optarg;
+				config->publicfacing = strdup(optarg);
 				break;
 
 			case 'V':
-				globalArgs.verbosity++;
+				config->verbosity++;
 				break;
 			case 'h':
 				print_usage();
@@ -53,7 +54,6 @@ int main(int argc, char *argv[]){
 			case '?':
 			case ':':
 			default:
-				printf("nope");
 				print_usage();
 				exit(1);
 				break;
@@ -64,5 +64,6 @@ int main(int argc, char *argv[]){
 	// int i; for(i = optind; i < argc; i++){printf("Do something with: %s\n", argv[i]);}
 
 	init_node();
+	free(config);
 	return 0;
 }
