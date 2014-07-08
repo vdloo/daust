@@ -54,7 +54,7 @@ int send_packets(char *host, int port, char *buf)
 	if (sh < 0) {
 		error("ERROR opening socket");
 	}
-	sa.sin_addr.s_addr 	= inet_addr("172.28.128.3"); 
+	sa.sin_addr.s_addr 	= inet_addr("127.0.0.1"); // replace this
 	if (sa.sin_addr.s_addr == INADDR_NONE) {
 	}
 	sa.sin_family 		= AF_INET;
