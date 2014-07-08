@@ -16,9 +16,9 @@ struct nodeinfo {
 };
 
 char *na = "N/A";
-struct nodeinfo *createNode(char *hn, char *kn, char *ih, char *eh)
+struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh)
 {
-	struct nodeinfo *node = malloc(sizeof(struct nodeinfo));
+	struct nodeinfo *node 	= malloc(sizeof(struct nodeinfo));
 	node->hostname 		= strdup(hn); free (hn);
 	node->internalhost 	= ih ? strdup(ih) : na;
 	node->keynode		= kn ? strdup(kn) : na;
@@ -35,12 +35,16 @@ int init_node()
 	char *kn = config->keynode;
 	char *ih = internalhost();
 	char *pf = config->publicface;
-	nodeself = createNode(hn, kn, ih, pf);
+	nodeself = create_node(hn, kn, ih, pf);
 	printf("nodeself->hostname is %s\n", nodeself->hostname);
 	printf("nodeself->keynode is %s\n", nodeself->keynode);
 	printf("nodeself->internalhost is %s\n", nodeself->internalhost);
 	printf("nodeself->publicface is %s\n", nodeself->externalhost);
 	printf("nodeself->neighbour 1 is %s\n", nodeself->neighbour[0]);
 	printf("nodeself->neighbour 2 is %s\n", nodeself->neighbour[1]);
+
+	send("kaas", 4040, "kaasisbaas");
+
 	free(nodeself);
+	printf("now exiting init_node()\n");
 }

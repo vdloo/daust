@@ -14,7 +14,7 @@ void error(const char *msg)
 }
 
 struct conf *config;
-static const char *optString = "vp:k:Vh:";
+static const char *optString = "vp:k:Vh";
 static const struct option longOpts[] = {
 	{ "version", no_argument, NULL, 'v' },
 	{ "keynode", required_argument, NULL, 'k' },
