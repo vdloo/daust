@@ -3,6 +3,7 @@
 #define CONFIG_H
 struct conf{
 	int verbosity;
+	int server; // replace this with threading
 	char *publicface;
 	char *keynode;
 };

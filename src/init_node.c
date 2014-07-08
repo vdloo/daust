@@ -43,7 +43,12 @@ int init_node()
 	printf("nodeself->neighbour 1 is %s\n", nodeself->neighbour[0]);
 	printf("nodeself->neighbour 2 is %s\n", nodeself->neighbour[1]);
 
-	send("test", 4040, "this is a test string");
+	if (config->server) {
+		receive_packets(4040);
+	} else {
+		char *testdata = strdup("test message");
+		send_packets("test", 4040, testdata);
+	}
 
 	free(nodeself);
 	printf("now exiting init_node()\n");

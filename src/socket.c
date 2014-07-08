@@ -23,7 +23,7 @@ unsigned short get_dli(char *res)
 
 void forge_packet(struct pack *pkt)
 {
-//	if (pkt->d) free(pkt->d);
+	if (pkt->d) free(pkt->d);
 	pkt->d = malloc(sizeof(unsigned short) + pkt->dli * sizeof(char) + 1);
 	memcpy(pkt->d, &pkt->dli, sizeof(unsigned short));
 	memcpy(pkt->d + sizeof(unsigned short), pkt->res, pkt->dli);
@@ -37,7 +37,7 @@ int save_residu(struct pack *pkt)
 	int nln = strlen(pkt->res) - pkt->dli;
 	if (nln > 0) {
 		tmp = malloc(nln);
-		memcpy(tmp, pkt->res + pkt->dli, nln); //deze gaat fout
+		memcpy(tmp, pkt->res + pkt->dli, nln);
 		free(pkt->res);
 		if (tmp) pkt->res = strdup(tmp);
 		free(tmp);
@@ -54,9 +54,8 @@ int send_packets(char *host, int port, char *buf)
 	if (sh < 0) {
 		error("ERROR opening socket");
 	}
-	sa.sin_addr.s_addr 	= inet_addr("172.28.128.1"); 
+	sa.sin_addr.s_addr 	= inet_addr("172.28.128.3"); 
 	if (sa.sin_addr.s_addr == INADDR_NONE) {
-		printf("WARNING invalid address\n");
 	}
 	sa.sin_family 		= AF_INET;
 	sa.sin_port 		= htons(port);
@@ -81,11 +80,39 @@ int send_packets(char *host, int port, char *buf)
 	return 0;
 }
 
+void process_incoming(int sh)
+{
+	int nsh, n;
+	struct sockaddr_in cla;
+	socklen_t cl = sizeof(cla);
+	nsh = accept(sh, (struct sockaddr *) &cla, &cl);
+	if (nsh < 0) {
+		error("ERROR accepting socket");
+	}
+	unsigned short dli = 0, prev_dli = 0;
+	int m_siz = 0;
+	char *buf = NULL;
+	do {
+		n = read(nsh, &dli, sizeof(unsigned short));
+		if (n < 0) {
+			error("ERROR reading data length from socket");
+		}
+		m_siz = m_siz + (dli * sizeof(char));
+		buf = realloc(buf, m_siz);
+		n = read(nsh, buf + prev_dli, (dli * sizeof(char)));
+		prev_dli = prev_dli + dli;
+	} while (dli == MAX_DATA_LENGTH);
+	close(nsh);
+	printf("received:\n%s\n", buf);
+	free(buf);
+}
+
+
 int receive_packets(int port)
 {
-	int sh, nsh, n, o = 1;
+	int sh, o = 1;
 	socklen_t cl;
-	struct sockaddr_in sa, cla;
+	struct sockaddr_in sa;
 	sh = socket(AF_INET, SOCK_STREAM, 0);
 	if (sh < 0) {
 		error("ERROR opening socket");
@@ -93,24 +120,12 @@ int receive_packets(int port)
 	sa.sin_family = AF_INET;
 	sa.sin_addr.s_addr = INADDR_ANY;
 	sa.sin_port = htons(port);
-	setsockopt(sh, SOL_SOCKET, SO_REUSEADDR, (const char *) &o, sizeof(int));
+	setsockopt(sh, SOL_SOCKET, SO_REUSEADDR, (const char *)&o, sizeof(int));
 	if (bind(sh, (struct sockaddr *) &sa, sizeof(sa)) > 0) {
 		error("ERROR on binding");
 	}
 	listen(sh, 5);
-	int i;
-	for (i = 0; i < 5; i++) {
-		cl = sizeof(cla);
-		nsh = accept(sh, (struct sockaddr *) &cla, &cl);
-		if (nsh < 0) {
-			error("ERROR accepting socket");
-		}
-		unsigned short dli;
-		n = read(nsh, dli, sizeof(unsigned short));
-		if (n < 0) error("ERROR reading data length from socket");
-		printf("received unsigned double is %hu\n", dli);
-	}
-	close(nsh);
+	while(1) process_incoming(sh);
 	close(sh);
 	return 0;
 }

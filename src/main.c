@@ -14,12 +14,13 @@ void error(const char *msg)
 }
 
 struct conf *config;
-static const char *optString = "vp:k:Vh";
+static const char *optString = "vp:k:Vhs";
 static const struct option longOpts[] = {
 	{ "version", no_argument, NULL, 'v' },
 	{ "keynode", required_argument, NULL, 'k' },
 	{ "publicface", required_argument, NULL, 'p' },
 	{ "verbose", no_argument, NULL, 'V' },
+	{ "server", no_argument, NULL, 's' }, //replace this with threading
 	{ "help", no_argument, NULL, 'h' },
 	{ NULL, no_argument, NULL, 0 }
 };
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
 	config->keynode 		= NULL;
 	config->publicface		= malloc(128 * sizeof(char));
 	config->publicface 		= NULL;
+	config->server 			= 0;
 	opt = getopt_long(argc, argv, optString, longOpts, &longIndex);
 	while (opt != -1) {
 		switch(opt) {
@@ -54,6 +56,9 @@ int main(int argc, char *argv[])
 		case 'h':
 			print_usage();
 			exit(0);
+			break;
+		case 's': //replace this with threading
+			config->server++;
 			break;
 
 		case '?':
