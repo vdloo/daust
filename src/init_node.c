@@ -8,28 +8,39 @@
 #include "socket.h"
 
 struct nodeinfo {
-	char *hostname;
-	char *internalhost;
-	char *externalhost;
-//      char *neighbours[2];
+	char *hostname; 	// hostname of the machine
+	char *keynode;		// node that introduced this node to the cluster
+	char *internalhost;	// local ip of node
+	char *externalhost;	// public facing ip of the node
+	char *neighbour[2];	// nodes that this node talks to
 };
 
 char *na = "N/A";
-struct nodeinfo *createNode(char *hn, char *ih, char *eh)
+struct nodeinfo *createNode(char *hn, char *kn, char *ih, char *eh)
 {
 	struct nodeinfo *node = malloc(sizeof(struct nodeinfo));
-	node->hostname = strdup(hn); free (hn);
-	node->internalhost = ih ? strdup(ih) : na;
-	node->externalhost = eh ? strdup(eh) : na;
+	node->hostname 		= strdup(hn); free (hn);
+	node->internalhost 	= ih ? strdup(ih) : na;
+	node->keynode		= kn ? strdup(kn) : na;
+	node->externalhost 	= eh ? strdup(eh) : na;
+	node->neighbour[0] 	= na;
+	node->neighbour[1] 	= na;
 	return node;
 }
 
 int init_node()
 {
 	struct nodeinfo *nodeself;
-	nodeself = createNode(hostname(), internalhost(), config->publicfacing);
+	char *hn = hostname();
+	char *kn = config->keynode;
+	char *ih = internalhost();
+	char *pf = config->publicface;
+	nodeself = createNode(hn, kn, ih, pf);
 	printf("nodeself->hostname is %s\n", nodeself->hostname);
+	printf("nodeself->keynode is %s\n", nodeself->keynode);
 	printf("nodeself->internalhost is %s\n", nodeself->internalhost);
-	printf("nodeself->publicfacing is %s\n", nodeself->externalhost);
+	printf("nodeself->publicface is %s\n", nodeself->externalhost);
+	printf("nodeself->neighbour 1 is %s\n", nodeself->neighbour[0]);
+	printf("nodeself->neighbour 2 is %s\n", nodeself->neighbour[1]);
 	free(nodeself);
 }

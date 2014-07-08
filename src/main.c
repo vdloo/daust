@@ -17,7 +17,7 @@ struct conf *config;
 static const char *optString = "vp:Vh:";
 static const struct option longOpts[] = {
 	{ "version", no_argument, NULL, 'v' },
-	{ "publicfacing", required_argument, NULL, 'p' },
+	{ "publicface", required_argument, NULL, 'p' },
 	{ "verbose", no_argument, NULL, 'V' },
 	{ "help", no_argument, NULL, 'h' },
 	{ NULL, no_argument, NULL, 0 }
@@ -30,8 +30,10 @@ int main(int argc, char *argv[])
 	int longIndex			= 0;
 	config				= malloc(sizeof(struct conf));
 	config->verbosity 		= 0;
-	config->publicfacing		= malloc(128 * sizeof(char));
-	config->publicfacing 		= NULL;
+	config->publicface		= malloc(128 * sizeof(char));
+	config->publicface 		= NULL;
+	config->keynode			= malloc(128 * sizeof(char));
+	config->keynode 		= NULL;
 	opt = getopt_long(argc, argv, optString, longOpts, &longIndex);
 	while (opt != -1) {
 		switch(opt) {
@@ -39,11 +41,12 @@ int main(int argc, char *argv[])
 			print_version();
 			exit(0);
 			break;
-
 		case 'p':
-			config->publicfacing = strdup(optarg);
+			config->publicface 	= strdup(optarg);
 			break;
-
+		case 'k':
+			config->keynode 	= strdup(optarg);
+			break;
 		case 'V':
 			config->verbosity++;
 			break;

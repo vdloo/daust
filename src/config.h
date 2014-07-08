@@ -3,7 +3,8 @@
 #define CONFIG_H
 struct conf{
 	int verbosity;
-	char *publicfacing;
+	char *publicface;
+	char *keynode;
 };
 extern struct conf *config;
 extern void error();
