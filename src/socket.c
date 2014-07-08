@@ -102,6 +102,7 @@ void process_incoming(int sh)
 		n = read(nsh, buf + prev_dli, (dli * sizeof(char)));
 		prev_dli = prev_dli + dli;
 	} while (dli == MAX_DATA_LENGTH);
+	buf[m_siz] = '\0';
 	close(nsh);
 	printf("received:\n%s\n", buf);
 	free(buf);
