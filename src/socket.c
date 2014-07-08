@@ -70,14 +70,11 @@ int send_packets(char *host, int port, char *buf)
 	do {
 		pkt->dli = get_dli(pkt->res);
 		forge_packet(pkt);
-		printf("pkt->res is %s\n", pkt->res);
 
 		n = write(sh, pkt->d, pkt->dli + 2);
 		if (n < 0) {
 			error("Error writing to socket");
 		}
-
-		printf("is it borked here yet? 4\n");
 	} while(save_residu(pkt));
 
 	close(sh);

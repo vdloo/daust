@@ -43,7 +43,7 @@ int init_node()
 	printf("nodeself->neighbour 1 is %s\n", nodeself->neighbour[0]);
 	printf("nodeself->neighbour 2 is %s\n", nodeself->neighbour[1]);
 
-	send("kaas", 4040, "kaasisbaas");
+	send("test", 4040, "this is a test string");
 
 	free(nodeself);
 	printf("now exiting init_node()\n");
