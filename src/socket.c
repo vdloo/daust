@@ -8,13 +8,15 @@
 #include <arpa/inet.h>
 #include "socket.h"
 
-char *hostname(){
+char *hostname()
+{
 	char *hn = malloc(128 * sizeof(char));
 	gethostname(hn, 128 * sizeof(char));
 	return hn;
 }
 
-char *internalhost(){
+char *internalhost()
+{
 	struct ifreq ifr;
 	int sh = socket(AF_INET, SOCK_DGRAM, 0);
 	ifr.ifr_addr.sa_family = AF_INET;

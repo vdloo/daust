@@ -8,12 +8,13 @@
 #include "messages.h"
 #include "init_node.h"
 
-void error(const char *msg){
+void error(const char *msg)
+{
 	perror(msg);
 }
 
+struct conf *config;
 static const char *optString = "vp:Vh:";
-
 static const struct option longOpts[] = {
 	{ "version", no_argument, NULL, 'v' },
 	{ "publicfacing", required_argument, NULL, 'p' },
@@ -22,9 +23,9 @@ static const struct option longOpts[] = {
 	{ NULL, no_argument, NULL, 0 }
 };
 
-struct conf *config;
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
 	int opt 			= 0;
 	int longIndex			= 0;
 	config				= malloc(sizeof(struct conf));
@@ -32,33 +33,33 @@ int main(int argc, char *argv[]){
 	config->publicfacing		= malloc(128 * sizeof(char));
 	config->publicfacing 		= NULL;
 	opt = getopt_long(argc, argv, optString, longOpts, &longIndex);
-	while( opt != -1 ) {
+	while (opt != -1) {
 		switch(opt) {
-			case 'v':
-				print_version();
-				exit(0);
-				break;
+		case 'v':
+			print_version();
+			exit(0);
+			break;
 
-			case 'p':
-				config->publicfacing = strdup(optarg);
-				break;
+		case 'p':
+			config->publicfacing = strdup(optarg);
+			break;
 
-			case 'V':
-				config->verbosity++;
-				break;
-			case 'h':
-				print_usage();
-				exit(0);
-				break;
+		case 'V':
+			config->verbosity++;
+			break;
+		case 'h':
+			print_usage();
+			exit(0);
+			break;
 
-			case '?':
-			case ':':
-			default:
-				print_usage();
-				exit(1);
-				break;
+		case '?':
+		case ':':
+		default:
+			print_usage();
+			exit(1);
+			break;
 		}
-		opt = getopt_long( argc, argv, optString, longOpts, &longIndex );
+		opt = getopt_long(argc, argv, optString, longOpts, &longIndex);
 	}
 	// maybe use this later to do things with arguments without a flag
 	// int i; for(i = optind; i < argc; i++){printf("Do something with: %s\n", argv[i]);}
