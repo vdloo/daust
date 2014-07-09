@@ -93,7 +93,7 @@ void destroy_node_list(struct nli *node)
 
 
 // count items left in list
-int count_nodes_left(struct nli *node)
+int count_node_list(struct nli *node)
 {
 	int i = 0;
 	if (node) {
@@ -114,9 +114,7 @@ char *append_to_buf(char *buf, int *m_sp, char *str)
 	*m_sp = *m_sp + (strlen(str) + 1) * sizeof(char);
 	buf = realloc(buf, *m_sp);
 	memcpy(buf + p_siz, str, strlen(str) * sizeof(char));
-	char *d = dl;
-	memcpy(buf + p_siz + strlen(str), d, strlen(d) * sizeof(char));
-	free(d);
+	memcpy(buf + p_siz + strlen(str), dl, strlen(dl) * sizeof(char));
 	return buf;
 }
 
@@ -152,16 +150,57 @@ char *serialize(struct nli *node)
 // returns pointer to new list.
 struct nli *deserialize(char *buf)
 {
-	struct nli *np, *head;
-	head = create_node_list();
+	struct nli *head = NULL, *np = NULL;
 
 	int l = strlen(buf);
+	int nest = 0, el = 0;
+	char *sg = strtok(buf, dl);
+	char *hn, *kn, *ih, *pf;
+	do {
+		if (strstr(sg, st)) {
+			el = 0;
+			++nest;	
+		}
+		if (strstr(sg, ed)) {
+			if (nest == 2) {
+				np->info 	= create_node(hn, kn, ih, pf);
+			}
+		       	--nest;
+		}
+		sg = strtok(NULL, dl);
+		if (nest == 2) {
+			switch(el) {
+				case 0: 
+					if (np) {
+						np = add_node_to_list(np);
+					} else {
+						head = create_node_list();
+						np = head;
+					}
+					hn 	= strdup(sg);
+					break;
+				case 1: 
+					kn 	= strdup(sg);
+					break;
+				case 2: 
+					ih	= strdup(sg);
+					break;
+				case 3:
+					pf	= strdup(sg);
+					break;
+			}
+			el++;
+		}
+	} while (sg);
+	return head;
 }
 
 void buf_callback(char *buf)
 {
 	printf("received\n%s\n", buf);
 	struct nli *nl = deserialize(buf);
+	int nodesleft = count_node_list(nl);
+	printf("received %d nodes\n", nodesleft);
 }
 
 
@@ -198,7 +237,6 @@ int init_node()
 		// serializing for transmission
 		char *buf;
 		buf = serialize(head);
-		send_packets("test", 4040, buf);
 		free(buf);
 	}
 
