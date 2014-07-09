@@ -174,13 +174,13 @@ struct nli *deserialize(char *buf)
 	do {
 		if (strstr(sg, st)) {
 			el = 0;
-			++nest;	
+			if (nest < 2) ++nest;	
 		}
 		if (strstr(sg, ed)) {
 			if (nest == 2) {
 				np->info 	= create_node(hn, kn, ih, pf);
 			}
-		       	--nest;
+		       	if (nest > 0) --nest;
 		}
 		sg = strtok(NULL, dl);
 		if (nest == 2) {
