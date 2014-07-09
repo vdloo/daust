@@ -124,7 +124,7 @@ char *serialize(struct nli *node)
 	if (node) {
 		char *st = strdup("|st_delim|");
 		char *ed = strdup("|end_delim|"); 
-		struct nodeinfo *nfo = node->info;
+		struct nodeinfo *nfo;
 		int m_siz = 0;
 		int *m_sp = &m_siz;
 
@@ -132,6 +132,7 @@ char *serialize(struct nli *node)
 		buf = append_to_buf(buf, m_sp, st);
 		do
 		{
+			nfo = node->info;
 			buf = append_to_buf(buf, m_sp, st);
 			buf = append_to_buf(buf, m_sp, nfo->hostname);
 			buf = append_to_buf(buf, m_sp, nfo->keynode);
