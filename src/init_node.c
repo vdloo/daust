@@ -110,7 +110,7 @@ char *append_to_buf(char *buf, int *m_sp, char *str)
 	*m_sp = *m_sp + (strlen(str) + 1) * sizeof(char);
 	buf = realloc(buf, *m_sp);
 	memcpy(buf + p_siz, str, strlen(str) * sizeof(char));
-	char *d = strdup(",");
+	char *d = strdup("\n");
 	memcpy(buf + p_siz + strlen(str), d, strlen(d) * sizeof(char));
 	free(d);
 	return buf;
@@ -122,8 +122,8 @@ char *serialize(struct nli *node)
 {
 	char *buf;
 	if (node) {
-		char *st = strdup("|st_delim|");
-		char *ed = strdup("|end_delim|"); 
+		char *st = strdup("|start_of_block|");
+		char *ed = strdup("|end_of_block|"); 
 		struct nodeinfo *nfo;
 		int m_siz = 0;
 		int *m_sp = &m_siz;
@@ -141,7 +141,7 @@ char *serialize(struct nli *node)
 			buf = append_to_buf(buf, m_sp, ed);
 		} while (node = node->next);
 		buf = append_to_buf(buf, m_sp, ed);
-		buf[m_siz - 1] = '\0'; //turn last comma into null terminator
+		buf[m_siz - 1] = '\0'; //turn last delimiter into null terminator
 		free(ed);
 		free(st);
 	}
@@ -176,20 +176,16 @@ int init_node()
 	np = add_node_to_list(np);
 	np->info 	= create_node(hn, kn, ih, pf);
 
-	// serializing for transmission
-	char *msg;
-	msg = serialize(head);
-	printf("serialized struct is:\n%s\n", msg);
+	if (config->server) {
+		receive_packets(4040);
+	} else {
+		// serializing for transmission
+		char *buf;
+		buf = serialize(head);
+		send_packets("test", 4040, buf);
+	}
+
 
 	destroy_node_list(head);
-
-//	if (config->server) {
-//		receive_packets(4040);
-//	} else {
-//		char *testdata = strdup("test message");
-//		send_packets("test", 4040, testdata);
-//	}
-
-
 	printf("now exiting init_node()\n");
 }
