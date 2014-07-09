@@ -16,6 +16,7 @@ struct nodeinfo {
 };
 
 char *na = "N/A";
+// populates new nodeinfo struct and returns pointer
 struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh)
 {
 	struct nodeinfo *node 	= malloc(sizeof(struct nodeinfo));
@@ -28,6 +29,7 @@ struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh)
 	return node;
 }
 
+// clears memory of nodeinfo struct pointed to by argument
 void destroy_node(struct nodeinfo *node)
 {
 	if (node) {
@@ -47,7 +49,7 @@ struct nli {
 };
 
 // add/insert node in list
-struct nli *anli(struct nli *cur)
+struct nli *add_node_to_list(struct nli *cur)
 {
 	struct nli *p = malloc(sizeof(struct nli));
 	p->next = NULL;
@@ -62,25 +64,25 @@ struct nli *anli(struct nli *cur)
 	return p;
 }
 
-// create new node list
-struct nli *nl()
+// create new node list, returns pointer to first item in new list
+struct nli *create_node_list()
 {
-	return anli(NULL);
+	return add_node_to_list(NULL);
 }
 
-// remove node from list
-struct nli* rnli(struct nli *node)
+// removes item from list and returns pointer to item before deleted
+struct nli* remove_node_from_list(struct nli *node)
 {
 	struct nli* n = node->prev;
 	if (node->prev) node->prev->next = node->next;
 	if (node->next) node->next->prev = node->prev;
 	destroy_node(node);
 	free(node);
-	return n; // remember to free deleted node before doing this
+	return n;
 }
 
-// free memory to end of list
-void dl(struct nli *node)
+// destroys from pointer to item to end of list
+void destroy_node_list(struct nli *node)
 {
 	if (node) {
 		do {
@@ -108,7 +110,7 @@ int init_node()
 {
 	char *hn, *kn, *ih, *pf;
 	struct nli *np, *head;
-	head = nl();
+	head = create_node_list();
 
 	hn = hostname();
 	kn = config->keynode;
@@ -121,17 +123,17 @@ int init_node()
 	kn = strdup("keynode1");
 	ih = strdup("192.168.1.2");
 	pf = strdup("n1.rickvandeloo.com");
-	np = anli(np);
+	np = add_node_to_list(np);
 	np->info 	= create_node(hn, kn, ih, pf);
 
 	hn = strdup("neigh2");
 	kn = strdup("keynode2");
 	ih = strdup("192.168.2.3");
 	pf = strdup("n2.rickvandeloo.com");
-	np = anli(np);
+	np = add_node_to_list(np);
 	np->info 	= create_node(hn, kn, ih, pf);
 
-	dl(head);
+	destroy_node_list(head);
 
 //	if (config->server) {
 //		receive_packets(4040);
