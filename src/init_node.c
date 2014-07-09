@@ -219,7 +219,6 @@ void buf_callback(char *buf)
 	}
 }
 
-
 int init_node()
 {
 	char *hn, *kn, *ih, *pf;
