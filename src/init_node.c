@@ -104,13 +104,17 @@ int count_nodes_left(struct nli *node)
 	return i;
 }
 
+char st[] = "|start_of_block|";
+char ed[] = "|end_of_block|";
+char dl[] = "\n";
+
 char *append_to_buf(char *buf, int *m_sp, char *str)
 {
 	int p_siz = *m_sp;
 	*m_sp = *m_sp + (strlen(str) + 1) * sizeof(char);
 	buf = realloc(buf, *m_sp);
 	memcpy(buf + p_siz, str, strlen(str) * sizeof(char));
-	char *d = strdup("\n");
+	char *d = dl;
 	memcpy(buf + p_siz + strlen(str), d, strlen(d) * sizeof(char));
 	free(d);
 	return buf;
@@ -122,8 +126,6 @@ char *serialize(struct nli *node)
 {
 	char *buf;
 	if (node) {
-		char *st = strdup("|start_of_block|");
-		char *ed = strdup("|end_of_block|"); 
 		struct nodeinfo *nfo;
 		int m_siz = 0;
 		int *m_sp = &m_siz;
@@ -142,10 +144,24 @@ char *serialize(struct nli *node)
 		} while (node = node->next);
 		buf = append_to_buf(buf, m_sp, ed);
 		buf[m_siz - 1] = '\0'; //turn last delimiter into null terminator
-		free(ed);
-		free(st);
 	}
 	return buf;
+}
+
+// deserializes buffer to nodeinfo linked list.
+// returns pointer to new list.
+struct nli *deserialize(char *buf)
+{
+	struct nli *np, *head;
+	head = create_node_list();
+
+	int l = strlen(buf);
+}
+
+void buf_callback(char *buf)
+{
+	printf("received\n%s\n", buf);
+	struct nli *nl = deserialize(buf);
 }
 
 
@@ -177,12 +193,13 @@ int init_node()
 	np->info 	= create_node(hn, kn, ih, pf);
 
 	if (config->server) {
-		receive_packets(4040);
+		receive_packets(4040, buf_callback);
 	} else {
 		// serializing for transmission
 		char *buf;
 		buf = serialize(head);
 		send_packets("test", 4040, buf);
+		free(buf);
 	}
 
 

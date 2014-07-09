@@ -80,7 +80,7 @@ int send_packets(char *host, int port, char *buf)
 	return 0;
 }
 
-void process_incoming(int sh)
+void process_incoming(int sh, void (*cb)(char *param))
 {
 	int nsh, n;
 	struct sockaddr_in cla;
@@ -104,12 +104,12 @@ void process_incoming(int sh)
 	} while (dli == MAX_DATA_LENGTH);
 	buf[m_siz] = '\0';
 	close(nsh);
-	printf("received:\n%s\n", buf);
+	cb(buf);
 	free(buf);
 }
 
 
-int receive_packets(int port)
+int receive_packets(int port, void (*cb)(char *param))
 {
 	int sh, o = 1;
 	socklen_t cl;
@@ -127,7 +127,7 @@ int receive_packets(int port)
 		error("ERROR on binding");
 	}
 	listen(sh, 5);
-	while(1) process_incoming(sh);
+	while(1) process_incoming(sh, cb);
 	close(sh);
 	return 0;
 }
