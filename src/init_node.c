@@ -28,20 +28,83 @@ struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh)
 	return node;
 }
 
+// node list item struct
+struct nli {
+	struct nodeinfo *info;
+	struct nli *prev;
+	struct nli *next;
+};
+
+// add/insert node in list
+struct nli *anli(struct nli *cur)
+{
+	struct nli *p = malloc(sizeof(struct nli));
+	p->next = NULL;
+	if (cur) {
+		if (cur->next) {
+			cur->next->prev = p;
+			p->next = cur->next;
+		}
+		cur->next = p;
+	}
+	p->prev = cur;
+	return p;
+}
+
+// create new node list
+struct nli *nl()
+{
+	return anli(NULL);
+}
+
+// remove node from list
+struct nli* rnli(struct nli *node)
+{
+	struct nli* n = node->prev;
+	if (node->prev) node->prev->next = node->next;
+	if (node->next) node->next->prev = node->prev;
+	free(node);
+	return n;
+}
+
+// count items left in list
+int count_nodes_left(struct nli *node)
+{
+	int i = 0;
+	if (node) {
+		do {
+			i++;
+		} while (node = node->next);
+	}
+	return i;
+}
+
 int init_node()
 {
-	struct nodeinfo *nodeself;
-	char *hn = hostname();
-	char *kn = config->keynode;
-	char *ih = internalhost();
-	char *pf = config->publicface;
-	nodeself = create_node(hn, kn, ih, pf);
-	printf("nodeself->hostname is %s\n", nodeself->hostname);
-	printf("nodeself->keynode is %s\n", nodeself->keynode);
-	printf("nodeself->internalhost is %s\n", nodeself->internalhost);
-	printf("nodeself->publicface is %s\n", nodeself->externalhost);
-	printf("nodeself->neighbour 1 is %s\n", nodeself->neighbour[0]);
-	printf("nodeself->neighbour 2 is %s\n", nodeself->neighbour[1]);
+	char *hn, *kn, *ih, *pf;
+	struct nli *np, *head;
+	head = nl();
+
+	hn = hostname();
+	kn = config->keynode;
+	ih = internalhost();
+	pf = config->publicface;
+	np = head;
+	head->info 	= create_node(hn, kn, ih, pf);
+
+	hn = "neigh1";
+	kn = "keynode1";
+	ih = "192.168.1.2";
+	pf = "n1.rickvandeloo.com";
+	np = anli(np);
+	np->info 	= create_node(hn, kn, ih, pf);
+
+	hn = "neigh2";
+	kn = "keynode2";
+	ih = "192.168.1.3";
+	pf = "n2.rickvandeloo.com";
+	np = anli(np);
+	np->info 	= create_node(hn, kn, ih, pf);
 
 	if (config->server) {
 		receive_packets(4040);
@@ -50,6 +113,5 @@ int init_node()
 		send_packets("test", 4040, testdata);
 	}
 
-	free(nodeself);
 	printf("now exiting init_node()\n");
 }

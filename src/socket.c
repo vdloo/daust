@@ -121,7 +121,8 @@ int receive_packets(int port)
 	sa.sin_family = AF_INET;
 	sa.sin_addr.s_addr = INADDR_ANY;
 	sa.sin_port = htons(port);
-	setsockopt(sh, SOL_SOCKET, SO_REUSEADDR, (const char *)&o, sizeof(int));
+	setsockopt(sh, SOL_SOCKET, SO_REUSEADDR, 
+			(const char *) &o, sizeof(int));
 	if (bind(sh, (struct sockaddr *) &sa, sizeof(sa)) > 0) {
 		error("ERROR on binding");
 	}
