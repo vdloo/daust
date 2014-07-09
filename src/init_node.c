@@ -118,6 +118,21 @@ char *append_to_buf(char *buf, int *m_sp, char *str)
 	return buf;
 }
 
+void log_nodelist(struct nli *node)
+{
+	if (node) {
+		struct nodeinfo *nfo;
+		do
+		{
+			nfo = node->info;
+			printf("%s: ",			nfo->hostname);
+			printf("internal ip %s, ", 	nfo->internalhost);
+			printf("public ip %s, ", 	nfo->externalhost);
+			printf("keynode %s.\n",		nfo->keynode);
+		} while (node = node->next);
+	}
+}
+
 // serializes from pointer to item, to end of list. 
 // returns pointer to new buffer.
 char *serialize(struct nli *node)
@@ -197,10 +212,11 @@ struct nli *deserialize(char *buf)
 
 void buf_callback(char *buf)
 {
-	printf("received\n%s\n", buf);
 	struct nli *nl = deserialize(buf);
 	int nodesleft = count_node_list(nl);
-	printf("received %d nodes\n", nodesleft);
+	if (config->verbosity) {
+		log_nodelist(nl);
+	}
 }
 
 
@@ -237,6 +253,7 @@ int init_node()
 		// serializing for transmission
 		char *buf;
 		buf = serialize(head);
+		send_packets("test", 4040, buf);
 		free(buf);
 	}
 
