@@ -58,9 +58,9 @@ struct nli *add_node_to_list(struct nli *cur)
 			cur->next->prev 	= p;
 			p->next 		= cur->next;
 		}
-		cur->next 	= p;
+		cur->next 			= p;
 	}
-	p->prev 	= cur;
+	p->prev 				= cur;
 	return p;
 }
 
@@ -71,17 +71,17 @@ struct nli *create_node_list()
 }
 
 // removes item from list and returns pointer to item before deleted
-struct nli* remove_node_from_list(struct nli *node)
+struct nli *remove_node_from_list(struct nli *node)
 {
-	struct nli* n = node->prev;
+	struct nli *n = node->prev;
 	if (node->prev) node->prev->next = node->next;
 	if (node->next) node->next->prev = node->prev;
-	destroy_node(node);
+	destroy_node(node->info);
 	free(node);
 	return n;
 }
 
-// destroys from pointer to item to end of list
+// destroys from pointer to item, to end of list
 void destroy_node_list(struct nli *node)
 {
 	if (node) {
@@ -104,6 +104,48 @@ int count_nodes_left(struct nli *node)
 	return i;
 }
 
+char *append_to_buf(char *buf, int *m_sp, char *str)
+{
+	int p_siz = *m_sp;
+	*m_sp = *m_sp + (strlen(str) + 1) * sizeof(char);
+	buf = realloc(buf, *m_sp);
+	memcpy(buf + p_siz, str, strlen(str) * sizeof(char));
+	char *d = strdup(",");
+	memcpy(buf + p_siz + strlen(str), d, strlen(d) * sizeof(char));
+	free(d);
+	return buf;
+}
+
+// serializes from pointer to item, to end of list. 
+// returns pointer to new buffer.
+char *serialize(struct nli *node)
+{
+	char *buf;
+	if (node) {
+		char *st = strdup("|st_delim|");
+		char *ed = strdup("|end_delim|"); 
+		struct nodeinfo *nfo = node->info;
+		int m_siz = 0;
+		int *m_sp = &m_siz;
+
+		buf = NULL;
+		buf = append_to_buf(buf, m_sp, st);
+		do
+		{
+			buf = append_to_buf(buf, m_sp, st);
+			buf = append_to_buf(buf, m_sp, nfo->hostname);
+			buf = append_to_buf(buf, m_sp, nfo->keynode);
+			buf = append_to_buf(buf, m_sp, nfo->internalhost);
+			buf = append_to_buf(buf, m_sp, nfo->externalhost);
+			buf = append_to_buf(buf, m_sp, ed);
+		} while (node = node->next);
+		buf = append_to_buf(buf, m_sp, ed);
+		buf[m_siz - 1] = '\0'; //turn last comma into null terminator
+		free(ed);
+		free(st);
+	}
+	return buf;
+}
 
 
 int init_node()
@@ -132,6 +174,11 @@ int init_node()
 	pf = strdup("n2.rickvandeloo.com");
 	np = add_node_to_list(np);
 	np->info 	= create_node(hn, kn, ih, pf);
+
+	// serializing for transmission
+	char *msg;
+	msg = serialize(head);
+	printf("serialized struct is:\n%s\n", msg);
 
 	destroy_node_list(head);
 
