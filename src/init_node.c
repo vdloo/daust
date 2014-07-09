@@ -28,6 +28,17 @@ struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh)
 	return node;
 }
 
+void destroy_node(struct nodeinfo *node)
+{
+	if (node) {
+		if (node->hostname) free(node->hostname);
+		if (node->internalhost != na) free(node->internalhost);
+		if (node->keynode != na) free(node->keynode);
+		if (node->externalhost != na) free(node->externalhost);
+		free(node);
+	}
+}
+
 // node list item struct
 struct nli {
 	struct nodeinfo *info;
@@ -63,9 +74,21 @@ struct nli* rnli(struct nli *node)
 	struct nli* n = node->prev;
 	if (node->prev) node->prev->next = node->next;
 	if (node->next) node->next->prev = node->prev;
+	destroy_node(node);
 	free(node);
-	return n;
+	return n; // remember to free deleted node before doing this
 }
+
+// free memory to end of list
+void dl(struct nli *node)
+{
+	if (node) {
+		do {
+			destroy_node(node->info);
+		} while (node = node->next);
+	}
+}
+
 
 // count items left in list
 int count_nodes_left(struct nli *node)
@@ -78,6 +101,8 @@ int count_nodes_left(struct nli *node)
 	}
 	return i;
 }
+
+
 
 int init_node()
 {
@@ -92,26 +117,29 @@ int init_node()
 	np = head;
 	head->info 	= create_node(hn, kn, ih, pf);
 
-	hn = "neigh1";
-	kn = "keynode1";
-	ih = "192.168.1.2";
-	pf = "n1.rickvandeloo.com";
+	hn = strdup("neigh1");
+	kn = strdup("keynode1");
+	ih = strdup("192.168.1.2");
+	pf = strdup("n1.rickvandeloo.com");
 	np = anli(np);
 	np->info 	= create_node(hn, kn, ih, pf);
 
-	hn = "neigh2";
-	kn = "keynode2";
-	ih = "192.168.1.3";
-	pf = "n2.rickvandeloo.com";
+	hn = strdup("neigh2");
+	kn = strdup("keynode2");
+	ih = strdup("192.168.2.3");
+	pf = strdup("n2.rickvandeloo.com");
 	np = anli(np);
 	np->info 	= create_node(hn, kn, ih, pf);
 
-	if (config->server) {
-		receive_packets(4040);
-	} else {
-		char *testdata = strdup("test message");
-		send_packets("test", 4040, testdata);
-	}
+	dl(head);
+
+//	if (config->server) {
+//		receive_packets(4040);
+//	} else {
+//		char *testdata = strdup("test message");
+//		send_packets("test", 4040, testdata);
+//	}
+
 
 	printf("now exiting init_node()\n");
 }
