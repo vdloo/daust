@@ -51,16 +51,16 @@ struct nli {
 // add/insert node in list
 struct nli *add_node_to_list(struct nli *cur)
 {
-	struct nli *p = malloc(sizeof(struct nli));
-	p->next = NULL;
+	struct nli *p 	= malloc(sizeof(struct nli));
+	p->next 	= NULL;
 	if (cur) {
 		if (cur->next) {
-			cur->next->prev = p;
-			p->next = cur->next;
+			cur->next->prev 	= p;
+			p->next 		= cur->next;
 		}
-		cur->next = p;
+		cur->next 	= p;
 	}
-	p->prev = cur;
+	p->prev 	= cur;
 	return p;
 }
 
