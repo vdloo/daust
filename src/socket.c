@@ -132,9 +132,12 @@ int receive_packets(int port)
 	return 0;
 }
 
+// writes hostname to a static buffer that gets overwritten every
+// time the function is called, returns pointer to this buffer
+char *hn;
 char *hostname()
 {
-	char *hn = malloc(128 * sizeof(char));
+	hn = malloc(128 * sizeof(char));
 	gethostname(hn, 128 * sizeof(char));
 	return hn;
 }

@@ -15,12 +15,12 @@ struct nodeinfo {
 	char *neighbour[2];	// nodes that this node talks to
 };
 
-char *na = "N/A";
+char na[] = "N/A";
 // populates new nodeinfo struct and returns pointer
 struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh)
 {
 	struct nodeinfo *node 	= malloc(sizeof(struct nodeinfo));
-	node->hostname 		= strdup(hn); free (hn);
+	node->hostname 		= hn ? strdup(hn) : na; 
 	node->internalhost 	= ih ? strdup(ih) : na;
 	node->keynode		= kn ? strdup(kn) : na;
 	node->externalhost 	= eh ? strdup(eh) : na;
@@ -33,10 +33,10 @@ struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh)
 void destroy_node(struct nodeinfo *node)
 {
 	if (node) {
-		if (node->hostname) free(node->hostname);
-		if (node->internalhost != na) free(node->internalhost);
-		if (node->keynode != na) free(node->keynode);
-		if (node->externalhost != na) free(node->externalhost);
+		if (node->hostname 	!= na) free(node->hostname);
+		if (node->internalhost 	!= na) free(node->internalhost);
+		if (node->keynode 	!= na) free(node->keynode);
+		if (node->externalhost 	!= na) free(node->externalhost);
 		free(node);
 	}
 }
