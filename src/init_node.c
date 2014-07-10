@@ -12,18 +12,20 @@ struct nodeinfo {
 	char *keynode;		// node that introduced this node to the cluster
 	char *internalhost;	// local ip of node
 	char *externalhost;	// public facing ip of the node
+	char *identifier;	// unique identifier
 	char *neighbour[2];	// nodes that this node talks to
 };
 
 char na[] = "N/A";
 // populates new nodeinfo struct and returns pointer
-struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh)
+struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh, char *id)
 {
 	struct nodeinfo *node 	= malloc(sizeof(struct nodeinfo));
 	node->hostname 		= hn ? strdup(hn) : na; 
 	node->internalhost 	= ih ? strdup(ih) : na;
 	node->keynode		= kn ? strdup(kn) : na;
 	node->externalhost 	= eh ? strdup(eh) : na;
+	node->identifier 	= id ? strdup(id) : na;
 	node->neighbour[0] 	= na;
 	node->neighbour[1] 	= na;
 	return node;
@@ -37,6 +39,7 @@ void destroy_node(struct nodeinfo *node)
 		if (node->internalhost 	!= na) free(node->internalhost);
 		if (node->keynode 	!= na) free(node->keynode);
 		if (node->externalhost 	!= na) free(node->externalhost);
+		if (node->identifier 	!= na) free(node->identifier);
 		free(node);
 	}
 }
@@ -156,6 +159,7 @@ char *serialize(struct nli *node)
 			buf = append_to_buf(buf, m_sp, nfo->keynode);
 			buf = append_to_buf(buf, m_sp, nfo->internalhost);
 			buf = append_to_buf(buf, m_sp, nfo->externalhost);
+			buf = append_to_buf(buf, m_sp, nfo->identifier);
 			buf = append_to_buf(buf, m_sp, ed);
 		} while (node = node->next);
 		buf = append_to_buf(buf, m_sp, ed);
@@ -173,7 +177,7 @@ struct nli *deserialize(char *buf)
 	int l = strlen(buf);
 	int nest = 0, el = 0;
 	char *sg = strtok(buf, dl);
-	char *hn, *kn, *ih, *pf;
+	char *hn, *kn, *ih, *pf, *id;
 	do {
 		if (strstr(sg, st)) {
 			el = 0;
@@ -181,7 +185,7 @@ struct nli *deserialize(char *buf)
 		}
 		if (strstr(sg, ed)) {
 			if (nest == 2) {
-				np->info 	= create_node(hn, kn, ih, pf);
+				np->info 	= create_node(hn, kn, ih, pf, id);
 			}
 		       	if (nest > 0) --nest;
 		}
@@ -206,6 +210,9 @@ struct nli *deserialize(char *buf)
 				case 3:
 					pf	= strdup(sg);
 					break;
+				case 4:
+					id	= strdup(sg);
+					break;
 			}
 			el++;
 		}
@@ -224,7 +231,7 @@ void buf_callback(char *buf)
 
 int init_node()
 {
-	char *hn, *kn, *ih, *pf;
+	char *hn, *kn, *ih, *pf, *id;
 	struct nli *np, *head;
 	head = create_node_list();
 
@@ -232,22 +239,25 @@ int init_node()
 	kn = config->keynode;
 	ih = internalhost();
 	pf = config->publicface;
+	id = config->identifier;
 	np = head;
-	head->info 	= create_node(hn, kn, ih, pf);
+	head->info 	= create_node(hn, kn, ih, pf, id);
 
 	hn = strdup("neigh1");
 	kn = strdup("keynode1");
 	ih = strdup("192.168.1.2");
 	pf = strdup("n1.rickvandeloo.com");
+	id = strdup("uuid1");
 	np = add_node_to_list(np);
-	np->info 	= create_node(hn, kn, ih, pf);
+	np->info 	= create_node(hn, kn, ih, pf, id);
 
 	hn = strdup("neigh2");
 	kn = strdup("keynode2");
 	ih = strdup("192.168.2.3");
 	pf = strdup("n2.rickvandeloo.com");
+	id = strdup("uuid2");
 	np = add_node_to_list(np);
-	np->info 	= create_node(hn, kn, ih, pf);
+	np->info 	= create_node(hn, kn, ih, pf, id);
 
 	if (config->server) {
 		receive_packets(4040, buf_callback);

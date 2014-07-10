@@ -26,7 +26,6 @@ static const struct option longOpts[] = {
 	{ NULL, no_argument, NULL, 0 }
 };
 
-
 int main(int argc, char *argv[])
 {
 	int opt 			= 0;
@@ -36,6 +35,7 @@ int main(int argc, char *argv[])
 	config->publicface 		= NULL;
 	config->keynode 		= NULL;
 	config->publicface 		= NULL;
+	config->identifier 		= gen_ident();
 	config->server 			= 0;
 	opt = getopt_long(argc, argv, optString, longOpts, &longIndex);
 	while (opt != -1) {
@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
 	free(config->keynode);
 	free(config->logfile);
 	free(config->publicface);
+	free(config->identifier);
 	free(config);
 	return 0;
 }
