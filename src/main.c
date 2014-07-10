@@ -14,10 +14,11 @@ void error(const char *msg)
 }
 
 struct conf *config;
-static const char *optString = "vp:k:Vhs";
+static const char *optString = "vk:l:p:Vsh";
 static const struct option longOpts[] = {
 	{ "version", no_argument, NULL, 'v' },
 	{ "keynode", required_argument, NULL, 'k' },
+	{ "logfile", required_argument, NULL, 'l' },
 	{ "publicface", required_argument, NULL, 'p' },
 	{ "verbose", no_argument, NULL, 'V' },
 	{ "server", no_argument, NULL, 's' }, //replace this with threading
@@ -32,9 +33,8 @@ int main(int argc, char *argv[])
 	int longIndex			= 0;
 	config				= malloc(sizeof(struct conf));
 	config->verbosity 		= 0;
-	config->keynode			= malloc(128 * sizeof(char));
+	config->publicface 		= NULL;
 	config->keynode 		= NULL;
-	config->publicface		= malloc(128 * sizeof(char));
 	config->publicface 		= NULL;
 	config->server 			= 0;
 	opt = getopt_long(argc, argv, optString, longOpts, &longIndex);
@@ -47,18 +47,21 @@ int main(int argc, char *argv[])
 		case 'k':
 			config->keynode 	= strdup(optarg);
 			break;
+		case 'l':
+			config->logfile 	= strdup(optarg);
+			break;
 		case 'p':
 			config->publicface 	= strdup(optarg);
 			break;
 		case 'V':
 			config->verbosity++;
 			break;
+		case 's': //replace this with threading
+			config->server++;
+			break;
 		case 'h':
 			print_usage();
 			exit(0);
-			break;
-		case 's': //replace this with threading
-			config->server++;
 			break;
 
 		case '?':
@@ -74,6 +77,9 @@ int main(int argc, char *argv[])
 	// int i; for(i = optind; i < argc; i++){printf("Do something with: %s\n", argv[i]);}
 
 	init_node();
+	free(config->keynode);
+	free(config->logfile);
+	free(config->publicface);
 	free(config);
 	return 0;
 }

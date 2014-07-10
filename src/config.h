@@ -4,8 +4,9 @@
 struct conf{
 	int verbosity;
 	int server; // replace this with threading
-	char *publicface;
+	char *logfile;
 	char *keynode;
+	char *publicface;
 };
 extern struct conf *config;
 extern void error();

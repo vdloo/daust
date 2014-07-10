@@ -13,6 +13,7 @@ void print_usage()
 		"       -V, --version           Print the version and exit.\n"
 		"       -h, --help              Print this help and exit.\n\n"
 		"Options: \n"
+		"  -l, --logfile           	Filename for optional logging.\n"
 		"  -k, --keynode           	Node that will introduce this node to the network.\n"
 		"  -p, --publicfacing           Specify a public facing address for this node.\n"
 		"  -v, --verbose                More verbose output\n"

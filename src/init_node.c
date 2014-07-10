@@ -125,6 +125,9 @@ void log_nodelist(struct nli *node)
 		do
 		{
 			nfo = node->info;
+			// change this to writing printf into a buffer
+			// and then printing it AND writing it to a
+			// log file if it is specified as an option
 			printf("%s: ",			nfo->hostname);
 			printf("internal ip %s, ", 	nfo->internalhost);
 			printf("public ip %s, ", 	nfo->externalhost);
