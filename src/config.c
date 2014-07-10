@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include "config.h"
 
@@ -17,6 +19,5 @@ char *gen_ident()
 		buf[sz] = an[rand() % (sizeof(an) - 1)];
 		--sz;
 	}
-	printf("just generated uid %s\n", buf);
 	return buf;
 }

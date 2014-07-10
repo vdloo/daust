@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include "config.h"
 #include "init_node.h"
 #include "socket.h"
@@ -14,13 +15,18 @@ struct nodeinfo {
 	char *externalhost;	// public facing ip of the node
 	char *identifier;	// unique identifier
 	char *neighbour[2];	// nodes that this node talks to
+	time_t timestamp;
 };
 
 char na[] = "N/A";
 // populates new nodeinfo struct and returns pointer
-struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh, char *id)
+struct nodeinfo *populate_node(	struct nodeinfo *node, 
+				char *hn, 
+				char *kn, 
+				char *ih, 
+				char *eh, 
+				char *id)
 {
-	struct nodeinfo *node 	= malloc(sizeof(struct nodeinfo));
 	node->hostname 		= hn ? strdup(hn) : na; 
 	node->internalhost 	= ih ? strdup(ih) : na;
 	node->keynode		= kn ? strdup(kn) : na;
@@ -28,7 +34,13 @@ struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh, char *id)
 	node->identifier 	= id ? strdup(id) : na;
 	node->neighbour[0] 	= na;
 	node->neighbour[1] 	= na;
+	node->timestamp		= time(NULL);
 	return node;
+}
+struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh, char *id)
+{
+	struct nodeinfo *node 	= malloc(sizeof(struct nodeinfo));
+	return populate_node(node, hn, kn, ih, eh, id);
 }
 
 // clears memory of nodeinfo struct pointed to by argument
@@ -220,33 +232,107 @@ struct nli *deserialize(char *buf)
 	return head;
 }
 
+
+
+struct nli *head;
+
+// tries to find node based on identifier to the end of
+// the list, then returns pointer to that node.
+struct nli *node_by_identifier(struct nli *node, char *ident)
+{
+	struct nli *match = NULL;
+	if (node) {
+		struct nodeinfo *nfo;
+		do
+		{
+			nfo = node->info;
+			if (strstr(node->info->identifier, ident)) {
+				match = node;	
+			}
+		} while (node = node->next);
+	}
+	return match;
+}
+
+struct nli *join_lists(struct nli *local, struct nli *foreign)
+{
+	if (foreign) {
+		struct nodeinfo *nfo;
+		struct nli *match = NULL;
+		int i = 0;
+		do
+		{
+			nfo = foreign->info;
+			match = node_by_identifier(local, nfo->identifier);
+
+			if (i < 1) {
+				// overwrite info in local with foreign
+				match->info = populate_node( 	match->info,
+							nfo->hostname,
+							nfo->keynode,
+							nfo->internalhost,
+							nfo->externalhost,
+							nfo->identifier);	
+				nfo = match->info;
+
+			} else {
+				// check if exists, if not then add
+				local = add_node_to_list(local);
+				local->info = create_node(nfo->hostname,
+							nfo->keynode,
+							nfo->internalhost,
+							nfo->externalhost,
+							nfo->identifier);
+				nfo = local->info;
+			}
+			nfo->timestamp = time(NULL);
+
+			i++;
+
+		} while (foreign = foreign->next);
+	}
+	return local;
+}
+
 void buf_callback(char *buf)
 {
 	struct nli *nl = deserialize(buf);
 	int nodesleft = count_node_list(nl);
 	if (config->verbosity) {
+		printf("received the following nodelist:\n");
 		log_nodelist(nl);
+		printf("local nodelist is now:\n");
+		log_nodelist(head);
 	}
+	
 }
 
 int init_node()
 {
 	char *hn, *kn, *ih, *pf, *id;
-	struct nli *np, *head;
+	struct nli *np;
 	head = create_node_list();
 
-	hn = hostname();
-	kn = config->keynode;
-	ih = internalhost();
-	pf = config->publicface;
-	id = config->identifier;
+//	hn = hostname();
+//	kn = config->keynode;
+//	ih = internalhost();
+//	pf = config->publicface;
+//	id = config->identifier;
+//	np = head;
+//	head->info 	= create_node(hn, kn, ih, pf, id);
+//	
+	hn = strdup("neigh0");
+	kn = strdup("keynode0");
+	ih = strdup("192.168.1.0");
+	pf = strdup("n4.rickvandeloo.com");
+	id = strdup("uuid0");
 	np = head;
-	head->info 	= create_node(hn, kn, ih, pf, id);
+	np->info 	= create_node(hn, kn, ih, pf, id);
 
 	hn = strdup("neigh1");
 	kn = strdup("keynode1");
 	ih = strdup("192.168.1.2");
-	pf = strdup("n1.rickvandeloo.com");
+	pf = strdup("n99.rickvandeloo.com");
 	id = strdup("uuid1");
 	np = add_node_to_list(np);
 	np->info 	= create_node(hn, kn, ih, pf, id);
@@ -258,6 +344,9 @@ int init_node()
 	id = strdup("uuid2");
 	np = add_node_to_list(np);
 	np->info 	= create_node(hn, kn, ih, pf, id);
+
+	printf("initalised with the following nodelist:\n");
+	log_nodelist(head);
 
 	if (config->server) {
 		receive_packets(4040, buf_callback);
