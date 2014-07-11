@@ -12,4 +12,5 @@ missing
 *.Po
 *.so
 *.status
+*.swo
 *.swp

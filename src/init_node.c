@@ -8,6 +8,7 @@
 #include "init_node.h"
 #include "socket.h"
 
+// structure that holds the local info on a node
 struct nodeinfo {
 	char *hostname; 	// hostname of the machine
 	char *keynode;		// node that introduced this node to the cluster
@@ -18,29 +19,29 @@ struct nodeinfo {
 	time_t timestamp;
 };
 
+// populates nodeinfo element and returns pointer to that element
 char na[] = "N/A";
-// populates new nodeinfo struct and returns pointer
-struct nodeinfo *populate_node(	struct nodeinfo *node, 
-				char *hn, 
-				char *kn, 
-				char *ih, 
-				char *eh, 
-				char *id)
+char *set_node_element(char **el, char *buf)
 {
-	node->hostname 		= hn ? strdup(hn) : na; 
-	node->internalhost 	= ih ? strdup(ih) : na;
-	node->keynode		= kn ? strdup(kn) : na;
-	node->externalhost 	= eh ? strdup(eh) : na;
-	node->identifier 	= id ? strdup(id) : na;
-	node->neighbour[0] 	= na;
-	node->neighbour[1] 	= na;
-	node->timestamp		= time(NULL);
-	return node;
+	*el = buf ? strdup(buf) : na;
+	return *el;
 }
-struct nodeinfo *create_node(char *hn, char *kn, char *ih, char *eh, char *id)
+
+// updates nodeinfo timestamp and returns pointer to the timestamp
+time_t update_node_timestamp(struct nodeinfo *node)
+{
+	node->timestamp = time(NULL);
+	return node->timestamp;
+}
+
+// creates new empty nodeinfo struct
+struct nodeinfo *create_node()
 {
 	struct nodeinfo *node 	= malloc(sizeof(struct nodeinfo));
-	return populate_node(node, hn, kn, ih, eh, id);
+	node->neighbour[0] 	= na;
+	node->neighbour[1] 	= na;
+	update_node_timestamp(node);
+	return node;
 }
 
 // clears memory of nodeinfo struct pointed to by argument
@@ -63,7 +64,7 @@ struct nli {
 	struct nli *next;
 };
 
-// add/insert node in list
+// add/insert node list item into list
 struct nli *add_node_to_list(struct nli *cur)
 {
 	struct nli *p 	= malloc(sizeof(struct nli));
@@ -85,29 +86,45 @@ struct nli *create_node_list()
 	return add_node_to_list(NULL);
 }
 
-// removes item from list and returns pointer to item before deleted
+// removes node list item from list and clears its allocated memory,
+// destroy_node continues to clear the memory of the associated nodeinfo
+// struct. returns pointer to the item before the one deleted
 struct nli *remove_node_from_list(struct nli *node)
 {
-	struct nli *n = node->prev;
-	if (node->prev) node->prev->next = node->next;
-	if (node->next) node->next->prev = node->prev;
-	destroy_node(node->info);
-	free(node);
+	struct nli *n = NULL;
+	if (node) {
+		n = node->prev;
+		if (node->prev) node->prev->next = node->next;
+		if (node->next) node->next->prev = node->prev;
+		destroy_node(node->info);
+		free(node);
+	}
 	return n;
 }
 
-// destroys from pointer to item, to end of list
+// removes all node list items from list and clears their allocated
+// memory. pass a pointer to any node list item in list to clear the
+// entire list
 void destroy_node_list(struct nli *node)
 {
 	if (node) {
+		// start with the last node list item in list
+		while (node) {
+			node = node->next;
+		}
+		// remove node list items until there are no more
+		// previous node list items left in the list
 		do {
-			destroy_node(node->info);
-		} while (node = node->next);
+			remove_node_from_list(node);
+			if (node) {
+				node = node->prev;
+			}
+		} while (node);
 	}
 }
 
 
-// count items left in list
+// count node list items from pointer to node list item to end of list
 int count_node_list(struct nli *node)
 {
 	int i = 0;
@@ -185,11 +202,12 @@ char *serialize(struct nli *node)
 struct nli *deserialize(char *buf)
 {
 	struct nli *head = NULL, *np = NULL;
+	struct nodeinfo *nfo;
 
 	int l = strlen(buf);
 	int nest = 0, el = 0;
 	char *sg = strtok(buf, dl);
-	char *hn, *kn, *ih, *pf, *id;
+	char *hn, *kn, *ih, *eh, *id;
 	do {
 		if (strstr(sg, st)) {
 			el = 0;
@@ -197,7 +215,13 @@ struct nli *deserialize(char *buf)
 		}
 		if (strstr(sg, ed)) {
 			if (nest == 2) {
-				np->info 	= create_node(hn, kn, ih, pf, id);
+				np->info = create_node();
+				nfo = np->info;
+				set_node_element(&nfo->hostname,	hn);
+				set_node_element(&nfo->keynode, 	kn);
+				set_node_element(&nfo->internalhost, 	ih);
+				set_node_element(&nfo->externalhost, 	eh);
+				set_node_element(&nfo->identifier, 	id);
 			}
 		       	if (nest > 0) --nest;
 		}
@@ -220,7 +244,7 @@ struct nli *deserialize(char *buf)
 					ih	= strdup(sg);
 					break;
 				case 3:
-					pf	= strdup(sg);
+					eh	= strdup(sg);
 					break;
 				case 4:
 					id	= strdup(sg);
@@ -257,35 +281,34 @@ struct nli *node_by_identifier(struct nli *node, char *ident)
 struct nli *join_lists(struct nli *local, struct nli *foreign)
 {
 	if (foreign) {
-		struct nodeinfo *nfo;
 		struct nli *match = NULL;
+		struct nodeinfo *nfo;
+		char *hn, *kn, *ih, *eh, *id;
 		int i = 0;
 		do
 		{
-			nfo = foreign->info;
-			match = node_by_identifier(local, nfo->identifier);
+			hn = foreign->info->hostname;
+			kn = foreign->info->keynode;
+			ih = foreign->info->internalhost;
+			eh = foreign->info->externalhost;
+			id = foreign->info->identifier;
 
+			// update nodeinfo from broadcasting node,
+			// add other nodes if it they don't locally
+			// exist yet
+			match 	= node_by_identifier(local, id);
 			if (i < 1) {
-				// overwrite info in local with foreign
-				match->info = populate_node( 	match->info,
-							nfo->hostname,
-							nfo->keynode,
-							nfo->internalhost,
-							nfo->externalhost,
-							nfo->identifier);	
-				nfo = match->info;
-
-			} else {
-				// check if exists, if not then add
+				nfo 	= match->info;	
+			} else if (!match){
 				local = add_node_to_list(local);
-				local->info = create_node(nfo->hostname,
-							nfo->keynode,
-							nfo->internalhost,
-							nfo->externalhost,
-							nfo->identifier);
-				nfo = local->info;
+				nfo = local->info = create_node();
 			}
-			nfo->timestamp = time(NULL);
+			set_node_element(&nfo->hostname,	hn);
+			set_node_element(&nfo->keynode, 	kn);
+			set_node_element(&nfo->internalhost, 	ih);
+			set_node_element(&nfo->externalhost, 	eh);
+			set_node_element(&nfo->identifier, 	id);
+			update_node_timestamp(nfo);
 
 			i++;
 
@@ -304,46 +327,31 @@ void buf_callback(char *buf)
 		printf("local nodelist is now:\n");
 		log_nodelist(head);
 	}
-	
 }
 
 int init_node()
 {
-	char *hn, *kn, *ih, *pf, *id;
 	struct nli *np;
-	head = create_node_list();
+	struct nodeinfo *nfo;
 
-//	hn = hostname();
-//	kn = config->keynode;
-//	ih = internalhost();
-//	pf = config->publicface;
-//	id = config->identifier;
-//	np = head;
-//	head->info 	= create_node(hn, kn, ih, pf, id);
-//	
-	hn = strdup("neigh0");
-	kn = strdup("keynode0");
-	ih = strdup("192.168.1.0");
-	pf = strdup("n4.rickvandeloo.com");
-	id = strdup("uuid0");
-	np = head;
-	np->info 	= create_node(hn, kn, ih, pf, id);
+       	np = create_node_list();
 
-	hn = strdup("neigh1");
-	kn = strdup("keynode1");
-	ih = strdup("192.168.1.2");
-	pf = strdup("n99.rickvandeloo.com");
-	id = strdup("uuid1");
-	np = add_node_to_list(np);
-	np->info 	= create_node(hn, kn, ih, pf, id);
+	np->info = create_node();
+	nfo = np->info;
+	set_node_element(&nfo->hostname, 	hostname());
+	set_node_element(&nfo->keynode, 	config->keynode);
+	set_node_element(&nfo->internalhost, 	internalhost());
+	set_node_element(&nfo->externalhost, 	config->publicface);
+	set_node_element(&nfo->identifier, 	config->identifier);
+	head = np;
 
-	hn = strdup("neigh2");
-	kn = strdup("keynode2");
-	ih = strdup("192.168.2.3");
-	pf = strdup("n2.rickvandeloo.com");
-	id = strdup("uuid2");
-	np = add_node_to_list(np);
-	np->info 	= create_node(hn, kn, ih, pf, id);
+	//hn = strdup("neigh1");
+	//kn = strdup("keynode1");
+	//ih = strdup("192.168.1.2");
+	//pf = strdup("n99.rickvandeloo.com");
+	//id = strdup("uuid1");
+	//np = add_node_to_list(np);
+	//np->info 	= create_node(hn, kn, ih, pf, id);
 
 	printf("initalised with the following nodelist:\n");
 	log_nodelist(head);
