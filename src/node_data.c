@@ -1,23 +1,10 @@
-/* init_node.c */
+/* node_data.c */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
-#include "config.h"
-#include "init_node.h"
-#include "socket.h"
-
-// structure that holds the local info on a node
-struct nodeinfo {
-	char *hostname; 	// hostname of the machine
-	char *keynode;		// node that introduced this node to the cluster
-	char *internalhost;	// local ip of node
-	char *externalhost;	// public facing ip of the node
-	char *identifier;	// unique identifier
-	char *neighbour[2];	// nodes that this node talks to
-	time_t timestamp;
-};
+#include "node_data.h"
 
 // populates nodeinfo element and returns pointer to that element
 char na[] = "N/A";
@@ -57,13 +44,6 @@ void destroy_node(struct nodeinfo *node)
 	}
 }
 
-// node list item struct
-struct nli {
-	struct nodeinfo *info;
-	struct nli *prev;
-	struct nli *next;
-};
-
 // add/insert node list item into list
 struct nli *add_node_to_list(struct nli *node)
 {
@@ -81,7 +61,7 @@ struct nli *add_node_to_list(struct nli *node)
 }
 
 // create new node list, returns pointer to first item in new list
-struct nli *create_node_list()
+struct nli *create_nodelist()
 {
 	return add_node_to_list(NULL);
 }
@@ -105,7 +85,7 @@ struct nli *remove_node_from_list(struct nli *node)
 // removes all node list items from list and clears their allocated
 // memory. pass a pointer to any node list item in list to clear the
 // entire list
-void destroy_node_list(struct nli *node)
+void destroy_nodelist(struct nli *node)
 {
 	if (node) {
 		// start with the last node list item in list
@@ -125,7 +105,7 @@ void destroy_node_list(struct nli *node)
 
 
 // count node list items from pointer to node list item to end of list
-int count_node_list(struct nli *node)
+int count_nodelist(struct nli *node)
 {
 	int i = 0;
 	if (node) {
@@ -232,7 +212,7 @@ struct nli *deserialize(char *buf)
 					if (node) {
 						node = add_node_to_list(node);
 					} else {
-						np = create_node_list();
+						np = create_nodelist();
 						node = np;
 					}
 					hn 	= strdup(sg);
@@ -255,8 +235,6 @@ struct nli *deserialize(char *buf)
 	} while (sg);
 	return np;
 }
-
-struct nli *head;
 
 // tries to find node based on identifier to the end of
 // the list, then returns pointer to that node.
@@ -295,7 +273,7 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 			// add other nodes if it they don't locally
 			// exist yet
 			match 	= node_by_identifier(local, id);
-			if (i < 1) {
+			if (i < 1 && match) {
 				nfo 	= match->info;	
 			} else if (!match){
 				local = add_node_to_list(local);
@@ -313,58 +291,4 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 		} while (foreign = foreign->next);
 	}
 	return local;
-}
-
-void buf_callback(char *buf)
-{
-	struct nli *nl = deserialize(buf);
-	int nodesleft = count_node_list(nl);
-	if (config->verbosity) {
-		printf("received the following nodelist:\n");
-		log_nodelist(nl);
-		printf("local nodelist is now:\n");
-		log_nodelist(head);
-	}
-}
-
-int init_node()
-{
-	struct nli *node;
-	struct nodeinfo *nfo;
-
-       	node = create_node_list();
-
-	node->info = create_node();
-	nfo = node->info;
-	set_node_element(&nfo->hostname, 	hostname());
-	set_node_element(&nfo->keynode, 	config->keynode);
-	set_node_element(&nfo->internalhost, 	internalhost());
-	set_node_element(&nfo->externalhost, 	config->publicface);
-	set_node_element(&nfo->identifier, 	config->identifier);
-	head = node;
-
-	//hn = strdup("neigh1");
-	//kn = strdup("keynode1");
-	//ih = strdup("192.168.1.2");
-	//pf = strdup("n99.rickvandeloo.com");
-	//id = strdup("uuid1");
-	//np = add_node_to_list(np);
-	//np->info 	= create_node(hn, kn, ih, pf, id);
-
-	printf("initalised with the following nodelist:\n");
-	log_nodelist(head);
-
-	if (config->server) {
-		receive_packets(4040, buf_callback);
-	} else {
-		// serializing for transmission
-		char *buf;
-		buf = serialize(head);
-		send_packets("test", 4040, buf);
-		free(buf);
-	}
-
-
-	destroy_node_list(head);
-	printf("now exiting init_node()\n");
 }

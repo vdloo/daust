@@ -6,7 +6,7 @@
 #include <getopt.h>
 #include "config.h"
 #include "messages.h"
-#include "init_node.h"
+#include "init.h"
 
 void error(const char *msg)
 {
@@ -76,7 +76,17 @@ int main(int argc, char *argv[])
 	// maybe use this later to do things with arguments without a flag
 	// int i; for(i = optind; i < argc; i++){printf("Do something with: %s\n", argv[i]);}
 
-	init_node();
+	init_nodelist();
+
+	if (config->server)
+	{
+		init_server();
+	} else {
+		init_client();	
+	}
+
+	terminate_nodelist();
+
 	free(config->keynode);
 	free(config->logfile);
 	free(config->publicface);
