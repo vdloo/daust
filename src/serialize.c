@@ -40,6 +40,7 @@ char *serialize(struct nli *node)
 			buf = append_to_buf(buf, m_sp, nfo->internalhost);
 			buf = append_to_buf(buf, m_sp, nfo->externalhost);
 			buf = append_to_buf(buf, m_sp, nfo->identifier);
+			buf = append_to_buf(buf, m_sp, nfo->command);
 			buf = append_to_buf(buf, m_sp, ed);
 		} while (node = node->next);
 		buf = append_to_buf(buf, m_sp, ed);
@@ -58,7 +59,7 @@ struct nli *deserialize(char *buf)
 	int l = strlen(buf);
 	int nest = 0, el = 0;
 	char *sg = strtok(buf, dl);
-	char *hn, *kn, *ih, *eh, *id;
+	char *hn, *kn, *ih, *eh, *id, *cd;
 	do {
 		if (strstr(sg, st)) {
 			el = 0;
@@ -73,6 +74,7 @@ struct nli *deserialize(char *buf)
 				set_node_element(&nfo->internalhost, 	ih);
 				set_node_element(&nfo->externalhost, 	eh);
 				set_node_element(&nfo->identifier, 	id);
+				set_node_element(&nfo->command, 	cd);
 			}
 		       	if (nest > 0) --nest;
 		}
@@ -86,19 +88,22 @@ struct nli *deserialize(char *buf)
 						np = create_nodelist();
 						node = np;
 					}
-					hn 	= strdup(sg);
+					set_node_element(&hn, sg);
 					break;
 				case 1: 
-					kn 	= strdup(sg);
+					set_node_element(&kn, sg);
 					break;
 				case 2: 
-					ih	= strdup(sg);
+					set_node_element(&ih, sg);
 					break;
 				case 3:
-					eh	= strdup(sg);
+					set_node_element(&eh, sg);
 					break;
 				case 4:
-					id	= strdup(sg);
+					set_node_element(&id, sg);
+					break;
+				case 5:
+					set_node_element(&cd, sg);
 					break;
 			}
 			el++;

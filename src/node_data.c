@@ -24,8 +24,14 @@ time_t update_node_timestamp(struct nodeinfo *node)
 struct nodeinfo *create_node()
 {
 	struct nodeinfo *node 	= malloc(sizeof(struct nodeinfo));
+	node->hostname		= na;
+	node->internalhost	= na;
+	node->keynode		= na;
+	node->externalhost	= na;
+	node->identifier	= na;
 	node->neighbour[0] 	= na;
 	node->neighbour[1] 	= na;
+	node->command		= na;
 	update_node_timestamp(node);
 	return node;
 }

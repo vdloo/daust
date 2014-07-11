@@ -10,6 +10,7 @@ struct nodeinfo {
 	char *externalhost;	// public facing ip of the node
 	char *identifier;	// unique identifier
 	char *neighbour[2];	// nodes that this node talks to
+	char *command;		// daust option request for other machine
 	time_t timestamp;
 };
 

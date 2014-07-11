@@ -10,7 +10,7 @@
 struct nli *head;
 
 // create local nodelist and initialize nodeinfo structure for self
-void init_nodelist()
+struct nli *create_self()
 {
 	struct nli *node;
 	struct nodeinfo *nfo;
@@ -24,16 +24,11 @@ void init_nodelist()
 	set_node_element(&nfo->internalhost, 	internalhost());
 	set_node_element(&nfo->externalhost, 	config->publicface);
 	set_node_element(&nfo->identifier, 	config->identifier);
-	head = node;
-
-	//hn = strdup("neigh1");
-	//kn = strdup("keynode1");
-	//ih = strdup("192.168.1.2");
-	//pf = strdup("n99.rickvandeloo.com");
-	//id = strdup("uuid1");
-	//np = add_node_to_list(np);
-	//np->info 	= create_node(hn, kn, ih, pf, id);
-	
+	return node;
+}
+void init_nodelist()
+{
+	head = create_self();
 	log_nodelist(head);
 }
 
@@ -46,11 +41,25 @@ void broadcast_nodelist()
 	free(buf);
 }
 
+void broadcast_command(char *command)
+{
+	char *buf;
+	struct nli *node;
+	struct nodeinfo *nfo;
+	node = create_self();
+	nfo = node->info;
+	set_node_element(&nfo->command,	command);
+
+	buf = serialize(node);
+	send_packets("test", 4040, serialize(node));
+}
+
 // the function to process incoming data
 void incoming_callback(char *buf)
 {
-	struct nli *nl = deserialize(buf);
-	int nodesleft = count_nodelist(nl);
+	struct nli *nl;
+       	nl = deserialize(buf);
+
 	if (config->verbosity) {
 		printf("received the following nodelist:\n");
 		log_nodelist(nl);
