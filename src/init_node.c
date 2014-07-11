@@ -65,19 +65,19 @@ struct nli {
 };
 
 // add/insert node list item into list
-struct nli *add_node_to_list(struct nli *cur)
+struct nli *add_node_to_list(struct nli *node)
 {
-	struct nli *p 	= malloc(sizeof(struct nli));
-	p->next 	= NULL;
-	if (cur) {
-		if (cur->next) {
-			cur->next->prev 	= p;
-			p->next 		= cur->next;
+	struct nli *np 	= malloc(sizeof(struct nli));
+	np->next 	= NULL;
+	if (node) {
+		if (node->next) {
+			node->next->prev 	= np;
+			np->next 		= node->next;
 		}
-		cur->next 			= p;
+		node->next 			= np;
 	}
-	p->prev 				= cur;
-	return p;
+	np->prev 				= node;
+	return np;
 }
 
 // create new node list, returns pointer to first item in new list
@@ -91,15 +91,15 @@ struct nli *create_node_list()
 // struct. returns pointer to the item before the one deleted
 struct nli *remove_node_from_list(struct nli *node)
 {
-	struct nli *n = NULL;
+	struct nli *np = NULL;
 	if (node) {
-		n = node->prev;
+		np = node->prev;
 		if (node->prev) node->prev->next = node->next;
 		if (node->next) node->next->prev = node->prev;
 		destroy_node(node->info);
 		free(node);
 	}
-	return n;
+	return np;
 }
 
 // removes all node list items from list and clears their allocated
@@ -201,7 +201,7 @@ char *serialize(struct nli *node)
 // returns pointer to new list.
 struct nli *deserialize(char *buf)
 {
-	struct nli *head = NULL, *np = NULL;
+	struct nli *np = NULL, *node = NULL;
 	struct nodeinfo *nfo;
 
 	int l = strlen(buf);
@@ -215,8 +215,8 @@ struct nli *deserialize(char *buf)
 		}
 		if (strstr(sg, ed)) {
 			if (nest == 2) {
-				np->info = create_node();
-				nfo = np->info;
+				node->info = create_node();
+				nfo = node->info;
 				set_node_element(&nfo->hostname,	hn);
 				set_node_element(&nfo->keynode, 	kn);
 				set_node_element(&nfo->internalhost, 	ih);
@@ -229,11 +229,11 @@ struct nli *deserialize(char *buf)
 		if (nest == 2) {
 			switch(el) {
 				case 0: 
-					if (np) {
-						np = add_node_to_list(np);
+					if (node) {
+						node = add_node_to_list(node);
 					} else {
-						head = create_node_list();
-						np = head;
+						np = create_node_list();
+						node = np;
 					}
 					hn 	= strdup(sg);
 					break;
@@ -253,10 +253,8 @@ struct nli *deserialize(char *buf)
 			el++;
 		}
 	} while (sg);
-	return head;
+	return np;
 }
-
-
 
 struct nli *head;
 
@@ -331,19 +329,19 @@ void buf_callback(char *buf)
 
 int init_node()
 {
-	struct nli *np;
+	struct nli *node;
 	struct nodeinfo *nfo;
 
-       	np = create_node_list();
+       	node = create_node_list();
 
-	np->info = create_node();
-	nfo = np->info;
+	node->info = create_node();
+	nfo = node->info;
 	set_node_element(&nfo->hostname, 	hostname());
 	set_node_element(&nfo->keynode, 	config->keynode);
 	set_node_element(&nfo->internalhost, 	internalhost());
 	set_node_element(&nfo->externalhost, 	config->publicface);
 	set_node_element(&nfo->identifier, 	config->identifier);
-	head = np;
+	head = node;
 
 	//hn = strdup("neigh1");
 	//kn = strdup("keynode1");
