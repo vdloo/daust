@@ -116,20 +116,6 @@ int count_nodelist(struct nli *node)
 	return i;
 }
 
-char st[] = "|start_of_block|";
-char ed[] = "|end_of_block|";
-char dl[] = "\n";
-
-char *append_to_buf(char *buf, int *m_sp, char *str)
-{
-	int p_siz = *m_sp;
-	*m_sp = *m_sp + (strlen(str) + 1) * sizeof(char);
-	buf = realloc(buf, *m_sp);
-	memcpy(buf + p_siz, str, strlen(str) * sizeof(char));
-	memcpy(buf + p_siz + strlen(str), dl, strlen(dl) * sizeof(char));
-	return buf;
-}
-
 void log_nodelist(struct nli *node)
 {
 	if (node) {
@@ -147,95 +133,6 @@ void log_nodelist(struct nli *node)
 		} while (node = node->next);
 	}
 }
-
-// serializes from pointer to item, to end of list. 
-// returns pointer to new buffer.
-char *serialize(struct nli *node)
-{
-	char *buf;
-	if (node) {
-		struct nodeinfo *nfo;
-		int m_siz = 0;
-		int *m_sp = &m_siz;
-
-		buf = NULL;
-		buf = append_to_buf(buf, m_sp, st);
-		do
-		{
-			nfo = node->info;
-			buf = append_to_buf(buf, m_sp, st);
-			buf = append_to_buf(buf, m_sp, nfo->hostname);
-			buf = append_to_buf(buf, m_sp, nfo->keynode);
-			buf = append_to_buf(buf, m_sp, nfo->internalhost);
-			buf = append_to_buf(buf, m_sp, nfo->externalhost);
-			buf = append_to_buf(buf, m_sp, nfo->identifier);
-			buf = append_to_buf(buf, m_sp, ed);
-		} while (node = node->next);
-		buf = append_to_buf(buf, m_sp, ed);
-		buf[m_siz - 1] = '\0'; //turn last delimiter into null terminator
-	}
-	return buf;
-}
-
-// deserializes buffer to nodeinfo linked list.
-// returns pointer to new list.
-struct nli *deserialize(char *buf)
-{
-	struct nli *np = NULL, *node = NULL;
-	struct nodeinfo *nfo;
-
-	int l = strlen(buf);
-	int nest = 0, el = 0;
-	char *sg = strtok(buf, dl);
-	char *hn, *kn, *ih, *eh, *id;
-	do {
-		if (strstr(sg, st)) {
-			el = 0;
-			if (nest < 2) ++nest;	
-		}
-		if (strstr(sg, ed)) {
-			if (nest == 2) {
-				node->info = create_node();
-				nfo = node->info;
-				set_node_element(&nfo->hostname,	hn);
-				set_node_element(&nfo->keynode, 	kn);
-				set_node_element(&nfo->internalhost, 	ih);
-				set_node_element(&nfo->externalhost, 	eh);
-				set_node_element(&nfo->identifier, 	id);
-			}
-		       	if (nest > 0) --nest;
-		}
-		sg = strtok(NULL, dl);
-		if (nest == 2) {
-			switch(el) {
-				case 0: 
-					if (node) {
-						node = add_node_to_list(node);
-					} else {
-						np = create_nodelist();
-						node = np;
-					}
-					hn 	= strdup(sg);
-					break;
-				case 1: 
-					kn 	= strdup(sg);
-					break;
-				case 2: 
-					ih	= strdup(sg);
-					break;
-				case 3:
-					eh	= strdup(sg);
-					break;
-				case 4:
-					id	= strdup(sg);
-					break;
-			}
-			el++;
-		}
-	} while (sg);
-	return np;
-}
-
 // tries to find node based on identifier to the end of
 // the list, then returns pointer to that node.
 struct nli *node_by_identifier(struct nli *node, char *ident)

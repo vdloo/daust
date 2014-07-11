@@ -20,11 +20,10 @@ struct nli {
 	struct nli *next;
 };
 
+struct nli *add_node_to_list(struct nli *node);
 struct nli *create_nodelist();
 struct nodeinfo *create_node();
 char *set_node_element(char **el, char *buf);
 void log_nodelist(struct nli *node);
-char *serialize(struct nli *node);
-struct nli *deserialize(char *buf);
 
 #endif

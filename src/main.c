@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 	{
 		init_server();
 	} else {
-		init_client();	
+		broadcast_nodelist();	
 	}
 
 	terminate_nodelist();

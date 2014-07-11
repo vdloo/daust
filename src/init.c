@@ -4,6 +4,7 @@
 #include "config.h"
 #include "init.h"
 #include "node_data.h"
+#include "serialize.h"
 #include "socket.h"
 
 struct nli *head;
@@ -36,8 +37,17 @@ void init_nodelist()
 	log_nodelist(head);
 }
 
+// broadcast nodelist to nodes in nodelist
+void broadcast_nodelist()
+{
+	char *buf;
+	buf = serialize(head);
+	send_packets("test", 4040, buf);
+	free(buf);
+}
+
 // the function to process incoming data
-void buf_callback(char *buf)
+void incoming_callback(char *buf)
 {
 	struct nli *nl = deserialize(buf);
 	int nodesleft = count_nodelist(nl);
@@ -49,19 +59,10 @@ void buf_callback(char *buf)
 	}
 }
 
-// broadcast nodelist to nodes in nodelist
-void init_client()
-{
-	char *buf;
-	buf = serialize(head);
-	send_packets("test", 4040, buf);
-	free(buf);
-}
-
 // receive data from other nodes
 void init_server()
 {
-	receive_packets(4040, buf_callback);
+	receive_packets(4040, incoming_callback);
 }
 
 // clean memory assigned to local nodelist
