@@ -1,6 +1,7 @@
 /* init.c */
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "config.h"
 #include "init.h"
 #include "node_data.h"
@@ -37,7 +38,7 @@ void broadcast_nodelist()
 {
 	char *buf;
 	buf = serialize(head);
-	send_packets("test", 4040, buf);
+	send_packets("test", 4040, serialize(head));
 	free(buf);
 }
 
@@ -48,16 +49,24 @@ void broadcast_command(char *command)
 	struct nodeinfo *nfo;
 	node = create_self();
 	nfo = node->info;
+
 	set_node_element(&nfo->command,	command);
 
 	buf = serialize(node);
 	send_packets("test", 4040, serialize(node));
+	free(buf);
+}
+
+int run_command(char *command)
+{
+	
 }
 
 // the function to process incoming data
-void incoming_callback(char *buf)
+char *incoming_callback(char *buf)
 {
 	struct nli *nl;
+	struct nodeinfo *nfo;
        	nl = deserialize(buf);
 
 	if (config->verbosity) {
@@ -65,6 +74,11 @@ void incoming_callback(char *buf)
 		log_nodelist(nl);
 		printf("local nodelist is now:\n");
 		log_nodelist(head);
+	}
+
+	nfo = nl->info;
+	if (nfo->command && !strstr(nfo->command, na)) {
+		//try to run command
 	}
 }
 

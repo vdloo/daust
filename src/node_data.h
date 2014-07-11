@@ -21,6 +21,7 @@ struct nli {
 	struct nli *next;
 };
 
+extern char na[];
 struct nli *add_node_to_list(struct nli *node);
 struct nli *create_nodelist();
 struct nodeinfo *create_node();

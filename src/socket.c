@@ -80,7 +80,7 @@ int send_packets(char *host, int port, char *buf)
 	return 0;
 }
 
-void process_incoming(int sh, void (*cb)(char *param))
+void process_incoming(int sh, char *(*cb)(char *param))
 {
 	int nsh, n;
 	struct sockaddr_in cla;
@@ -105,11 +105,12 @@ void process_incoming(int sh, void (*cb)(char *param))
 	buf[m_siz] = '\0';
 	close(nsh);
 	cb(buf);
+	// send response here, should be return value from callback as string.
 	free(buf);
 }
 
 
-int receive_packets(int port, void (*cb)(char *param))
+int receive_packets(int port, char *(*cb)(char *param))
 {
 	int sh, o = 1;
 	socklen_t cl;
