@@ -1,4 +1,4 @@
-/* main.c */
+/* daust.c */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,10 +7,10 @@
 #include "config.h"
 #include "messages.h"
 #include "init.h"
+#include "dispatch.h"
 
-static const char *os = "vk:l:p:Vdh";
+static const char *os = "vk:l:p:Vh";
 static const struct option lo[] = {
-	{ "daemon", no_argument, NULL, 'd' },
 	{ "help", no_argument, NULL, 'h' },
 	{ "keynode", required_argument, NULL, 'k' },
 	{ "logfile", required_argument, NULL, 'l' },
@@ -26,16 +26,12 @@ int main(int argc, char *argv[])
 {
 	init_config();
 
-	int opt, li = 0, in = 1;
+	int opt, li = 0;
 	opt = getopt_long(argc, argv, os, lo, &li);
 	while (opt != -1) {
 		switch(opt) {
-			case 'd': //replace this with threading
-				config->daemon++;
-				break;
 			case 'h':
 				print_usage();
-				--in;
 				break;
 			case 'k':
 				config->keynode 	= strdup(optarg);
@@ -51,26 +47,19 @@ int main(int argc, char *argv[])
 				break;
 			case 'V':
 				print_version();
-				--in;
 				break;
 			case '?':
 			case ':':
 			default:
 				print_usage();
-				--in;
 				break;
 		}
 		opt = getopt_long(argc, argv, os, lo, &li);
 	}
-	if (config->daemon) {
-		if (daemon(0,0) == -1) {
-			perror("ERROR detaching");
-		}
-		init_nodelist();
-		init_server();
-		terminate_nodelist();
-	} else if (in > 0) {
+	if (optind < argc) {
 		init_dispatch(argc, argv, optind);
+	} else {
+		print_usage();
 	}
 
 	terminate_config();
