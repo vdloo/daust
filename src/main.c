@@ -8,7 +8,7 @@
 #include "messages.h"
 #include "init.h"
 
-static const char *os = "vk:l:p:Vsh";
+static const char *os = "vk:l:p:Vdh";
 static const struct option lo[] = {
 	{ "daemon", no_argument, NULL, 'd' },
 	{ "help", no_argument, NULL, 'h' },
@@ -62,12 +62,15 @@ int main(int argc, char *argv[])
 		}
 		opt = getopt_long(argc, argv, os, lo, &li);
 	}
-
-	if (in > 0) {
+	if (config->daemon) {
+		if (daemon(0,0) == -1) {
+			perror("ERROR detaching");
+		}
 		init_nodelist();
-		init_dispatch(argc, argv, optind);
-
+		init_server();
 		terminate_nodelist();
+	} else if (in > 0) {
+		init_dispatch(argc, argv, optind);
 	}
 
 	terminate_config();
