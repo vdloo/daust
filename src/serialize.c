@@ -18,24 +18,23 @@ char *serialize(struct nli *node)
 	if (node) {
 		struct nodeinfo *nfo;
 		int m_siz = 0;
-		int *m_sp = &m_siz;
+		int *mp = &m_siz;
 
 		buf = NULL;
-		buf = append_to_buf(buf, m_sp, st, dl);
+		buf = asdtobfp(buf, mp, st, dl);
 		do
 		{
 			nfo = node->info;
-			buf = append_to_buf(buf, m_sp, st, dl);
-			buf = append_to_buf(buf, m_sp, nfo->hostname, dl);
-			buf = append_to_buf(buf, m_sp, nfo->keynode, dl);
-			buf = append_to_buf(buf, m_sp, nfo->internalhost, dl);
-			buf = append_to_buf(buf, m_sp, nfo->externalhost, dl);
-			buf = append_to_buf(buf, m_sp, nfo->identifier, dl);
-			buf = append_to_buf(buf, m_sp, nfo->command, dl);
-			buf = append_to_buf(buf, m_sp, ed, dl);
+			buf = asdtobfp(buf, mp, st, dl);
+			buf = asdtobfp(buf, mp, nfo->hostname, dl);
+			buf = asdtobfp(buf, mp, nfo->keynode, dl);
+			buf = asdtobfp(buf, mp, nfo->internalhost, dl);
+			buf = asdtobfp(buf, mp, nfo->externalhost, dl);
+			buf = asdtobfp(buf, mp, nfo->identifier, dl);
+			buf = asdtobfp(buf, mp, nfo->command, dl);
+			buf = asdtobfp(buf, mp, ed, dl);
 		} while (node = node->next);
-		buf = append_to_buf(buf, m_sp, ed, dl);
-		buf[m_siz - 1] = '\0'; //turn last delimiter into null terminator
+		buf = asdtobfp(buf, mp, ed, '\0');
 	}
 	return buf;
 }

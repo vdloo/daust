@@ -1,6 +1,7 @@
 /*.cache
 configure
-daust
+src/daust
+src/daustd
 depcomp
 *.in
 install-sh
