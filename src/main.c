@@ -10,13 +10,13 @@
 
 static const char *os = "vk:l:p:Vsh";
 static const struct option lo[] = {
-	{ "version", no_argument, NULL, 'v' },
+	{ "daemon", no_argument, NULL, 'd' },
+	{ "help", no_argument, NULL, 'h' },
 	{ "keynode", required_argument, NULL, 'k' },
 	{ "logfile", required_argument, NULL, 'l' },
 	{ "publicface", required_argument, NULL, 'p' },
-	{ "verbose", no_argument, NULL, 'V' },
-	{ "server", no_argument, NULL, 's' }, //replace this with threading
-	{ "help", no_argument, NULL, 'h' },
+	{ "verbose", no_argument, NULL, 'v' },
+	{ "version", no_argument, NULL, 'V' },
 	{ NULL, no_argument, NULL, 0 }
 };
 
@@ -30,8 +30,11 @@ int main(int argc, char *argv[])
 	opt = getopt_long(argc, argv, os, lo, &li);
 	while (opt != -1) {
 		switch(opt) {
-		case 'v':
-			print_version();
+		case 'd': //replace this with threading
+			config->daemon++;
+			break;
+		case 'h':
+			print_usage();
 			--in;
 			break;
 		case 'k':
@@ -43,14 +46,11 @@ int main(int argc, char *argv[])
 		case 'p':
 			config->publicface 	= strdup(optarg);
 			break;
-		case 'V':
+		case 'v':
 			config->verbosity++;
 			break;
-		case 's': //replace this with threading
-			config->server++;
-			break;
-		case 'h':
-			print_usage();
+		case 'V':
+			print_version();
 			--in;
 			break;
 
@@ -58,13 +58,13 @@ int main(int argc, char *argv[])
 		case ':':
 		default:
 			print_usage();
-			exit(1);
+			--in;
 			break;
 		}
 		opt = getopt_long(argc, argv, os, lo, &li);
 	}
 
-	if (in) {
+	if (in > 0) {
 		init_nodelist();
 		init_dispatch(argc, argv, optind);
 

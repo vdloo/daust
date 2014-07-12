@@ -4,7 +4,7 @@
 
 struct conf{
 	int verbosity;
-	int server; // replace this with threading
+	int daemon;
 	char *logfile;
 	char *keynode;
 	char *publicface;

@@ -30,22 +30,22 @@ char *gen_ident()
 void *init_config()
 {
 	config	= malloc(sizeof(struct conf));
-	config->verbosity               = 0;
-	config->publicface              = NULL;
+	config->daemon 			= 0;
+	config->identifier 		= gen_ident();
 	config->keynode                 = NULL;
 	config->publicface              = NULL;
-	config->identifier 		= gen_ident();
-	config->server 			= 0;
+	config->publicface              = NULL;
+	config->verbosity               = 0;
 	return config;
 }
 
 void *terminate_config()
 {
 	if (config) {
+		if (config->identifier)		free(config->identifier);
 		if (config->keynode) 		free(config->keynode);
 		if (config->logfile) 		free(config->logfile);
 		if (config->publicface) 	free(config->publicface);
-		if (config->identifier)		free(config->identifier);
 		free(config);
 	}
 }
