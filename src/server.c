@@ -19,6 +19,8 @@ int verify_node(char *local, char *foreign)
 
 int check_command(struct nodeinfo *nfo)
 {
+	printf("checking the incoming command: %s\n", nfo->command);
+
 	int i = 0;
 	if (strstr(nfo->command, "all")) {
 		// do one of the 'all' commands

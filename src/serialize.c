@@ -4,20 +4,11 @@
 #include <string.h>
 #include "serialize.h"
 #include "node_data.h"
+#include "utils.h"
 
 char st[] = "|start_of_block|";
 char ed[] = "|end_of_block|";
 char dl[] = "\n";
-
-char *append_to_buf(char *buf, int *m_sp, char *str)
-{
-	int p_siz = *m_sp;
-	*m_sp = *m_sp + (strlen(str) + 1) * sizeof(char);
-	buf = realloc(buf, *m_sp);
-	memcpy(buf + p_siz, str, strlen(str) * sizeof(char));
-	memcpy(buf + p_siz + strlen(str), dl, strlen(dl) * sizeof(char));
-	return buf;
-}
 
 // serializes from pointer to item, to end of list. 
 // returns pointer to new buffer.
@@ -30,20 +21,20 @@ char *serialize(struct nli *node)
 		int *m_sp = &m_siz;
 
 		buf = NULL;
-		buf = append_to_buf(buf, m_sp, st);
+		buf = append_to_buf(buf, m_sp, st, dl);
 		do
 		{
 			nfo = node->info;
-			buf = append_to_buf(buf, m_sp, st);
-			buf = append_to_buf(buf, m_sp, nfo->hostname);
-			buf = append_to_buf(buf, m_sp, nfo->keynode);
-			buf = append_to_buf(buf, m_sp, nfo->internalhost);
-			buf = append_to_buf(buf, m_sp, nfo->externalhost);
-			buf = append_to_buf(buf, m_sp, nfo->identifier);
-			buf = append_to_buf(buf, m_sp, nfo->command);
-			buf = append_to_buf(buf, m_sp, ed);
+			buf = append_to_buf(buf, m_sp, st, dl);
+			buf = append_to_buf(buf, m_sp, nfo->hostname, dl);
+			buf = append_to_buf(buf, m_sp, nfo->keynode, dl);
+			buf = append_to_buf(buf, m_sp, nfo->internalhost, dl);
+			buf = append_to_buf(buf, m_sp, nfo->externalhost, dl);
+			buf = append_to_buf(buf, m_sp, nfo->identifier, dl);
+			buf = append_to_buf(buf, m_sp, nfo->command, dl);
+			buf = append_to_buf(buf, m_sp, ed, dl);
 		} while (node = node->next);
-		buf = append_to_buf(buf, m_sp, ed);
+		buf = append_to_buf(buf, m_sp, ed, dl);
 		buf[m_siz - 1] = '\0'; //turn last delimiter into null terminator
 	}
 	return buf;
