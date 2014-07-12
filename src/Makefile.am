@@ -1,4 +1,10 @@
 AM_CFLAG 	= -g -Wall -Wextra
 bin_PROGRAMS 	= daust daustd
-daust_SOURCES 	= daust.c config.h config.c messages.h messages.c init.h init.c utils.h utils.c node_data.h node_data.c serialize.h serialize.c socket.h socket.c dispatch.h dispatch.c
-daustd_SOURCES 	= daustd.c config.h config.c messages.h messages.c init.h init.c utils.h utils.c node_data.h node_data.c serialize.h serialize.c socket.h socket.c server.h server.c
+SHARED_CFILES	= config.c messages.c init.c utils.c node_data.c serialize.c socket.c
+SHARED_HFILES	= config.h messages.h init.h utils.h node_data.h serialize.h socket.h
+DAUST_CFILES	= daust.c dispatch.c
+DAUST_HFILES	= daust.h dispatch.h
+DAUSTD_CFILES	= daustd.c server.c
+DAUSTD_HFILES	= daustd.h server.h
+daust_SOURCES	= $(DAUST_CFILES) $(DAUST_HFILES) $(SHARED_CFILES) $(SHARED_HFILES)
+daustd_SOURCES	= $(DAUSTD_CFILES) $(DAUSTD_HFILES) $(SHARED_CFILES) $(SHARED_HFILES)
