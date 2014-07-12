@@ -11,8 +11,9 @@ struct conf{
 	char *identifier;
 };
 
-char *gen_ident();
+void error(const char *msg);
+void *init_config();
+void *terminate_config();
 
 extern struct conf *config;
-extern void error();
 #endif

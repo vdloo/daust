@@ -8,14 +8,8 @@
 #include "messages.h"
 #include "init.h"
 
-void error(const char *msg)
-{
-	perror(msg);
-}
-
-struct conf *config;
-static const char *optString = "vk:l:p:Vsh";
-static const struct option longOpts[] = {
+static const char *os = "vk:l:p:Vsh";
+static const struct option lo[] = {
 	{ "version", no_argument, NULL, 'v' },
 	{ "keynode", required_argument, NULL, 'k' },
 	{ "logfile", required_argument, NULL, 'l' },
@@ -26,23 +20,19 @@ static const struct option longOpts[] = {
 	{ NULL, no_argument, NULL, 0 }
 };
 
+struct conf *config;
+
 int main(int argc, char *argv[])
 {
-	int opt 			= 0;
-	int longIndex			= 0;
-	config				= malloc(sizeof(struct conf));
-	config->verbosity 		= 0;
-	config->publicface 		= NULL;
-	config->keynode 		= NULL;
-	config->publicface 		= NULL;
-	config->identifier 		= gen_ident();
-	config->server 			= 0;
-	opt = getopt_long(argc, argv, optString, longOpts, &longIndex);
+	init_config();
+
+	int opt, li = 0, in = 1;
+	opt = getopt_long(argc, argv, os, lo, &li);
 	while (opt != -1) {
 		switch(opt) {
 		case 'v':
 			print_version();
-			exit(0);
+			--in;
 			break;
 		case 'k':
 			config->keynode 	= strdup(optarg);
@@ -61,7 +51,7 @@ int main(int argc, char *argv[])
 			break;
 		case 'h':
 			print_usage();
-			exit(0);
+			--in;
 			break;
 
 		case '?':
@@ -71,26 +61,17 @@ int main(int argc, char *argv[])
 			exit(1);
 			break;
 		}
-		opt = getopt_long(argc, argv, optString, longOpts, &longIndex);
-	}
-	// maybe use this later to do things with arguments without a flag
-	// int i; for(i = optind; i < argc; i++){printf("Do something with: %s\n", argv[i]);}
-
-	init_nodelist();
-
-	if (config->server)
-	{
-		init_server();
-	} else {
-		broadcast_nodelist();	
+		opt = getopt_long(argc, argv, os, lo, &li);
 	}
 
-	terminate_nodelist();
+	if (in) {
+		init_nodelist();
+		init_dispatch(argc, argv, optind);
 
-	free(config->keynode);
-	free(config->logfile);
-	free(config->publicface);
-	free(config->identifier);
-	free(config);
+		terminate_nodelist();
+	}
+
+	terminate_config();
+
 	return 0;
 }

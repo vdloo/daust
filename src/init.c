@@ -33,6 +33,18 @@ void init_nodelist()
 	log_nodelist(head);
 }
 
+void init_dispatch(int argc, char *argv[], int optind)
+{
+//	int i; for(i = optind; i < argc; i++){printf("Do something with: // %s\n", argv[i]);}
+}
+
+// clean memory assigned to local nodelist
+void terminate_nodelist()
+{
+	//printf("cleaning up..\n");
+	destroy_nodelist(head);
+}
+
 // broadcast nodelist to nodes in nodelist
 void broadcast_nodelist()
 {
@@ -112,9 +124,3 @@ void init_server()
 	receive_packets(4040, incoming_callback);
 }
 
-// clean memory assigned to local nodelist
-void terminate_nodelist()
-{
-	//printf("cleaning up..\n");
-	destroy_nodelist(head);
-}
