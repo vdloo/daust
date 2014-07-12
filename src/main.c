@@ -30,36 +30,35 @@ int main(int argc, char *argv[])
 	opt = getopt_long(argc, argv, os, lo, &li);
 	while (opt != -1) {
 		switch(opt) {
-		case 'd': //replace this with threading
-			config->daemon++;
-			break;
-		case 'h':
-			print_usage();
-			--in;
-			break;
-		case 'k':
-			config->keynode 	= strdup(optarg);
-			break;
-		case 'l':
-			config->logfile 	= strdup(optarg);
-			break;
-		case 'p':
-			config->publicface 	= strdup(optarg);
-			break;
-		case 'v':
-			config->verbosity++;
-			break;
-		case 'V':
-			print_version();
-			--in;
-			break;
-
-		case '?':
-		case ':':
-		default:
-			print_usage();
-			--in;
-			break;
+			case 'd': //replace this with threading
+				config->daemon++;
+				break;
+			case 'h':
+				print_usage();
+				--in;
+				break;
+			case 'k':
+				config->keynode 	= strdup(optarg);
+				break;
+			case 'l':
+				config->logfile 	= strdup(optarg);
+				break;
+			case 'p':
+				config->publicface 	= strdup(optarg);
+				break;
+			case 'v':
+				config->verbosity++;
+				break;
+			case 'V':
+				print_version();
+				--in;
+				break;
+			case '?':
+			case ':':
+			default:
+				print_usage();
+				--in;
+				break;
 		}
 		opt = getopt_long(argc, argv, os, lo, &li);
 	}

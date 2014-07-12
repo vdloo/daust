@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
+#include <sys/stat.h>
 #include "config.h"
+
+#define PATH_MAX 4096
 
 void error(const char *msg)
 {
@@ -15,7 +19,7 @@ char *gen_ident()
 	buf     = malloc(sz * sizeof(char));
 	srand(time(NULL));
 	--sz;
-	buf[sz] = '\0';
+	buf[sz] 	= '\0';
 	static const char an[] =
 		"0123456789"
 		"abcdefghijklmnopqrstuvwxyz"
@@ -27,13 +31,76 @@ char *gen_ident()
 	return buf;
 }
 
+char *get_ident_path()
+{
+	char *p 	= malloc(PATH_MAX * sizeof(char));
+	char *fn 	= ".daust";
+	char *hd	= getenv("HOME");
+	char *root	= strdup("/");
+	if (strcmp(hd, root) == 0) {
+		*hd = '\0'; // remember that it is not a good idea to run this program as root
+	}
+	snprintf(p, PATH_MAX, "%s/%s", hd, fn);
+	mkdir(p, 0777);
+	snprintf(p, PATH_MAX, "%s/%s/%s", hd, fn, "ident");
+	return p;
+}
+
+char *read_ident()
+{
+	FILE *f;
+	char *p = get_ident_path();
+	f = fopen(p, "r");
+	free(p);
+	char *buf = NULL;
+	if (f != NULL) {
+		fseek(f, 0, SEEK_END);
+		long fs = ftell(f);
+		fs = ftell(f);
+		rewind(f);	
+		buf = malloc(fs * (sizeof(char)));
+		size_t r = fread(buf, sizeof(char), fs, f);
+		fclose(f);
+	}
+	return buf;
+}
+
+char *write_ident(char *buf)
+{
+	FILE *f;
+	char *p = get_ident_path();
+	f = fopen(p, "w");
+	free(p);
+	if (f != NULL) {
+		fputs(buf, f);
+		fclose(f);
+	}
+}
+
+void *new_ident()
+{
+	char *buf = NULL;
+	buf = gen_ident();
+	write_ident(buf);
+	return buf;
+}
+
+char *get_ident()
+{
+	char *buf;
+	buf = read_ident();
+	if (!buf) {
+		buf = new_ident();
+	}
+	return buf;
+}
+
 void *init_config()
 {
 	config	= malloc(sizeof(struct conf));
 	config->daemon 			= 0;
-	config->identifier 		= gen_ident();
+	config->identifier 		= get_ident();
 	config->keynode                 = NULL;
-	config->publicface              = NULL;
 	config->publicface              = NULL;
 	config->verbosity               = 0;
 	return config;
