@@ -6,7 +6,6 @@
 #include <getopt.h>
 #include "config.h"
 #include "messages.h"
-#include "init.h"
 #include "dispatch.h"
 
 static const char *os = "vk:l:p:Vh";

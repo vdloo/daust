@@ -11,7 +11,6 @@ struct conf{
 	char *identifier;
 };
 
-void error(const char *msg);
 void *init_config();
 void *terminate_config();
 

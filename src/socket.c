@@ -7,6 +7,7 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 #include "socket.h"
+#include "config.h"
 
 #define MAX_DATA_LENGTH 8189
 
@@ -52,15 +53,25 @@ int send_packets(char *host, int port, char *buf)
 	struct hostent *serv;
 	sh = socket(AF_INET, SOCK_STREAM, 0);
 	if (sh < 0) {
-		error("ERROR opening socket");
+		if (config->verbosity) {
+			perror("ERROR opening socket");
+		}
+		return 1;
 	}
 	sa.sin_addr.s_addr 	= inet_addr("127.0.0.1"); // replace this
 	if (sa.sin_addr.s_addr == INADDR_NONE) {
+		if (config->verbosity) {
+			perror("ERROR invalid address");
+		}
+		return 1;
 	}
 	sa.sin_family 		= AF_INET;
 	sa.sin_port 		= htons(port);
 	if (connect(sh, (struct sockaddr *) &sa, sizeof(sa)) < 0) {
-		error("Error connecting");
+		if (config->verbosity) {
+			perror("Error connecting");
+		}
+		return 1;
 	}
 
 	struct pack *pkt = malloc(sizeof(struct pack));
@@ -72,7 +83,10 @@ int send_packets(char *host, int port, char *buf)
 
 		n = write(sh, pkt->d, pkt->dli + 2);
 		if (n < 0) {
-			error("Error writing to socket");
+			if (config->verbosity) {
+				perror("Error writing to socket");
+			}
+			return 1;
 		}
 	} while(save_residu(pkt));
 
@@ -87,7 +101,7 @@ void process_incoming(int sh, char *(*cb)(char *param))
 	socklen_t cl = sizeof(cla);
 	nsh = accept(sh, (struct sockaddr *) &cla, &cl);
 	if (nsh < 0) {
-		error("ERROR accepting socket");
+		perror("ERROR accepting socket");
 	}
 	unsigned short dli = 0, prev_dli = 0;
 	int m_siz = 0;
@@ -95,7 +109,7 @@ void process_incoming(int sh, char *(*cb)(char *param))
 	do {
 		n = read(nsh, &dli, sizeof(unsigned short));
 		if (n < 0) {
-			error("ERROR reading data length from socket");
+			perror("ERROR reading data length from socket");
 		}
 		m_siz = m_siz + (dli * sizeof(char));
 		buf = realloc(buf, m_siz);
@@ -117,7 +131,7 @@ int receive_packets(int port, char *(*cb)(char *param))
 	struct sockaddr_in sa;
 	sh = socket(AF_INET, SOCK_STREAM, 0);
 	if (sh < 0) {
-		error("ERROR opening socket");
+		perror("ERROR opening socket");
 	}
 	sa.sin_family = AF_INET;
 	sa.sin_addr.s_addr = INADDR_ANY;
@@ -125,7 +139,7 @@ int receive_packets(int port, char *(*cb)(char *param))
 	setsockopt(sh, SOL_SOCKET, SO_REUSEADDR, 
 			(const char *) &o, sizeof(int));
 	if (bind(sh, (struct sockaddr *) &sa, sizeof(sa)) > 0) {
-		error("ERROR on binding");
+		perror("ERROR on binding");
 	}
 	listen(sh, 5);
 	while(1) process_incoming(sh, cb);

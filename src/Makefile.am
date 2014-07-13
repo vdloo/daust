@@ -1,7 +1,7 @@
 AM_CFLAG 	= -g -Wall -Wextra
 bin_PROGRAMS 	= daust daustd
-SHARED_CFILES	= config.c messages.c init.c utils.c node_data.c serialize.c socket.c
-SHARED_HFILES	= config.h messages.h init.h utils.h node_data.h serialize.h socket.h
+SHARED_CFILES	= config.c messages.c init.c utils.c node_data.c serialize.c socket.c filter.c
+SHARED_HFILES	= config.h messages.h init.h utils.h node_data.h serialize.h socket.h filter.h
 DAUST_CFILES	= daust.c dispatch.c
 DAUST_HFILES	= daust.h dispatch.h
 DAUSTD_CFILES	= daustd.c server.c

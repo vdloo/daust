@@ -49,17 +49,19 @@ void broadcast_nodelist()
 	free(buf);
 }
 
-void broadcast_command(char *command)
+int broadcast_command(char *command)
 {
-	char *buf;
 	struct nli *node;
 	struct nodeinfo *nfo;
 	node = create_self();
 	nfo = node->info;
-
 	set_node_element(&nfo->command,	command);
 
+	char *buf;
 	buf = serialize(node);
-	send_packets("test", 4040, serialize(node));
+
+	int r = 0;
+	r = send_packets("test", 4040, buf);
 	free(buf);
+	return r;
 }

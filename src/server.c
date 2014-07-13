@@ -63,5 +63,7 @@ char *incoming_callback(char *buf)
 // receive data from other nodes
 void init_server()
 {
+	init_nodelist();
 	receive_packets(4040, incoming_callback);
+	terminate_nodelist();
 }

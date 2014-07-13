@@ -7,11 +7,6 @@
 
 #define PATH_MAX 4096
 
-void error(const char *msg)
-{
-	perror(msg);
-}
-
 char *gen_ident() 
 {
 	char *buf;
