@@ -6,4 +6,6 @@ void broadcast_nodelist();
 void init_server();
 void terminate_nodelist();
 extern struct nli *head;
+char *response_callback(char *buf);
+int broadcast_command(char *command);
 #endif

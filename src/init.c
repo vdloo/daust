@@ -40,12 +40,17 @@ void terminate_nodelist()
 	destroy_nodelist(head);
 }
 
+char *response_callback(char *buf)
+{
+	// do something with response data
+}
+
 // broadcast nodelist to nodes in nodelist
 void broadcast_nodelist()
 {
 	char *buf;
 	buf = serialize(head);
-	send_packets("test", 4040, serialize(head));
+	send_packets("test", 4040, serialize(head), response_callback);
 	free(buf);
 }
 
@@ -61,7 +66,7 @@ int broadcast_command(char *command)
 	buf = serialize(node);
 
 	int r = 0;
-	r = send_packets("test", 4040, buf);
+	r = send_packets("test", 4040, buf, response_callback);
 	free(buf);
 	return r;
 }

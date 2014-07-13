@@ -46,7 +46,7 @@ int save_residu(struct pack *pkt)
 	return nln > 0;
 }
 
-int send_packets(char *host, int port, char *buf)
+int send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 {
 	int sh, n;
 	struct sockaddr_in sa;
@@ -88,6 +88,9 @@ int send_packets(char *host, int port, char *buf)
 			}
 			return 1;
 		}
+
+		// do something with response
+		//cb(returnbuf);
 	} while(save_residu(pkt));
 
 	close(sh);
