@@ -8,33 +8,54 @@
 #include "node_data.h"
 #include "serialize.h"
 #include "socket.h"
+#include "filter.h"
+#include "utils.h"
 
 int verify_node(char *local, char *foreign)
 {
 	// replace this with some kind of public/private 
 	// key mechanism in the // future
-	return strstr(local, foreign) ? 1 : 0;
+	return strcmp(local, foreign) == 0 ? 1 : 0;
 }
 
+int process_command(char *cmd)
+{
+
+	char *rmt 		= NULL;
+	if (strstr(cmd, "all")) {
+		// do one of the 'all' commands
+	} else if (strstr(cmd, "remote")) {
+		// do one of the 'remote' commands
+	} else if (strstr(cmd, "group")) {
+		// do one of the 'group' commands
+	} 
+}
 
 int check_command(struct nodeinfo *nfo)
 {
-	printf("checking the incoming command: %s\n", nfo->command);
-
-	int i = 0;
-	if (strstr(nfo->command, "all")) {
-		// do one of the 'all' commands
-	} else if (strstr(nfo->command, "remote")) {
-		// do one of the 'remote' commands
-	} else if (strstr(nfo->command, "group")) {
-		// do one of the 'group' commands
-	} else {
-		// do one of the 'self' commands
-		if (verify_node(nfo->identifier, config->identifier)) {
-//			i = run_command(nfo->command);
-		}
+	if (verify_node(nfo->identifier, config->identifier) > 0) {
+		return 1;
 	}
-	return i;
+
+
+	char *cmd = NULL;
+	cmd 		= nfo->command;
+	int ac 		= 0;
+	int *acp 	= &ac;
+	char **av 	= explode(cmd, " ", acp); 
+
+	printf("command is %s\n", cmd);
+
+	// destroy explode array
+	int i;
+	for (i = 0; i < ac ; i++) {
+		printf("seg %d is %s\n", i, av[i]);
+		if (av[i]) free(av[i]);
+	}
+	free(av);
+	if (cmd) free(cmd);
+
+	return 0;
 }
 
 // the function to process incoming data
@@ -52,7 +73,8 @@ char *incoming_callback(char *buf)
 	}
 
 	nfo = nl->info;
-	if (nfo->command && !strstr(nfo->command, na)) {
+	printf("command is %s\n", nfo->command);
+	if (nfo->command && strcmp(nfo->command, na) != 0) {
 		//try to run command
 		if (!check_command(nfo) && config->verbosity) {
 			printf("Declined incoming command\n");

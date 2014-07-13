@@ -8,7 +8,6 @@ void init_dispatch(int ac, char *av[], int o)
 {
 	char *rmt 	= NULL;
 	rmt		= filter_specified_remote(ac, av, o);
-	// 0 is local, 1 is specified remote, 2 is all
 	int who		= rmt ? 1 : filter_specified_all(ac, av, o);
 	char *buf 	= NULL;
 	buf 		= filter_command(ac, av, o);

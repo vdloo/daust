@@ -21,7 +21,7 @@ static const struct option lo[] = {
 
 struct conf *config;
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
 	init_config();
 

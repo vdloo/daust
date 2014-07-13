@@ -1,4 +1,5 @@
 /* filter.c */
+#include <stdlib.h>
 #include "string.h"
 #include "utils.h"
 #include "filter.h"
@@ -21,7 +22,7 @@ char *reconstruct_command(int w, char *rmt, char *command)
 }
 
 // checks if a specific remote node is targeted
-char *filter_specified_remote(int ac, char *av[], int o)
+char *filter_specified_remote(int ac, char **av, int o)
 {
 	char *rmt = NULL;
 	int i;
@@ -37,7 +38,7 @@ char *filter_specified_remote(int ac, char *av[], int o)
 }
 
 // checks if all remote nodes are targeted 
-int filter_specified_all(int ac, char *av[], int o)
+int filter_specified_all(int ac, char **av, int o)
 {
 	int i, a = 0;
 	for (i = o; i < ac; i++) {
@@ -49,7 +50,7 @@ int filter_specified_all(int ac, char *av[], int o)
 }
 
 // filters command from destination
-char *filter_command(int ac, char *av[], int o)
+char *filter_command(int ac, char **av, int o)
 {
 	int a 		= 0;
 	int j 		= 0;
@@ -73,4 +74,24 @@ char *filter_command(int ac, char *av[], int o)
 	} 
 	buf = astobfp(buf, mp, NULL);
 	return buf;
+}
+
+// 0 is local, 1 is specified remote, 2 is all
+int filter_who(int ac, char **av, int o, char *rmt)
+{
+	return rmt ? 1 : filter_specified_all(ac, av, o);
+}
+
+char *sanitize_command(int ac, char **av, int o)
+{
+	char *rmt 	= NULL;
+	rmt 		= filter_specified_remote(ac, av, o);	
+	int w		= filter_who(ac, av, o, rmt);
+	char *buf	= NULL;
+	buf		= filter_command(ac, av, o);
+	char *cmd	= NULL;
+	cmd		= reconstruct_command(w, rmt, buf);
+	if (rmt) free(rmt);
+	if (buf) free(buf);
+	return cmd;
 }
