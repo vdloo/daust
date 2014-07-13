@@ -11,56 +11,82 @@
 #include "filter.h"
 #include "utils.h"
 
-int verify_node(char *local, char *foreign)
+int auth_node(char *local, char *foreign)
 {
 	// replace this with some kind of public/private 
 	// key mechanism in the // future
-	return strcmp(local, foreign) == 0 ? 1 : 0;
+	return 0;
 }
 
-int process_command(char *cmd)
+int verify_local(char *local, char *foreign)
 {
-
-	char *rmt 		= NULL;
-	if (strstr(cmd, "all")) {
-		// do one of the 'all' commands
-	} else if (strstr(cmd, "remote")) {
-		// do one of the 'remote' commands
-	} else if (strstr(cmd, "group")) {
-		// do one of the 'group' commands
-	} 
+	return !strcmp(local, foreign) == 0;
 }
 
-int check_command(struct nodeinfo *nfo)
+char *run_command(char *cmd)
 {
-	if (verify_node(nfo->identifier, config->identifier) > 0) {
-		return 1;
+	char *r	= NULL;
+	if (strcmp(cmd, "list") == 0) {
+
+	}	
+}
+
+char *check_then_run_command(struct nodeinfo *nfo)
+{
+	if (auth_node(nfo->identifier, config->identifier) > 0) {
+		return NULL;
 	}
 
-
-	char *cmd = NULL;
-	cmd 		= nfo->command;
+	// put incoming options into array
 	int ac 		= 0;
 	int *acp 	= &ac;
-	char **av 	= explode(cmd, " ", acp); 
+	char **av 	= explode(nfo->command, " ", acp); 
 
-	printf("command is %s\n", cmd);
+	char *rmt 	= NULL;
+	rmt 		= filter_specified_remote(ac, av, 0);
+	int who		= filter_who(ac, av, 0, rmt);
 
-	// destroy explode array
+	char *cmd 	= NULL;
+	cmd		= sanitize_command(ac, av, 0);
+
+	char *r		= NULL;
+	switch (who) {
+		// run local
+		case 0:
+			// check if identifier matches
+			if (verify_local(nfo->identifier, config->identifier) > 0) {
+				r = NULL;
+			} else {
+				run_command(cmd);
+				r = "Ran local command";
+			}
+			break;
+		// run on specified remote
+		case 1:
+			// check if this node is the specified node
+			r = "Ran command aimed at specific node";
+			break;
+		// run on all
+		case 2: 
+			r = "Ran command aimed at all nodes";
+			break;
+	}
+
+	// destroy array from explode
 	int i;
 	for (i = 0; i < ac ; i++) {
-		printf("seg %d is %s\n", i, av[i]);
 		if (av[i]) free(av[i]);
 	}
 	free(av);
 	if (cmd) free(cmd);
 
-	return 0;
+	return r;
 }
 
 // the function to process incoming data
 char *incoming_callback(char *buf)
 {
+	char *r = NULL;
 	struct nli *nl;
 	struct nodeinfo *nfo;
        	nl = deserialize(buf);
@@ -73,13 +99,14 @@ char *incoming_callback(char *buf)
 	}
 
 	nfo = nl->info;
-	printf("command is %s\n", nfo->command);
 	if (nfo->command && strcmp(nfo->command, na) != 0) {
 		//try to run command
-		if (!check_command(nfo) && config->verbosity) {
+		r = check_then_run_command(nfo);
+		if (r == NULL && config->verbosity) {
 			printf("Declined incoming command\n");
 		}
 	}
+	return r;
 }
 
 // receive data from other nodes
