@@ -47,7 +47,7 @@ char *response_callback(char *buf)
 	struct nodeinfo *nfo;
 	nl = deserialize(buf);
 	nfo = nl->info;
-	printf("received the following command %s\n", nfo->command);
+	printf("%s\n", nfo->command);
 }
 
 // broadcast nodelist to nodes in nodelist

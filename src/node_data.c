@@ -4,6 +4,8 @@
 #include <string.h>
 #include <time.h>
 #include "node_data.h"
+#include "utils.h"
+#include "config.h"
 
 // populates nodeinfo element and returns pointer to that element
 char na[] = "N/A";
@@ -121,22 +123,30 @@ int count_nodelist(struct nli *node)
 	return i;
 }
 
-void log_nodelist(struct nli *node)
+char *log_nodelist(struct nli *node)
 {
+	char *buf = NULL;
 	if (node) {
 		struct nodeinfo *nfo;
+		int ms = 0;
+		int *mp = &ms;
 		do
 		{
 			nfo = node->info;
 			// change this to writing printf into a buffer
 			// and then printing it AND writing it to a
 			// log file if it is specified as an option
-			printf("%s: ",			nfo->hostname);
-			printf("internal ip %s, ", 	nfo->internalhost);
-			printf("public ip %s, ", 	nfo->externalhost);
-			printf("keynode %s.\n",		nfo->keynode);
+			buf = astobfp(buf, mp, nfo->hostname);
+			buf = astobfp(buf, mp, ": internal ip ");
+			buf = astobfp(buf, mp, nfo->internalhost);
+			buf = astobfp(buf, mp, ", public ip ");
+			buf = astobfp(buf, mp, nfo->externalhost);
+			buf = astobfp(buf, mp, ", keynode ip ");
+			buf = astobfp(buf, mp, nfo->keynode);
+			buf = asdtobfp(buf, mp, " ", '\0');
 		} while (node = node->next);
 	}
+	return buf;
 }
 // tries to find node based on identifier to the end of
 // the list, then returns pointer to that node.
@@ -175,7 +185,7 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 			// add other nodes if it they don't locally
 			// exist yet
 			match 	= node_by_identifier(local, id);
-			if (i < 1 && match) {
+			if (match) {
 				nfo 	= match->info;	
 			} else if (!match){
 				local = add_node_to_list(local);

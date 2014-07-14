@@ -36,13 +36,17 @@ char *run_command(char *cmd)
 		} else if (strcmp(cmd, "ping") == 0) {
 			printf("pong\n");
 			r = "pong";
+		} else if (strcmp(cmd, "list") == 0) {
+			r = log_nodelist(head);
 		}
 	}
 	return r;
 }
 
-char *check_then_run_command(struct nodeinfo *nfo)
+char *check_then_run_command(struct nli *nl)
 {
+	struct nodeinfo *nfo;
+	nfo = nl->info;
 	if (auth_node(nfo->identifier, config->identifier) > 0) {
 		return NULL;
 	}
@@ -55,6 +59,17 @@ char *check_then_run_command(struct nodeinfo *nfo)
 	char *rmt 	= NULL;
 	rmt 		= filter_specified_remote(ac, av, 0);
 	int who		= filter_who(ac, av, 0, rmt);
+
+	if (who > 0) {
+		join_lists(head, nl);
+		if (config->verbosity) {
+			printf("local nodelist is now: \n");
+			char *lbuf	= NULL;
+			lbuf		= log_nodelist(head);
+			printf("%s\n", lbuf);
+			free(lbuf);
+		}
+	}
 
 	char *cmd 	= NULL;
 	cmd		= sanitize_command(ac, av, 0);
@@ -97,20 +112,19 @@ char *incoming_callback(char *buf)
 {
 	char *r = NULL;
 	struct nli *nl;
-	struct nodeinfo *nfo;
-       	nl = deserialize(buf);
+	nl = deserialize(buf);
 
 	if (config->verbosity) {
-		printf("received the following nodelist:\n");
-		log_nodelist(nl);
-		printf("local nodelist is now:\n");
-		log_nodelist(head);
+		printf("received the following nodelist: \n");
+		char *fbuf 	= NULL;
+		fbuf 		= log_nodelist(nl);
+		printf("%s\n", fbuf);
+		free(fbuf);
 	}
 
-	nfo = nl->info;
-	if (nfo->command && strcmp(nfo->command, na) != 0) {
+	if (nl->info->command && strcmp(nl->info->command, na) != 0) {
 		//try to run command
-		r = check_then_run_command(nfo);
+		r = check_then_run_command(nl);
 		if (r == NULL && config->verbosity) {
 			printf("Declined incoming command\n");
 		}
@@ -128,6 +142,13 @@ char *incoming_callback(char *buf)
 void init_server()
 {
 	init_nodelist();
+	if (config->verbosity) {
+		printf("initialized nodelist: \n");
+		char *lbuf	= NULL;
+		lbuf		= log_nodelist(head);
+		printf("%s\n", lbuf);
+		free(lbuf);
+	}
 	receive_packets(4040, incoming_callback);
 	terminate_nodelist();
 }
