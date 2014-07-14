@@ -69,7 +69,7 @@ int send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 	sa.sin_port 		= htons(port);
 	if (connect(sh, (struct sockaddr *) &sa, sizeof(sa)) < 0) {
 		if (config->verbosity) {
-			perror("Error connecting");
+			perror("ERROR connecting");
 		}
 		return 1;
 	}
@@ -84,14 +84,36 @@ int send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 		n = write(sh, pkt->d, pkt->dli + 2);
 		if (n < 0) {
 			if (config->verbosity) {
-				perror("Error writing to socket");
+				perror("ERROR writing to socket");
 			}
 			return 1;
 		}
-
-		// do something with response
-		//cb(returnbuf);
 	} while(save_residu(pkt));
+
+	// catch return packet
+	unsigned short dli = 0, prev_dli = 0;
+	int m_siz = 0;
+	char *rbuf = NULL;
+	do {
+		n = read(sh, &dli, sizeof(unsigned short));
+		if (n < 0) {
+			if (config->verbosity) {
+				perror("ERROR reading data length from socket");
+			}
+		}
+		m_siz = m_siz + (dli * sizeof(char));
+		rbuf = realloc(rbuf, m_siz);
+		n = read(sh, rbuf + prev_dli, (dli * sizeof(char)));
+		prev_dli = prev_dli + dli;
+	} while (dli == MAX_DATA_LENGTH);
+	rbuf[m_siz] = '\0';
+	if (n > 0) {
+		cb(rbuf);
+	} else {
+		if (config->verbosity) {
+			perror("ERROR connection sent no response\n");
+		}
+	}
 
 	close(sh);
 	return 0;
@@ -104,7 +126,9 @@ void process_incoming(int sh, char *(*cb)(char *param))
 	socklen_t cl = sizeof(cla);
 	nsh = accept(sh, (struct sockaddr *) &cla, &cl);
 	if (nsh < 0) {
-		perror("ERROR accepting socket");
+		if (config->verbosity) {
+			perror("ERROR accepting socket");
+		}
 	}
 	unsigned short dli = 0, prev_dli = 0;
 	int m_siz = 0;
@@ -120,9 +144,26 @@ void process_incoming(int sh, char *(*cb)(char *param))
 		prev_dli = prev_dli + dli;
 	} while (dli == MAX_DATA_LENGTH);
 	buf[m_siz] = '\0';
+
+	// send return packet
+	char *rbuf = NULL;
+	rbuf = cb(buf);
+	struct pack *pkt = malloc(sizeof(struct pack));
+	pkt->res = rbuf;
+	pkt->d = NULL;
+	do {
+		pkt->dli = get_dli(pkt->res);
+		forge_packet(pkt);
+
+		n = write(nsh, pkt->d, pkt->dli + 2);
+		if (n < 0) {
+			if (config->verbosity) {
+				perror("ERROR writing to socket");
+			}
+		}
+	} while(save_residu(pkt));
+
 	close(nsh);
-	cb(buf);
-	// send response here, should be return value from callback as string.
 	free(buf);
 }
 

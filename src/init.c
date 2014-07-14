@@ -42,7 +42,12 @@ void terminate_nodelist()
 
 char *response_callback(char *buf)
 {
-	// do something with response data
+	char *r = NULL;
+	struct nli *nl;
+	struct nodeinfo *nfo;
+	nl = deserialize(buf);
+	nfo = nl->info;
+	printf("received the following command %s\n", nfo->command);
 }
 
 // broadcast nodelist to nodes in nodelist

@@ -43,6 +43,7 @@ char *serialize(struct nli *node)
 // returns pointer to new list.
 struct nli *deserialize(char *buf)
 {
+	if (!buf) return NULL;
 	struct nli *np = NULL, *node = NULL;
 	struct nodeinfo *nfo;
 

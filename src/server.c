@@ -28,13 +28,17 @@ char *run_command(char *cmd)
 	char *r	= NULL;
 	if (cmd) {
 		if (strcmp(cmd, "stop") == 0) {
-			printf("Received stop command. Goodbye.\n");
+			if (config->verbosity) {
+				printf("Received stop command. Goodbye.\n");
+			}
 			terminate_config();		
 			exit(0);
 		} else if (strcmp(cmd, "ping") == 0) {
 			printf("pong\n");
+			r = "pong";
 		}
 	}
+	return r;
 }
 
 char *check_then_run_command(struct nodeinfo *nfo)
@@ -63,8 +67,7 @@ char *check_then_run_command(struct nodeinfo *nfo)
 			if (verify_local(nfo->identifier, config->identifier)) {
 				r = NULL;
 			} else {
-				run_command(cmd);
-				r = "Ran local command";
+				r = run_command(cmd);
 			}
 			break;
 		// run on specified remote
@@ -112,7 +115,13 @@ char *incoming_callback(char *buf)
 			printf("Declined incoming command\n");
 		}
 	}
-	return r;
+
+	struct nli *node;
+	struct nodeinfo *rnfo;
+	node = create_self();
+	rnfo = node->info;
+	set_node_element(&rnfo->command, r);
+	return serialize(node);
 }
 
 // receive data from other nodes
