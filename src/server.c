@@ -26,17 +26,18 @@ int verify_local(char *local, char *foreign)
 char *run_command(char *cmd)
 {
 	char *r	= NULL;
+	char *first = strtok(cmd, " ");
 	if (cmd) {
-		if (strcmp(cmd, "stop") == 0) {
+		if (strcmp(first, "stop") == 0) {
 			if (config->verbosity) {
 				printf("Received stop command. Goodbye.\n");
 			}
 			terminate_config();		
 			exit(0);
-		} else if (strcmp(cmd, "ping") == 0) {
+		} else if (strcmp(first, "ping") == 0) {
 			printf("pong\n");
 			r = "pong";
-		} else if (strcmp(cmd, "list") == 0) {
+		} else if (strcmp(first, "list") == 0) {
 			r = log_nodelist(head);
 		}
 	}
@@ -74,6 +75,17 @@ char *check_then_run_command(struct nli *nl)
 	char *cmd 	= NULL;
 	cmd		= sanitize_command(ac, av, 0);
 
+	// destroy array from explode
+	int i;
+	for (i = 0; i < ac ; i++) {
+		if (av[i]) free(av[i]);
+	}
+	if (av) free(av);
+
+	ac 		= 0;
+	av		= explode(cmd, " ", acp);
+	cmd 		= filter_command(ac, av, 0);
+
 	char *r		= NULL;
 	char *hn 	= NULL;
 	switch (who) {
@@ -89,11 +101,17 @@ char *check_then_run_command(struct nli *nl)
 		// run on specified remote
 		case 1:
 			// check if this node is the specified node
+			// otherwise, send it to that node
 			hn = hostname();
-			if (verify_local(rmt, head->info->externalhost) == 0 || 
-			    verify_local(rmt, head->info->internalhost) == 0) {
+			if ( strcmp(rmt, head->info->hostname) == 0 ||
+			     strcmp(rmt, head->info->internalhost) == 0 ||
+		  	    (strcmp(na, head->info->externalhost) != 0 &&
+			     strcmp(rmt, head->info->externalhost) == 0)) {
 				r = run_command(cmd);
-			} 
+			} else {
+				// contact rmt specified node
+				r = "Remote node is unknown";
+			}
 			break;
 		// run on all
 		case 2: 
@@ -102,12 +120,11 @@ char *check_then_run_command(struct nli *nl)
 	}
 	free(hn);
 
-	// destroy array from explode
-	int i;
 	for (i = 0; i < ac ; i++) {
 		if (av[i]) free(av[i]);
 	}
-	free(av);
+	if (av) free(av);
+
 	if (cmd) free(cmd);
 
 	return r;
