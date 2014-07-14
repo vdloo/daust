@@ -166,6 +166,34 @@ struct nli *node_by_identifier(struct nli *node, char *ident)
 	return match;
 }
 
+struct nli *node_by_hostname(struct nli *node, char *hostname) 
+{
+	struct nli *match = NULL;
+	if (node) {
+		struct nodeinfo *nfo;
+		do
+		{
+			nfo = node->info;
+			if (strstr(node->info->hostname, hostname)) {
+				match = node;	
+			}
+		} while (node = node->next);
+	}
+	return match;
+}
+
+char *externalhost_by_hostname(struct nli *node, char *hostname) 
+{
+	struct nli *nl = node_by_hostname(node, hostname);
+	return nl ? nl->info->externalhost: NULL;
+}
+
+char *internalhost_by_hostname(struct nli *node, char *hostname) 
+{
+	struct nli *nl = node_by_hostname(node, hostname);
+	return nl ? nl->info->internalhost: NULL;
+}
+
 struct nli *join_lists(struct nli *local, struct nli *foreign)
 {
 	if (foreign) {

@@ -7,6 +7,7 @@
 #include "node_data.h"
 #include "serialize.h"
 #include "socket.h"
+#include "messages.h"
 
 struct nli *head;
 
@@ -40,26 +41,38 @@ void terminate_nodelist()
 	destroy_nodelist(head);
 }
 
-char *response_callback(char *buf)
+char *response_callback_silent(char *buf)
 {
 	char *r = NULL;
 	struct nli *nl;
 	struct nodeinfo *nfo;
 	nl = deserialize(buf);
 	nfo = nl->info;
-	printf("%s\n", nfo->command);
+	return nfo->command;
+}
+
+char *response_callback_print(char *buf)
+{
+	char *res 	= NULL;
+	res 		= response_callback_silent(buf);
+	if (strcmp(res, na) == 0) {
+		print_usage();
+	} else {
+		printf("%s\n", res);
+	}
+	free(res);
 }
 
 // broadcast nodelist to nodes in nodelist
-void broadcast_nodelist()
+void broadcast_nodelist(char *dest)
 {
 	char *buf;
 	buf = serialize(head);
-	send_packets("test", 4040, serialize(head), response_callback);
+	send_packets(dest, 4040, buf, response_callback_silent);
 	free(buf);
 }
 
-int broadcast_command(char *command)
+int broadcast_command(char *dest, char *command)
 {
 	struct nli *node;
 	struct nodeinfo *nfo;
@@ -71,7 +84,7 @@ int broadcast_command(char *command)
 	buf = serialize(node);
 
 	int r = 0;
-	r = send_packets("test", 4040, buf, response_callback);
+	r = send_packets(dest, 4040, buf, response_callback_print);
 	free(buf);
 	return r;
 }

@@ -4,6 +4,17 @@
 #include "filter.h"
 #include "init.h"
 
+char *broadcast_to_local(char *cmd) 
+{
+	char *dest	= "127.0.0.1";
+	int r = 0;
+	r = broadcast_command(dest, cmd);
+	if (r > 0) {
+		printf("Can't reach the local daustd socket.\n");
+		printf("Are you sure daustd is running?\n");
+	}
+}
+
 void init_dispatch(int ac, char *av[], int o)
 {
 	char *rmt 	= NULL;
@@ -15,12 +26,6 @@ void init_dispatch(int ac, char *av[], int o)
 	cmd		= reconstruct_command(who, rmt, buf);
 	if (rmt) free(rmt);
 	if (buf) free(buf);
-
-	int r = 0;
-	r = broadcast_command(cmd);
-	if (r > 0) {
-		printf("Can't reach the local daustd socket.\n");
-		printf("Are you sure daustd is running?\n");
-	}
+	broadcast_to_local(cmd);
 	if (cmd) free(cmd);
 }

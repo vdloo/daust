@@ -58,7 +58,7 @@ int send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 		}
 		return 1;
 	}
-	sa.sin_addr.s_addr 	= inet_addr("127.0.0.1"); // replace this
+	sa.sin_addr.s_addr 	= inet_addr(host);
 	if (sa.sin_addr.s_addr == INADDR_NONE) {
 		if (config->verbosity) {
 			perror("ERROR invalid address");
