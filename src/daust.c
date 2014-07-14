@@ -8,7 +8,7 @@
 #include "messages.h"
 #include "dispatch.h"
 
-static const char *os = "vk:l:p:Vh";
+static const char *os = "hVv";
 static const struct option lo[] = {
 	{ "help", no_argument, NULL, 'h' },
 	{ "keynode", required_argument, NULL, 'k' },
@@ -29,28 +29,19 @@ int main(int argc, char **argv)
 	opt = getopt_long(argc, argv, os, lo, &li);
 	while (opt != -1) {
 		switch(opt) {
-			case 'h':
-				print_usage();
-				break;
-			case 'k':
-				config->keynode 	= strdup(optarg);
-				break;
-			case 'l':
-				config->logfile 	= strdup(optarg);
-				break;
-			case 'p':
-				config->publicface 	= strdup(optarg);
-				break;
 			case 'v':
 				config->verbosity++;
 				break;
 			case 'V':
 				print_version();
+				return 0;
 				break;
+			case 'h':
 			case '?':
 			case ':':
 			default:
-				print_usage();
+				print_daust_usage();
+				return 1;
 				break;
 		}
 		opt = getopt_long(argc, argv, os, lo, &li);
@@ -58,7 +49,7 @@ int main(int argc, char **argv)
 	if (optind < argc) {
 		init_dispatch(argc, argv, optind);
 	} else {
-		print_usage();
+		print_daust_usage();
 	}
 
 	terminate_config();

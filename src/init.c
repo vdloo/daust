@@ -56,7 +56,7 @@ char *response_callback_print(char *buf)
 	char *res 	= NULL;
 	res 		= response_callback_silent(buf);
 	if (strcmp(res, na) == 0) {
-		print_usage();
+		print_daust_usage();
 	} else {
 		printf("%s\n", res);
 	}

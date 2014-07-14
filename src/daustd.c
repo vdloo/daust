@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 			case '?':
 			case ':':
 			default:
-				print_usage();
+				print_daustd_usage();
 				return 1;
 				break;
 		}
