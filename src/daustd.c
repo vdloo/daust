@@ -25,6 +25,10 @@ struct conf *config;
 int main(int argc, char *argv[])
 {
 	init_config();
+	if (!broadcast_command("ping")) {
+		printf("daustd is already running\n");
+		return 1;
+	}
 
 	int opt, li = 0, in = 1;
 	opt = getopt_long(argc, argv, os, lo, &li);

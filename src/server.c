@@ -31,7 +31,9 @@ char *run_command(char *cmd)
 			printf("Received stop command. Goodbye.\n");
 			terminate_config();		
 			exit(0);
-		}	
+		} else if (strcmp(cmd, "ping") == 0) {
+			printf("pong\n");
+		}
 	}
 }
 
