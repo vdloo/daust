@@ -8,7 +8,7 @@ char *broadcast_to_local(char *cmd)
 {
 	char *dest	= "127.0.0.1";
 	int r = 0;
-	r = broadcast_command(dest, cmd);
+	r = broadcast_command_print(dest, cmd);
 	if (r > 0) {
 		printf("Can't reach the local daustd socket.\n");
 		printf("Are you sure daustd is running?\n");

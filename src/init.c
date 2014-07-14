@@ -28,6 +28,7 @@ struct nli *create_self()
 	set_node_element(&nfo->identifier, 	config->identifier);
 	return node;
 }
+
 void init_nodelist()
 {
 	head = create_self();
@@ -72,7 +73,24 @@ void broadcast_nodelist(char *dest)
 	free(buf);
 }
 
-int broadcast_command(char *dest, char *command)
+int broadcast_command_silent(char *dest, char *command)
+{
+	struct nli *node;
+	struct nodeinfo *nfo;
+	node = create_self();
+	nfo = node->info;
+	set_node_element(&nfo->command,	command);
+
+	char *buf;
+	buf = serialize(node);
+
+	int r = 0;
+	r = send_packets(dest, 4040, buf, response_callback_silent);
+	free(buf);
+	return r;
+}
+
+int broadcast_command_print(char *dest, char *command)
 {
 	struct nli *node;
 	struct nodeinfo *nfo;

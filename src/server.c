@@ -75,12 +75,13 @@ char *check_then_run_command(struct nli *nl)
 	cmd		= sanitize_command(ac, av, 0);
 
 	char *r		= NULL;
+	char *hn 	= NULL;
 	switch (who) {
 		// run local
 		case 0:
 			// check if identifier matches
 			if (verify_local(nfo->identifier, config->identifier)) {
-				r = NULL;
+				r = "your client ident doesn't match the server";
 			} else {
 				r = run_command(cmd);
 			}
@@ -88,13 +89,18 @@ char *check_then_run_command(struct nli *nl)
 		// run on specified remote
 		case 1:
 			// check if this node is the specified node
-			r = "Ran command aimed at specific node";
+			hn = hostname();
+			if (verify_local(rmt, head->info->externalhost) == 0 || 
+			    verify_local(rmt, head->info->internalhost) == 0) {
+				r = run_command(cmd);
+			} 
 			break;
 		// run on all
 		case 2: 
 			r = "Ran command aimed at all nodes";
 			break;
 	}
+	free(hn);
 
 	// destroy array from explode
 	int i;
