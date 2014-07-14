@@ -64,7 +64,11 @@ char *filter_command(int ac, char **av, int o)
 			!(strcmp(sg, "remote") == 0) &&
 			j == 0
 		) {
-			buf = asdtobfp(buf, mp, sg, " ");
+			if (i+1 == ac) {
+				buf = asdtobfp(buf, mp, sg, NULL);
+			} else {
+				buf = asdtobfp(buf, mp, sg, " ");
+			}
 		} else if (strcmp(sg, "remote") == 0) {
 			// skip next arg if current is "remote"
 			j = 1;
@@ -72,7 +76,6 @@ char *filter_command(int ac, char **av, int o)
 			j = 0;
 		}
 	} 
-	buf = astobfp(buf, mp, NULL);
 	return buf;
 }
 

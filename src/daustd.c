@@ -8,7 +8,7 @@
 #include "messages.h"
 #include "server.h"
 
-static const char *os = "vk:l:p:Vh";
+static const char *os = "vk:l:p:Vhd";
 static const struct option lo[] = {
 	{ "daemon", no_argument, NULL, 'd' },
 	{ "help", no_argument, NULL, 'h' },
@@ -26,16 +26,12 @@ int main(int argc, char *argv[])
 {
 	init_config();
 
-	int opt, li = 0, in = 1, d = 0;
+	int opt, li = 0, in = 1;
 	opt = getopt_long(argc, argv, os, lo, &li);
 	while (opt != -1) {
 		switch(opt) {
 			case 'd':
-				d++;
-				break;
-			case 'h':
-				print_usage();
-				--in;
+				config->daemon++;
 				break;
 			case 'k':
 				config->keynode 	= strdup(optarg);
@@ -51,19 +47,21 @@ int main(int argc, char *argv[])
 				break;
 			case 'V':
 				print_version();
-				--in;
 				break;
+			case 'h':
 			case '?':
 			case ':':
 			default:
 				print_usage();
-				--in;
+				return 1;
 				break;
 		}
 		opt = getopt_long(argc, argv, os, lo, &li);
 	}
-	if (d > 0 && daemon(0,0) == -1) {
-		perror("ERROR detaching");
+	if (config->daemon) {
+		if (daemon(0,0) == -1) {
+			perror("ERROR detaching");
+		}
 	}
 	init_server();
 

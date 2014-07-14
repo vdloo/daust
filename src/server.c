@@ -26,9 +26,13 @@ int verify_local(char *local, char *foreign)
 char *run_command(char *cmd)
 {
 	char *r	= NULL;
-	if (strcmp(cmd, "list") == 0) {
-
-	}	
+	if (cmd) {
+		if (strcmp(cmd, "stop") == 0) {
+			printf("Received stop command. Goodbye.\n");
+			terminate_config();		
+			exit(0);
+		}	
+	}
 }
 
 char *check_then_run_command(struct nodeinfo *nfo)
@@ -54,7 +58,7 @@ char *check_then_run_command(struct nodeinfo *nfo)
 		// run local
 		case 0:
 			// check if identifier matches
-			if (verify_local(nfo->identifier, config->identifier) > 0) {
+			if (verify_local(nfo->identifier, config->identifier)) {
 				r = NULL;
 			} else {
 				run_command(cmd);

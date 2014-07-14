@@ -13,6 +13,7 @@ char *astobfp(char *buf, int *mp, char *str)
 		memcpy(buf + p_siz, str, strl * sizeof(char));
 	} else {
 		*mp = *mp + sizeof(char);
+		buf = realloc(buf, *mp); 
 		buf[p_siz] = '\0'; // p_siz == *mp - 1
 	}
 	return buf;
@@ -28,7 +29,7 @@ char *asdtobfp(char *buf, int *mp, char *str1, char *str2)
 
 int count_delim(char *buf, char *dl)
 {
-	int i 		= 0;
+	int i 		= 1;
 	if (buf && dl != NULL) {
 		char *sg = buf;
 		while ((sg = strpbrk(sg, " ")) != NULL){
