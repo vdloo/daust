@@ -3,15 +3,21 @@
 #include <stdlib.h>
 #include "filter.h"
 #include "init.h"
+#include "messages.h"
+#include "node_data.h"
 
 char *broadcast_to_local(char *cmd) 
 {
 	char *dest	= "127.0.0.1";
 	char *r 	= NULL;;
-	r = broadcast_command_print(dest, cmd);
-	if (r != NULL) {
+	r = broadcast_command(dest, cmd);
+	if (r == NULL) {
 		printf("Can't reach the local daustd socket.\n");
 		printf("Are you sure daustd is running?\n");
+	} else if (strcmp(r, na) == 0) {
+		print_daust_usage();
+	} else {
+		printf("%s\n", r);
 	}
 }
 

@@ -107,13 +107,11 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 		prev_dli = prev_dli + dli;
 	} while (dli == MAX_DATA_LENGTH);
 	rbuf[m_siz] 	= '\0';
-	char *res 	= "no response data";
+	char *res 	= NULL;
 	if (n > 0) {
 		res 	= cb(rbuf);
 	} else {
-		if (config->verbosity) {
-			perror("ERROR connection sent no response\n");
-		}
+		res 	= "Server closed the connection. Goodbye";
 	}
 
 	close(sh);

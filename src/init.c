@@ -42,25 +42,14 @@ void terminate_nodelist()
 	destroy_nodelist(head);
 }
 
-char *response_callback_silent(char *buf)
+char *response_callback(char *buf)
 {
-	char *r = NULL;
+	char *res	= NULL;
 	struct nli *nl;
 	struct nodeinfo *nfo;
-	nl = deserialize(buf);
-	nfo = nl->info;
-	return nfo->command;
-}
-
-char *response_callback_print(char *buf)
-{
-	char *res 	= NULL;
-	res 		= response_callback_silent(buf);
-	if (strcmp(res, na) == 0) {
-		print_daust_usage();
-	} else {
-		printf("%s\n", res);
-	}
+	nl 		= deserialize(buf);
+	nfo 		= nl->info;
+	res		= nfo->command;
 	return res;
 }
 
@@ -69,11 +58,11 @@ void broadcast_nodelist(char *dest)
 {
 	char *buf;
 	buf = serialize(head);
-	send_packets(dest, 4040, buf, response_callback_silent);
+	send_packets(dest, 4040, buf, response_callback);
 	free(buf);
 }
 
-char *broadcast_command_silent(char *dest, char *command)
+char *broadcast_command(char *dest, char *command)
 {
 	struct nli *node;
 	struct nodeinfo *nfo;
@@ -85,24 +74,7 @@ char *broadcast_command_silent(char *dest, char *command)
 	buf = serialize(node);
 
 	char *r = NULL;;
-	r = send_packets(dest, 4040, buf, response_callback_silent);
-	free(buf);
-	return r;
-}
-
-char *broadcast_command_print(char *dest, char *command)
-{
-	struct nli *node;
-	struct nodeinfo *nfo;
-	node = create_self();
-	nfo = node->info;
-	set_node_element(&nfo->command,	command);
-
-	char *buf;
-	buf = serialize(node);
-
-	char *r = NULL;
-	r = send_packets(dest, 4040, buf, response_callback_print);
+	r = send_packets(dest, 4040, buf, response_callback);
 	free(buf);
 	return r;
 }
