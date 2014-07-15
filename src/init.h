@@ -8,5 +8,6 @@ struct nli *create_self();
 void terminate_nodelist();
 extern struct nli *head;
 char *response_callback(char *buf);
-int broadcast_command(char *dest, char *command);
+char *broadcast_command_silent(char *dest, char *command);
+char *broadcast_command_print(char *dest, char *command);
 #endif

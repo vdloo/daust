@@ -46,7 +46,7 @@ int save_residu(struct pack *pkt)
 	return nln > 0;
 }
 
-int send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
+char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 {
 	int sh, n;
 	struct sockaddr_in sa;
@@ -56,14 +56,14 @@ int send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 		if (config->verbosity) {
 			perror("ERROR opening socket");
 		}
-		return 1;
+		return NULL;
 	}
 	sa.sin_addr.s_addr 	= inet_addr(host);
 	if (sa.sin_addr.s_addr == INADDR_NONE) {
 		if (config->verbosity) {
 			perror("ERROR invalid address");
 		}
-		return 1;
+		return NULL;
 	}
 	sa.sin_family 		= AF_INET;
 	sa.sin_port 		= htons(port);
@@ -71,7 +71,7 @@ int send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 		if (config->verbosity) {
 			perror("ERROR connecting");
 		}
-		return 1;
+		return NULL;
 	}
 
 	struct pack *pkt = malloc(sizeof(struct pack));
@@ -86,7 +86,7 @@ int send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 			if (config->verbosity) {
 				perror("ERROR writing to socket");
 			}
-			return 1;
+			return NULL;
 		}
 	} while(save_residu(pkt));
 
@@ -106,9 +106,10 @@ int send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 		n = read(sh, rbuf + prev_dli, (dli * sizeof(char)));
 		prev_dli = prev_dli + dli;
 	} while (dli == MAX_DATA_LENGTH);
-	rbuf[m_siz] = '\0';
+	rbuf[m_siz] 	= '\0';
+	char *res 	= "no response data";
 	if (n > 0) {
-		cb(rbuf);
+		res 	= cb(rbuf);
 	} else {
 		if (config->verbosity) {
 			perror("ERROR connection sent no response\n");
@@ -116,7 +117,7 @@ int send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 	}
 
 	close(sh);
-	return 0;
+	return res;
 }
 
 void process_incoming(int sh, char *(*cb)(char *param))

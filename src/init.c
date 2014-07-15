@@ -61,7 +61,7 @@ char *response_callback_print(char *buf)
 	} else {
 		printf("%s\n", res);
 	}
-	free(res);
+	return res;
 }
 
 // broadcast nodelist to nodes in nodelist
@@ -73,7 +73,7 @@ void broadcast_nodelist(char *dest)
 	free(buf);
 }
 
-int broadcast_command_silent(char *dest, char *command)
+char *broadcast_command_silent(char *dest, char *command)
 {
 	struct nli *node;
 	struct nodeinfo *nfo;
@@ -84,13 +84,13 @@ int broadcast_command_silent(char *dest, char *command)
 	char *buf;
 	buf = serialize(node);
 
-	int r = 0;
+	char *r = NULL;;
 	r = send_packets(dest, 4040, buf, response_callback_silent);
 	free(buf);
 	return r;
 }
 
-int broadcast_command_print(char *dest, char *command)
+char *broadcast_command_print(char *dest, char *command)
 {
 	struct nli *node;
 	struct nodeinfo *nfo;
@@ -101,7 +101,7 @@ int broadcast_command_print(char *dest, char *command)
 	char *buf;
 	buf = serialize(node);
 
-	int r = 0;
+	char *r = NULL;
 	r = send_packets(dest, 4040, buf, response_callback_print);
 	free(buf);
 	return r;
