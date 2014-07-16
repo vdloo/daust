@@ -11,7 +11,8 @@
 char na[] = "N/A";
 char *set_node_element(char **el, char *buf)
 {
-	*el = buf ? strdup(buf) : na;
+	*el = buf ? strdup(buf) : strdup(na);
+	if (buf) free(buf);
 	return *el;
 }
 
@@ -26,14 +27,14 @@ time_t update_node_timestamp(struct nodeinfo *node)
 struct nodeinfo *create_node()
 {
 	struct nodeinfo *node 	= malloc(sizeof(struct nodeinfo));
-	node->hostname		= na;
-	node->internalhost	= na;
-	node->keynode		= na;
-	node->externalhost	= na;
-	node->identifier	= na;
-	node->neighbour[0] 	= na;
-	node->neighbour[1] 	= na;
-	node->command		= na;
+	node->hostname		= strdup(na);
+	node->internalhost	= strdup(na);
+	node->keynode		= strdup(na);
+	node->externalhost	= strdup(na);
+	node->identifier	= strdup(na);
+	node->neighbour[0] 	= strdup(na);
+	node->neighbour[1] 	= strdup(na);
+	node->command		= strdup(na);
 	update_node_timestamp(node);
 	return node;
 }
@@ -42,11 +43,12 @@ struct nodeinfo *create_node()
 void destroy_node(struct nodeinfo *node)
 {
 	if (node) {
-		if (node->hostname 	!= na) free(node->hostname);
-		if (node->internalhost 	!= na) free(node->internalhost);
-		if (node->keynode 	!= na) free(node->keynode);
-		if (node->externalhost 	!= na) free(node->externalhost);
-		if (node->identifier 	!= na) free(node->identifier);
+		if (node->hostname) free(node->hostname);
+		if (node->internalhost) free(node->internalhost);
+		if (node->keynode) free(node->keynode);
+		if (node->identifier) free(node->identifier);
+		if (node->command) free(node->command);
+		if (node->externalhost) free(node->externalhost);
 		free(node);
 	}
 }
@@ -143,6 +145,8 @@ char *log_nodelist(struct nli *node)
 			buf = astobfp(buf, mp, nfo->externalhost);
 			buf = astobfp(buf, mp, ", keynode ip ");
 			buf = astobfp(buf, mp, nfo->keynode);
+			buf = astobfp(buf, mp, ", command ");
+			buf = astobfp(buf, mp, nfo->command);
 			buf = asdtobfp(buf, mp, " ", '\0');
 		} while (node = node->next);
 	}
@@ -150,7 +154,7 @@ char *log_nodelist(struct nli *node)
 }
 // tries to find node based on identifier to the end of
 // the list, then returns pointer to that node.
-struct nli *node_by_identifier(struct nli *node, char *ident)
+struct nli *node_by_identifier(char *ident, struct nli *node)
 {
 	struct nli *match = NULL;
 	if (node) {
@@ -166,7 +170,7 @@ struct nli *node_by_identifier(struct nli *node, char *ident)
 	return match;
 }
 
-struct nli *node_by_hostname(struct nli *node, char *hostname) 
+struct nli *node_by_hostname(char *hostname, struct nli *node)
 {
 	struct nli *match = NULL;
 	if (node) {
@@ -182,15 +186,15 @@ struct nli *node_by_hostname(struct nli *node, char *hostname)
 	return match;
 }
 
-char *externalhost_by_hostname(struct nli *node, char *hostname) 
+char *externalhost_by_hostname(char *hostname, struct nli *node)
 {
-	struct nli *nl = node_by_hostname(node, hostname);
+	struct nli *nl = node_by_hostname(hostname, node);
 	return nl ? nl->info->externalhost: NULL;
 }
 
-char *internalhost_by_hostname(struct nli *node, char *hostname) 
+char *internalhost_by_hostname(char *hostname, struct nli *node) 
 {
-	struct nli *nl = node_by_hostname(node, hostname);
+	struct nli *nl = node_by_hostname(hostname, node);
 	return nl ? nl->info->internalhost: NULL;
 }
 
@@ -212,7 +216,7 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 			// update nodeinfo from broadcasting node,
 			// add other nodes if it they don't locally
 			// exist yet
-			match 	= node_by_identifier(local, id);
+			match 	= node_by_identifier(id, local);
 			if (match) {
 				nfo 	= match->info;	
 			} else if (!match){

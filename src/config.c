@@ -4,6 +4,7 @@
 #include <time.h>
 #include <sys/stat.h>
 #include "config.h"
+#include "node_data.h"
 
 #define PATH_MAX 4096
 
@@ -11,6 +12,7 @@ char *gen_ident()
 {
 	char *buf;
 	int sz  = 512;
+	buf 	= NULL;
 	buf     = malloc(sz * sizeof(char));
 	srand(time(NULL));
 	--sz;
@@ -35,6 +37,7 @@ char *get_ident_path()
 	if (strcmp(hd, root) == 0) {
 		*hd = '\0'; // remember that it is not a good idea to run this program as root
 	}
+	free(root);
 	snprintf(p, PATH_MAX, "%s/%s", hd, fn);
 	mkdir(p, 0777);
 	snprintf(p, PATH_MAX, "%s/%s/%s", hd, fn, "ident");
@@ -47,7 +50,8 @@ char *read_ident()
 	char *p = get_ident_path();
 	f = fopen(p, "r");
 	free(p);
-	char *buf = NULL;
+	char *buf;
+	buf = NULL;
 	if (f != NULL) {
 		fseek(f, 0, SEEK_END);
 		long fs = ftell(f);
@@ -74,7 +78,8 @@ char *write_ident(char *buf)
 
 void *new_ident()
 {
-	char *buf = NULL;
+	char *buf;
+	buf = NULL;
 	buf = gen_ident();
 	write_ident(buf);
 	return buf;
@@ -92,12 +97,15 @@ char *get_ident()
 
 void *init_config()
 {
-	config	= malloc(sizeof(struct conf));
+	config = NULL;
+	config = malloc(sizeof(struct conf));
 	config->daemon 			= 0;
+	config->identifier		= strdup(na);
 	config->identifier 		= get_ident();
-	config->keynode                 = NULL;
-	config->publicface              = NULL;
+	config->keynode                 = strdup(na);
+	config->publicface              = strdup(na);
 	config->verbosity               = 0;
+	config->logfile			= strdup(na);
 	return config;
 }
 

@@ -15,12 +15,12 @@ char dl[] = "\n";
 char *serialize(struct nli *node)
 {
 	char *buf;
+	buf = NULL;
 	if (node) {
 		struct nodeinfo *nfo;
 		int m_siz = 0;
 		int *mp = &m_siz;
 
-		buf = NULL;
 		buf = asdtobfp(buf, mp, st, dl);
 		do
 		{
@@ -79,22 +79,22 @@ struct nli *deserialize(char *buf)
 						np = create_nodelist();
 						node = np;
 					}
-					set_node_element(&hn, sg);
+					set_node_element(&hn, strdup(sg));
 					break;
 				case 1: 
-					set_node_element(&kn, sg);
+					set_node_element(&kn, strdup(sg));
 					break;
 				case 2: 
-					set_node_element(&ih, sg);
+					set_node_element(&ih, strdup(sg));
 					break;
 				case 3:
-					set_node_element(&eh, sg);
+					set_node_element(&eh, strdup(sg));
 					break;
 				case 4:
-					set_node_element(&id, sg);
+					set_node_element(&id, strdup(sg));
 					break;
 				case 5:
-					set_node_element(&cd, sg);
+					set_node_element(&cd, strdup(sg));
 					break;
 			}
 			el++;

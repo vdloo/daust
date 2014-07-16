@@ -25,7 +25,7 @@ struct conf *config;
 int main(int argc, char *argv[])
 {
 	init_config();
-	if (broadcast_command("127.0.0.1", "ping")) {
+	if (broadcast_command(strdup("127.0.0.1"), strdup("ping"))) {
 		printf("daustd is already running\n");
 		return 1;
 	}

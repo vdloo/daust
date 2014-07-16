@@ -17,15 +17,17 @@ struct nli *create_self()
 	struct nli *node;
 	struct nodeinfo *nfo;
 
+	node = NULL;
        	node = create_nodelist();
 
 	node->info = create_node();
+	nfo = NULL;
 	nfo = node->info;
 	set_node_element(&nfo->hostname, 	hostname());
-	set_node_element(&nfo->keynode, 	config->keynode);
+	set_node_element(&nfo->keynode, 	strdup(config->keynode));
 	set_node_element(&nfo->internalhost, 	internalhost());
-	set_node_element(&nfo->externalhost, 	config->publicface);
-	set_node_element(&nfo->identifier, 	config->identifier);
+	set_node_element(&nfo->externalhost, 	strdup(config->publicface));
+	set_node_element(&nfo->identifier, 	strdup(config->identifier));
 	return node;
 }
 
@@ -66,15 +68,17 @@ char *broadcast_command(char *dest, char *command)
 {
 	struct nli *node;
 	struct nodeinfo *nfo;
+	node = NULL;
 	node = create_self();
 	nfo = node->info;
-	set_node_element(&nfo->command,	command);
+	set_node_element(&nfo->command,	strdup(command));
 
 	char *buf;
 	buf = serialize(node);
+	destroy_nodelist(node);
 
 	char *r = NULL;;
 	r = send_packets(dest, 4040, buf, response_callback);
-	free(buf);
+	if (buf) free(buf);
 	return r;
 }

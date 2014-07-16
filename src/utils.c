@@ -31,11 +31,13 @@ int count_delim(char *buf, char *dl)
 {
 	int i 		= 1;
 	if (buf && dl != NULL) {
-		char *sg = buf;
+		char *cbuf = strdup(buf);
+		char *sg   = cbuf;
 		while ((sg = strpbrk(sg, " ")) != NULL){
 			++sg;
 			++i;
 		}
+		if (cbuf) free(cbuf);
 	}
 	return i;
 }

@@ -18,18 +18,24 @@ struct pack {
 
 unsigned short get_dli(char *res) 
 {
-	int ln = strlen(res); 
-	return ln < MAX_DATA_LENGTH ? ln : MAX_DATA_LENGTH;
+	if (res) {
+		int ln = strlen(res); 
+		return ln < MAX_DATA_LENGTH ? ln : MAX_DATA_LENGTH;
+	} else {
+		return 0;
+	}
 }
 
 void forge_packet(struct pack *pkt)
 {
-	if (pkt->d) free(pkt->d);
-	pkt->d = malloc(sizeof(unsigned short) + pkt->dli * sizeof(char) + 1);
-	memcpy(pkt->d, &pkt->dli, sizeof(unsigned short));
-	memcpy(pkt->d + sizeof(unsigned short), pkt->res, pkt->dli);
-	char nt = '\0';
-	memcpy(pkt->d + MAX_DATA_LENGTH + 2, &nt, 1);
+	if (pkt) {
+		if (pkt->d) free(pkt->d);
+		pkt->d = malloc(sizeof(unsigned short) + pkt->dli * sizeof(char) + 1);
+		memcpy(pkt->d, &pkt->dli, sizeof(unsigned short));
+		memcpy(pkt->d + sizeof(unsigned short), pkt->res, pkt->dli);
+		char nt = '\0';
+		memcpy(pkt->d + MAX_DATA_LENGTH + 2, &nt, 1);
+	}
 }
 
 int save_residu(struct pack *pkt)
@@ -77,18 +83,24 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 	struct pack *pkt = malloc(sizeof(struct pack));
 	pkt->res = buf;
 	pkt->d = NULL;
-	do {
-		pkt->dli = get_dli(pkt->res);
-		forge_packet(pkt);
+	if (pkt) {
+		do {
+			pkt->dli = get_dli(pkt->res);
+			forge_packet(pkt);
 
-		n = write(sh, pkt->d, pkt->dli + 2);
-		if (n < 0) {
-			if (config->verbosity) {
-				perror("ERROR writing to socket");
+			if (pkt->d && pkt->dli) {
+				n = write(sh, pkt->d, pkt->dli + 2);
+				if (n < 0) {
+					if (config->verbosity) {
+						perror("ERROR writing to socket");
+					}
+					return NULL;
+				}
 			}
-			return NULL;
-		}
-	} while(save_residu(pkt));
+		} while(save_residu(pkt));
+	}
+	if (pkt->d) free(pkt->d);
+	if (pkt) free(pkt);
 
 	// catch return packet
 	unsigned short dli = 0, prev_dli = 0;
@@ -142,28 +154,33 @@ void process_incoming(int sh, char *(*cb)(char *param))
 		n = read(nsh, buf + prev_dli, (dli * sizeof(char)));
 		prev_dli = prev_dli + dli;
 	} while (dli == MAX_DATA_LENGTH);
-	buf[m_siz] = '\0';
+	buf[m_siz - 1] = '\0';
 
 	// send return packet
 	char *rbuf = NULL;
 	rbuf = cb(buf);
+	if (buf) free(buf);
 	struct pack *pkt = malloc(sizeof(struct pack));
 	pkt->res = rbuf;
 	pkt->d = NULL;
-	do {
-		pkt->dli = get_dli(pkt->res);
-		forge_packet(pkt);
+	if (pkt) {
+		do {
+			pkt->dli = get_dli(pkt->res);
+			forge_packet(pkt);
 
-		n = write(nsh, pkt->d, pkt->dli + 2);
-		if (n < 0) {
-			if (config->verbosity) {
-				perror("ERROR writing to socket");
+			if (pkt->d && pkt->dli) {
+				n = write(nsh, pkt->d, pkt->dli + 2);
+				if (n < 0) {
+					if (config->verbosity) {
+						perror("ERROR writing to socket");
+					}
+				}
 			}
-		}
-	} while(save_residu(pkt));
-
+		} while(save_residu(pkt));
+	}
+	if (pkt->d) free(pkt->d);
+	if (pkt) free(pkt);
 	close(nsh);
-	free(buf);
 }
 
 
@@ -190,11 +207,10 @@ int receive_packets(int port, char *(*cb)(char *param))
 	return 0;
 }
 
-// writes hostname to a static buffer that gets overwritten every
-// time the function is called, returns pointer to this buffer
-char *hn;
 char *hostname()
 {
+	char *hn;
+	hn = NULL;
 	hn = malloc(128 * sizeof(char));
 	gethostname(hn, 128 * sizeof(char));
 	return hn;
@@ -209,5 +225,5 @@ char *internalhost()
 	ioctl(sh, SIOCGIFADDR, &ifr);
 	close(sh);
 	char *iaddr = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
-	return iaddr;
+	return strdup(iaddr);
 }

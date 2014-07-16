@@ -20,7 +20,11 @@ int auth_node(char *local, char *foreign)
 
 int verify_local(char *local, char *foreign)
 {
-	return !strcmp(local, foreign) == 0;
+	int r = 1;
+	if (local && foreign) {
+		r = !strcmp(local, foreign) == 0;
+	}
+	return r;
 }
 
 char *run_command(char *cmd)
@@ -41,6 +45,65 @@ char *run_command(char *cmd)
 			r = log_nodelist(head);
 		}
 	}
+	return r;
+}
+
+char *try_broadcast(char *dest, char *buf) {
+	if (config->verbosity) {
+		printf("Trying to broadcast %s to %s\n", buf, dest);
+	}
+	char *r 	= NULL;
+	r  		= broadcast_command(dest, buf);
+	if (r == NULL) {
+		if (config->verbosity) {
+			printf("Couldn't reach %s", dest);
+		}
+	}
+	return r;
+}
+
+char *broadcast_to_remote(char *rmt, char *buf) {
+	char *r = NULL;
+	char *d = NULL;
+
+	d 	= internalhost_by_hostname(rmt, head);
+	if (d && strcmp(d, na) != 0) {
+		r = try_broadcast(d, buf);
+		if (r == NULL) {
+			if (config->verbosity) {
+				printf( "Will now try the external host\n");
+			}
+		} else {
+			return r;
+		}
+	} else {
+		if (config->verbosity) {
+			printf(	"Found no matching internalhost, "
+				"will now try to match for external\n");
+		}
+	}
+	d 	= externalhost_by_hostname(rmt, head);
+	if (d && strcmp(d, na) != 0) {
+		r = try_broadcast(d, buf);
+		if (r == NULL) {
+			if (config->verbosity) {
+				printf( "Will now try to contact node by address\n");
+			}
+		} else {
+			return r;
+		}
+	} else {
+		if (config->verbosity) {
+			printf(	"Found no matching externalhost, "
+				"will now try to contact node by address\n");
+		}
+	}
+	r = try_broadcast(rmt, buf);
+	if (r == NULL) {
+		if (config->verbosity) {
+			printf("Could not reach node by address\n");
+		}
+	} 
 	return r;
 }
 
@@ -72,22 +135,29 @@ char *check_then_run_command(struct nli *nl)
 		}
 	}
 
-	char *cmd 	= NULL;
-	cmd		= sanitize_command(ac, av, 0);
+	char *buf 	= NULL;
+	buf		= sanitize_command(ac, av, 0);
+	char *cbuf	= strdup(buf);
+	if (buf == NULL) {
+		return "no command";
+	}
 
 	// destroy array from explode
 	int i;
-	for (i = 0; i < ac ; i++) {
-		if (av[i]) free(av[i]);
+	if (av) {
+		for (i = 0; i < ac ; i++) {
+			if (av[i]) free(av[i]);
+		}
+		free(av);
 	}
-	if (av) free(av);
 
 	ac 		= 0;
-	av		= explode(cmd, " ", acp);
+	av		= explode(buf, " ", acp);
+	if (buf) free(buf);
+	char *cmd	= NULL;
 	cmd 		= filter_command(ac, av, 0);
 
 	char *r		= NULL;
-	char *hn 	= NULL;
 	switch (who) {
 		// run local
 		case 0:
@@ -102,7 +172,6 @@ char *check_then_run_command(struct nli *nl)
 		case 1:
 			// check if this node is the specified node
 			// otherwise, send it to that node
-			hn = hostname();
 			if ( strcmp(rmt, head->info->hostname) == 0 ||
 			     strcmp(rmt, head->info->internalhost) == 0 ||
 		  	    (strcmp(na, head->info->externalhost) != 0 &&
@@ -110,15 +179,22 @@ char *check_then_run_command(struct nli *nl)
 				r = run_command(cmd);
 			} else {
 				// contact rmt specified node
-				r = "Remote node is unknown";
+				r = broadcast_to_remote(rmt, cbuf);
+				if (r == NULL) {
+					r = "can not reach remote node";
+				}
 			}
 			break;
 		// run on all
 		case 2: 
+			// send the command to all nodes
+
+			// run the command locally as well
+			run_command(cmd);
 			r = "Ran command aimed at all nodes";
 			break;
 	}
-	free(hn);
+	if (cbuf) free(cbuf);
 
 	for (i = 0; i < ac ; i++) {
 		if (av[i]) free(av[i]);
@@ -142,7 +218,7 @@ char *incoming_callback(char *buf)
 		char *fbuf 	= NULL;
 		fbuf 		= log_nodelist(nl);
 		printf("%s\n", fbuf);
-		free(fbuf);
+		if (fbuf) free(fbuf);
 	}
 
 	if (nl->info->command && strcmp(nl->info->command, na) != 0) {
@@ -157,7 +233,7 @@ char *incoming_callback(char *buf)
 	struct nodeinfo *rnfo;
 	node = create_self();
 	rnfo = node->info;
-	set_node_element(&rnfo->command, r);
+	set_node_element(&rnfo->command, strdup(r));
 	return serialize(node);
 }
 

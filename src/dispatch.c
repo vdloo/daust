@@ -8,7 +8,7 @@
 
 char *broadcast_to_local(char *cmd) 
 {
-	char *dest	= "127.0.0.1";
+	char *dest	= strdup("127.0.0.1");
 	char *r 	= NULL;;
 	r = broadcast_command(dest, cmd);
 	if (r == NULL) {
@@ -33,5 +33,4 @@ void init_dispatch(int ac, char *av[], int o)
 	if (rmt) free(rmt);
 	if (buf) free(buf);
 	broadcast_to_local(cmd);
-	if (cmd) free(cmd);
 }
