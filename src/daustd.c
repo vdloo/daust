@@ -8,7 +8,7 @@
 #include "messages.h"
 #include "server.h"
 
-static const char *os = "vk:l:p:Vhd";
+static const char *os = "dhk:l:p:vV";
 static const struct option lo[] = {
 	{ "daemon", no_argument, NULL, 'd' },
 	{ "help", no_argument, NULL, 'h' },
