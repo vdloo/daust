@@ -79,26 +79,32 @@ struct nli *deserialize(char *buf)
 						np = create_nodelist();
 						node = np;
 					}
-					set_node_element(&hn, strdup(sg));
+					set_node_element(&hn, sg);
 					break;
 				case 1: 
-					set_node_element(&kn, strdup(sg));
+					set_node_element(&kn, sg);
 					break;
 				case 2: 
-					set_node_element(&ih, strdup(sg));
+					set_node_element(&ih, sg);
 					break;
 				case 3:
-					set_node_element(&eh, strdup(sg));
+					set_node_element(&eh, sg);
 					break;
 				case 4:
-					set_node_element(&id, strdup(sg));
+					set_node_element(&id, sg);
 					break;
 				case 5:
-					set_node_element(&cd, strdup(sg));
+					set_node_element(&cd, sg);
 					break;
 			}
 			el++;
 		}
 	} while (sg);
+	if (hn) free(hn);
+	if (kn) free(kn);
+	if (ih) free(ih);
+	if (eh) free(eh);
+	if (id) free(id);
+	if (cd) free(cd);
 	return np;
 }

@@ -12,7 +12,6 @@ char na[] = "N/A";
 char *set_node_element(char **el, char *buf)
 {
 	*el = buf ? strdup(buf) : strdup(na);
-	if (buf) free(buf);
 	return *el;
 }
 

@@ -23,11 +23,14 @@ struct nli *create_self()
 	node->info = create_node();
 	nfo = NULL;
 	nfo = node->info;
-	set_node_element(&nfo->hostname, 	hostname());
-	set_node_element(&nfo->keynode, 	strdup(config->keynode));
+	char *hn	= NULL;
+	hn		= hostname();
+	set_node_element(&nfo->hostname, 	hn);
+	free(hn);
+	set_node_element(&nfo->keynode, 	config->keynode);
 	set_node_element(&nfo->internalhost, 	internalhost());
-	set_node_element(&nfo->externalhost, 	strdup(config->publicface));
-	set_node_element(&nfo->identifier, 	strdup(config->identifier));
+	set_node_element(&nfo->externalhost, 	config->publicface);
+	set_node_element(&nfo->identifier, 	config->identifier);
 	return node;
 }
 
@@ -71,7 +74,7 @@ char *broadcast_command(char *dest, char *command)
 	node = NULL;
 	node = create_self();
 	nfo = node->info;
-	set_node_element(&nfo->command,	strdup(command));
+	set_node_element(&nfo->command,	command);
 
 	char *buf;
 	buf = serialize(node);
