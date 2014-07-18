@@ -22,10 +22,25 @@ static const struct option lo[] = {
 
 struct conf *config;
 
+int check_if_running()
+{
+	int r		= 0;
+	char *dest 	= NULL;
+	dest		= strdup("127.0.0.1");
+	char *cmd	= NULL;
+	cmd 		= strdup("ping");
+	char *cmd	= "ping";
+	r = broadcast_command(dest, cmd);
+	free(dest);
+	free(cmd);
+	return r;
+}
+
 int main(int argc, char *argv[])
 {
 	init_config();
-	if (broadcast_command(strdup("127.0.0.1"), strdup("ping"))) {
+
+	if (check_if_running()) {
 		printf("daustd is already running\n");
 		return 1;
 	}
@@ -62,11 +77,13 @@ int main(int argc, char *argv[])
 		}
 		opt = getopt_long(argc, argv, os, lo, &li);
 	}
+
 	if (config->daemon) {
 		if (daemon(0,0) == -1) {
 			perror("ERROR detaching");
 		}
 	}
+
 	init_server();
 
 	terminate_config();
