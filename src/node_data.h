@@ -26,7 +26,7 @@ struct nli *add_node_to_list(struct nli *node);
 struct nli *create_nodelist();
 struct nodeinfo *create_node();
 char *set_node_element(char **el, char *buf);
-char *log_nodelist(struct nli *node);
+char *nodelist_list(struct nli *node);
 struct nli *node_by_identifier(char *ident, struct nli *node);
 struct nli *node_by_hostname(char *hostname, struct nli *node);
 char *externalhost_by_hostname(char *hostname, struct nli *node);

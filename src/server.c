@@ -42,7 +42,7 @@ char *run_command(char *cmd)
 			printf("pong\n");
 			r = "pong";
 		} else if (strcmp(first, "list") == 0) {
-			r = log_nodelist(head);
+			r = nodelist_list(head);
 		}
 	}
 	return r;
@@ -107,8 +107,11 @@ char *broadcast_to_remote(char *rmt, char *buf) {
 	return r;
 }
 
-char *check_then_run_command(struct nli *nl)
+char *check_command(struct nli *nl)
 {
+	if (nl->info->command == NULL || strcmp(nl->info->command, na) == 0) {
+		return NULL;
+	}
 	struct nodeinfo *nfo;
 	nfo = nl->info;
 	if (auth_node(nfo->identifier, config->identifier) > 0) {
@@ -196,46 +199,61 @@ char *check_then_run_command(struct nli *nl)
 	return r;
 }
 
+void print_received_nodelist(struct nli *nl)
+{
+	if (config->verbosity) {
+		printf("received the following nodelist: \n");
+		char *fbuf 	= NULL;
+		fbuf 		= nodelist_list(nl);
+		printf("%s\n", fbuf);
+		free(fbuf);
+	}
+}
+
+void print_local_nodelist()
+{
+	if (config->verbosity) {
+		printf("local nodelist is now: \n");
+		char *lbuf	= NULL;
+		lbuf		= nodelist_list(head);
+		printf("%s\n", lbuf);
+		free(lbuf);
+	}
+}
+
+// join incoming with local
+void join_incoming(struct nli *nl)
+{
+	print_received_nodelist(nl);
+	join_lists(head, nl);
+	print_local_nodelist();
+}
+
 // the function to process incoming data
 char *incoming_callback(char *buf)
 {
 	char *r = NULL;
-	struct nli *nl;
-	nl = deserialize(buf);
+	struct nli *nli;
+	nli = deserialize(buf);
+	join_incoming(nli);
 
-	if (config->verbosity) {
-		printf("received the following nodelist: \n");
-		char *fbuf 	= NULL;
-		fbuf 		= log_nodelist(nl);
-		printf("%s\n", fbuf);
-		if (fbuf) free(fbuf);
-	}
-	
-	// join incoming with local
-	printf("joining lists\n");
-	join_lists(head, nl);
-	if (config->verbosity) {
-		printf("local nodelist is now: \n");
-		char *lbuf	= NULL;
-		lbuf		= log_nodelist(head);
-		printf("%s\n", lbuf);
-		free(lbuf);
+	r = check_command(nli);
+	if (r == NULL && config->verbosity) {
+		printf("Declined incoming command\n");
 	}
 
-	if (nl->info->command && strcmp(nl->info->command, na) != 0) {
-		//try to run command
-		r = check_then_run_command(nl);
-		if (r == NULL && config->verbosity) {
-			printf("Declined incoming command\n");
-		}
-	}
+	destroy_nodelist(nli);
 
-	struct nli *node;
+	struct nli *rnli;
 	struct nodeinfo *rnfo;
-	node = create_self();
-	rnfo = node->info;
+	rnli = create_self();
+	rnfo = rnli->info;
 	set_node_element(&rnfo->command, strdup(r));
-	return serialize(node);
+
+	char *res 	= NULL;
+	res		= serialize(rnli);
+	destroy_nodelist(rnli);
+	return res;
 }
 
 // receive data from other nodes
@@ -245,7 +263,7 @@ void init_server()
 	if (config->verbosity) {
 		printf("initialized nodelist: \n");
 		char *lbuf	= NULL;
-		lbuf		= log_nodelist(head);
+		lbuf		= nodelist_list(head);
 		printf("%s\n", lbuf);
 		free(lbuf);
 	}

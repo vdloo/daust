@@ -84,8 +84,6 @@ int main(int argc, char *argv[])
 	}
 
 	init_server();
-
 	terminate_config();
-
 	return 0;
 }

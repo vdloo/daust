@@ -124,7 +124,7 @@ int count_nodelist(struct nli *node)
 	return i;
 }
 
-char *log_nodelist(struct nli *node)
+char *nodelist_list(struct nli *node)
 {
 	char *buf = NULL;
 	if (node) {
@@ -217,13 +217,10 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 			// add other nodes if it they don't locally
 			// exist yet
 			match 	= node_by_identifier(id, local);
-			printf("trying to match existing node\n");
 			if (match) {
 				nfo 	= match->info;	
-				printf("matched and overwritten node\n");
 			} else if (!match){
 				local = add_node_to_list(local);
-				printf("not matched and created new node\n");
 				nfo = local->info = create_node();
 			}
 			set_node_element(&nfo->hostname,	hn);

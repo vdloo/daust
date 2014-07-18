@@ -1,16 +1,14 @@
 /* dispatch.c */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "filter.h"
 #include "init.h"
 #include "messages.h"
 #include "node_data.h"
 
-char *broadcast_to_local(char *cmd) 
+void print_broadcast_response(char *r)
 {
-	char *dest	= strdup("127.0.0.1");
-	char *r 	= NULL;;
-	r = broadcast_command(dest, cmd);
 	if (r == NULL) {
 		printf("Can't reach the local daustd socket.\n");
 		printf("Are you sure daustd is running?\n");
@@ -19,6 +17,15 @@ char *broadcast_to_local(char *cmd)
 	} else {
 		printf("%s\n", r);
 	}
+}
+
+void broadcast_to_local(char *cmd) 
+{
+	char *dest	= strdup("127.0.0.1");
+	char *r 	= NULL;;
+	r = broadcast_command(dest, cmd);
+	free(dest);
+	print_broadcast_response(r);
 }
 
 void init_dispatch(int ac, char *av[], int o)

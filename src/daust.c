@@ -53,6 +53,5 @@ int main(int argc, char **argv)
 	}
 
 	terminate_config();
-
 	return 0;
 }
