@@ -29,7 +29,6 @@ int check_if_running()
 	dest		= strdup("127.0.0.1");
 	char *cmd	= NULL;
 	cmd 		= strdup("ping");
-	char *cmd	= "ping";
 	r = broadcast_command(dest, cmd);
 	free(dest);
 	free(cmd);
