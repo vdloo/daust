@@ -62,48 +62,109 @@ char *try_broadcast(char *dest, char *buf) {
 	return r;
 }
 
+void print_try_external()
+{
+	if (config->verbosity) {
+		printf( "Will now try the external host\n");
+	}
+}
+
+void print_failed_internal()
+{
+	if (config->verbosity) {
+		printf(	"Found no matching internalhost, "
+			"will now try to match for external\n");
+	}
+}
+
+void print_try_address()
+{
+	if (config->verbosity) {
+		printf( "Will now try to contact node by address\n");
+	}
+}
+
+void print_failed_external()
+{
+	if (config->verbosity) {
+		printf(	"Found no matching externalhost, "
+			"will now try to contact node by address\n");
+	}
+}
+
+void print_failed_address()
+{
+	if (config->verbosity) {
+		printf("Could not reach node by address\n");
+	}
+}
+
+// if internalhost is found matching a hostname,
+// try connecting to this address
+char *try_internal(char *d, char *buf)
+{
+	char *r = NULL;
+	if (d && strcmp(d, na) != 0) {
+		r = try_broadcast(d, buf);
+		if (r == NULL) {
+			print_try_external();
+		} else {
+			return r;
+		}
+	} else {
+		print_failed_internal();
+	}
+	return r;
+}
+
+// if externalhost is found matching a hostname,
+// try connecting to this address
+char *try_external(char *d, char *buf)
+{
+	char *r = NULL;
+	if (d && strcmp(d, na) != 0) {
+		r = try_broadcast(d, buf);
+		if (r == NULL) {
+			print_try_address();
+		} else {
+			return r;
+		}
+	} else {
+		print_failed_external();
+	}
+	return r;
+}
+
+// try connecting using the buf as the address
+char *try_address(char *d, char *buf)
+{
+	char *r = NULL;
+	r = try_broadcast(d, buf);
+	if (r == NULL) {
+		print_failed_address();
+	} 
+	return r;
+}
+
+// try to broadcast the message to a node by first
+// checking if there is a known and responsive internalhost 
+// for this hostname, then the same for a known externalhost
+// and then if those fail try to connect using the hostname
+// as the address. So first time connecting with 
+// 	$ daust remote 192.168.50.3 
+// will result in directly connecting to that node by ip address
 char *broadcast_to_remote(char *rmt, char *buf) {
 	char *r = NULL;
 	char *d = NULL;
-
-	d 	= internalhost_by_hostname(rmt, head);
-	if (d && strcmp(d, na) != 0) {
-		r = try_broadcast(d, buf);
-		if (r == NULL) {
-			if (config->verbosity) {
-				printf( "Will now try the external host\n");
-			}
-		} else {
-			return r;
-		}
-	} else {
-		if (config->verbosity) {
-			printf(	"Found no matching internalhost, "
-				"will now try to match for external\n");
-		}
-	}
-	d 	= externalhost_by_hostname(rmt, head);
-	if (d && strcmp(d, na) != 0) {
-		r = try_broadcast(d, buf);
-		if (r == NULL) {
-			if (config->verbosity) {
-				printf( "Will now try to contact node by address\n");
-			}
-		} else {
-			return r;
-		}
-	} else {
-		if (config->verbosity) {
-			printf(	"Found no matching externalhost, "
-				"will now try to contact node by address\n");
-		}
-	}
-	r = try_broadcast(rmt, buf);
+	d = internalhost_by_hostname(rmt, head);
+	r = try_internal(d, buf);
 	if (r == NULL) {
-		if (config->verbosity) {
-			printf("Could not reach node by address\n");
-		}
-	} 
+		d = externalhost_by_hostname(rmt, head);
+		r = try_external(d, buf);
+	}
+	if (r == NULL) {
+		r = try_address(rmt, buf);	
+	}
 	return r;
 }
 
