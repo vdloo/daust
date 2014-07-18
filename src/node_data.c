@@ -64,7 +64,7 @@ struct nli *add_node_to_list(struct nli *node)
 		}
 		node->next 			= np;
 	}
-	np->prev 				= node;
+	np->prev 			= node;
 	return np;
 }
 
@@ -146,8 +146,9 @@ char *log_nodelist(struct nli *node)
 			buf = astobfp(buf, mp, nfo->keynode);
 			buf = astobfp(buf, mp, ", command ");
 			buf = astobfp(buf, mp, nfo->command);
-			buf = asdtobfp(buf, mp, " ", '\0');
+			buf = asdtobfp(buf, mp, " ", "\n");
 		} while (node = node->next);
+		buf = astobfp(buf, mp, NULL);
 	}
 	return buf;
 }
@@ -216,10 +217,13 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 			// add other nodes if it they don't locally
 			// exist yet
 			match 	= node_by_identifier(id, local);
+			printf("trying to match existing node\n");
 			if (match) {
 				nfo 	= match->info;	
+				printf("matched and overwritten node\n");
 			} else if (!match){
 				local = add_node_to_list(local);
+				printf("not matched and created new node\n");
 				nfo = local->info = create_node();
 			}
 			set_node_element(&nfo->hostname,	hn);

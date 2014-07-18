@@ -124,16 +124,6 @@ char *check_then_run_command(struct nli *nl)
 	rmt 		= filter_specified_remote(ac, av, 0);
 	int who		= filter_who(ac, av, 0, rmt);
 
-	if (who > 0) {
-		join_lists(head, nl);
-		if (config->verbosity) {
-			printf("local nodelist is now: \n");
-			char *lbuf	= NULL;
-			lbuf		= log_nodelist(head);
-			printf("%s\n", lbuf);
-			free(lbuf);
-		}
-	}
 
 	char *buf 	= NULL;
 	buf		= sanitize_command(ac, av, 0);
@@ -219,6 +209,17 @@ char *incoming_callback(char *buf)
 		fbuf 		= log_nodelist(nl);
 		printf("%s\n", fbuf);
 		if (fbuf) free(fbuf);
+	}
+	
+	// join incoming with local
+	printf("joining lists\n");
+	join_lists(head, nl);
+	if (config->verbosity) {
+		printf("local nodelist is now: \n");
+		char *lbuf	= NULL;
+		lbuf		= log_nodelist(head);
+		printf("%s\n", lbuf);
+		free(lbuf);
 	}
 
 	if (nl->info->command && strcmp(nl->info->command, na) != 0) {
