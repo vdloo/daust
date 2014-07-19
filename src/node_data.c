@@ -11,6 +11,7 @@
 char na[] = "N/A";
 char *set_node_element(char **el, char *buf)
 {
+	if (*el) free(*el);
 	*el = buf ? strdup(buf) : strdup(na);
 	return *el;
 }
@@ -31,24 +32,24 @@ struct nodeinfo *create_node()
 	node->keynode		= strdup(na);
 	node->externalhost	= strdup(na);
 	node->identifier	= strdup(na);
-	node->neighbour[0] 	= strdup(na);
-	node->neighbour[1] 	= strdup(na);
+	//node->neighbour[0] 	= strdup(na);
+	//node->neighbour[1] 	= strdup(na);
 	node->command		= strdup(na);
 	update_node_timestamp(node);
 	return node;
 }
 
 // clears memory of nodeinfo struct pointed to by argument
-void destroy_node(struct nodeinfo *node)
+void destroy_node(struct nodeinfo *nfo)
 {
-	if (node) {
-		if (node->hostname) free(node->hostname);
-		if (node->internalhost) free(node->internalhost);
-		if (node->keynode) free(node->keynode);
-		if (node->identifier) free(node->identifier);
-		if (node->command) free(node->command);
-		if (node->externalhost) free(node->externalhost);
-		free(node);
+	if (nfo) {
+		if (nfo->hostname) free(nfo->hostname);
+		if (nfo->internalhost) free(nfo->internalhost);
+		if (nfo->keynode) free(nfo->keynode);
+		if (nfo->identifier) free(nfo->identifier);
+		if (nfo->command) free(nfo->command);
+		if (nfo->externalhost) free(nfo->externalhost);
+		free(nfo);
 	}
 }
 
@@ -57,6 +58,7 @@ struct nli *add_node_to_list(struct nli *node)
 {
 	struct nli *np 	= malloc(sizeof(struct nli));
 	np->next 	= NULL;
+	np->prev	= NULL;
 	if (node) {
 		if (node->next) {
 			node->next->prev 	= np;
@@ -97,12 +99,14 @@ void destroy_nodelist(struct nli *node)
 {
 	if (node) {
 		// start with the last node list item in list
-		while (node) {
+		while (node->next) {
+			printf("go to end step\n");
 			node = node->next;
 		}
 		// remove node list items until there are no more
 		// previous node list items left in the list
 		do {
+			printf("delete from end on step\n");
 			remove_node_from_list(node);
 			if (node) {
 				node = node->prev;

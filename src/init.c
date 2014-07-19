@@ -23,12 +23,13 @@ struct nli *create_self()
 	node->info = create_node();
 	nfo = NULL;
 	nfo = node->info;
-	char *hn	= NULL;
-	hn		= hostname();
+	char *hn	= hostname();
 	set_node_element(&nfo->hostname, 	hn);
 	free(hn);
 	set_node_element(&nfo->keynode, 	config->keynode);
-	set_node_element(&nfo->internalhost, 	internalhost());
+	char *ih	= internalhost();
+	set_node_element(&nfo->internalhost, 	ih);
+	free(ih);
 	set_node_element(&nfo->externalhost, 	config->publicface);
 	set_node_element(&nfo->identifier, 	config->identifier);
 	return node;
@@ -60,6 +61,7 @@ char *response_callback(char *buf)
 	nl 		= deserialize(buf);
 	nfo 		= nl->info;
 	res		= strdup(nfo->command);
+	destroy_nodelist(nl);
 	return res;
 }
 
@@ -74,19 +76,15 @@ void broadcast_nodelist(char *dest)
 
 char *broadcast_command(char *dest, char *command)
 {
-	struct nli *node;
-	struct nodeinfo *nfo;
-	node = NULL;
-	node = create_self();
-	nfo = node->info;
-	set_node_element(&nfo->command,	command);
+	struct nli *nli;
+	nli = create_self();
+	set_node_element(&nli->info->command, command);
 
 	char *buf;
-	buf = serialize(node);
-	destroy_nodelist(node);
+	buf = serialize(nli);
+	destroy_nodelist(nli);
 
-	char *r = NULL;;
-	r = send_packets(dest, 4040, buf, response_callback);
+	char *r = send_packets(dest, 4040, buf, response_callback);
 	if (buf) free(buf);
 	return r;
 }

@@ -100,7 +100,6 @@ void *init_config()
 	config = NULL;
 	config = malloc(sizeof(struct conf));
 	config->daemon 			= 0;
-	config->identifier		= strdup(na);
 	config->identifier 		= get_ident();
 	config->keynode                 = strdup(na);
 	config->publicface              = strdup(na);

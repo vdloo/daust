@@ -1,4 +1,4 @@
-/* dispatch.c */
+/* client_dispatch.c */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,22 +22,21 @@ void print_broadcast_response(char *r)
 void broadcast_to_local(char *cmd) 
 {
 	char *dest	= strdup("127.0.0.1");
-	char *r 	= NULL;;
-	r = broadcast_command(dest, cmd);
+	char *r 	= broadcast_command(dest, cmd);
 	free(dest);
+
 	print_broadcast_response(r);
+	if (r) free(r);
 }
 
-void init_dispatch(int ac, char *av[], int o)
+void client_dispatch(int ac, char *av[], int o)
 {
-	char *rmt 	= NULL;
-	rmt		= filter_specified_remote(ac, av, o);
+	char *rmt 	= filter_specified_remote(ac, av, o);
 	int who		= rmt ? 1 : filter_specified_all(ac, av, o);
-	char *buf 	= NULL;
-	buf 		= filter_command(ac, av, o);
-	char *cmd	= NULL;
-	cmd		= reconstruct_command(who, rmt, buf);
+	char *buf 	= filter_command(ac, av, o);
+	char *cmd	= reconstruct_command(who, rmt, buf);
 	if (rmt) free(rmt);
 	if (buf) free(buf);
 	broadcast_to_local(cmd);
+	if (cmd) free(cmd);
 }

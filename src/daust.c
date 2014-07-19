@@ -6,7 +6,7 @@
 #include <getopt.h>
 #include "config.h"
 #include "messages.h"
-#include "dispatch.h"
+#include "client_dispatch.h"
 
 static const char *os = "hVv";
 static const struct option lo[] = {
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 		opt = getopt_long(argc, argv, os, lo, &li);
 	}
 	if (optind < argc) {
-		init_dispatch(argc, argv, optind);
+		client_dispatch(argc, argv, optind);
 	} else {
 		print_daust_usage();
 	}

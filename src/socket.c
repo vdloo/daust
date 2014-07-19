@@ -125,7 +125,7 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 	} else {
 		res 	= strdup("Server closed the connection. Goodbye");
 	}
-
+	if (rbuf) free(rbuf);
 	close(sh);
 	return res;
 }
@@ -159,7 +159,9 @@ void process_incoming(int sh, char *(*cb)(char *param))
 	// send return packet
 	char *rbuf = NULL;
 	rbuf = cb(buf);
+
 	if (buf) free(buf);
+
 	struct pack *pkt = malloc(sizeof(struct pack));
 	pkt->res = rbuf;
 	pkt->d = NULL;
@@ -180,6 +182,7 @@ void process_incoming(int sh, char *(*cb)(char *param))
 	}
 	if (pkt->d) free(pkt->d);
 	if (pkt) free(pkt);
+	if (rbuf) free(rbuf);
 	close(nsh);
 }
 
