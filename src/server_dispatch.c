@@ -319,6 +319,7 @@ char *server_dispatch(struct nli *nli)
 	char *r;
 	r = route_command(nli, who, rmt, cmd, buf);
 
+	if (rmt) free(rmt);
 	if (buf) free(buf);
 	if (cmd) free(cmd);
 

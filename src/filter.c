@@ -29,7 +29,9 @@ char *filter_specified_remote(int ac, char **av, int o)
 	for (i = o; i < ac; i++) {
 		if (strcmp(av[i], "remote") == 0) {
 			if ((i + 1) < ac) {
-				if (!rmt) rmt = strdup(av[i+1]);
+				if (rmt == NULL) {
+				       rmt = strdup(av[i+1]);
+				}
 				i++;
 			}
 		}

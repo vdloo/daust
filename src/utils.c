@@ -77,5 +77,6 @@ void destroy_array(char **av, int ac)
 			el = av[i];
 			if (el) free(el);
 		}
+		free(av);
 	}
 }
