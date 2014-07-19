@@ -57,9 +57,10 @@ char *read_ident()
 		long fs = ftell(f);
 		fs = ftell(f);
 		rewind(f);	
-		buf = malloc(fs * (sizeof(char)));
+		buf = malloc((1 + fs) * (sizeof(char))); // + 1 for nullterm
 		size_t r = fread(buf, sizeof(char), fs, f);
 		fclose(f);
+		buf[fs] = '\0';
 	}
 	return buf;
 }

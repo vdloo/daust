@@ -34,7 +34,7 @@ void forge_packet(struct pack *pkt)
 		memcpy(pkt->d, &pkt->dli, sizeof(unsigned short));
 		memcpy(pkt->d + sizeof(unsigned short), pkt->res, pkt->dli);
 		char nt = '\0';
-		memcpy(pkt->d + MAX_DATA_LENGTH + 2, &nt, 1);
+		memcpy(pkt->d + sizeof(unsigned short) + pkt->dli, &nt, 1);
 	}
 }
 
@@ -81,6 +81,7 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 	}
 
 	struct pack *pkt = malloc(sizeof(struct pack));
+	pkt->res = NULL;
 	pkt->res = buf;
 	pkt->d = NULL;
 	if (pkt) {
@@ -118,7 +119,7 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 		n = read(sh, rbuf + prev_dli, (dli * sizeof(char)));
 		prev_dli = prev_dli + dli;
 	} while (dli == MAX_DATA_LENGTH);
-	rbuf[m_siz] 	= '\0';
+	rbuf[m_siz - 1] 	= '\0';
 	char *res 	= NULL;
 	if (n > 0) {
 		res 	= cb(rbuf);

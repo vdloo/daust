@@ -100,14 +100,12 @@ void destroy_nodelist(struct nli *node)
 	if (node) {
 		// start with the last node list item in list
 		while (node->next) {
-			printf("go to end step\n");
 			node = node->next;
 		}
 		// remove node list items until there are no more
 		// previous node list items left in the list
 		do {
-			printf("delete from end on step\n");
-			remove_node_from_list(node);
+			node = remove_node_from_list(node);
 			if (node) {
 				node = node->prev;
 			}
@@ -138,9 +136,6 @@ char *nodelist_list(struct nli *node)
 		do
 		{
 			nfo = node->info;
-			// change this to writing printf into a buffer
-			// and then printing it AND writing it to a
-			// log file if it is specified as an option
 			buf = astobfp(buf, mp, nfo->hostname);
 			buf = astobfp(buf, mp, ": internal ip ");
 			buf = astobfp(buf, mp, nfo->internalhost);
