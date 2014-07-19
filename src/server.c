@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "config.h"
 #include "server.h"
 #include "init.h"
@@ -10,13 +11,7 @@
 #include "socket.h"
 #include "filter.h"
 #include "utils.h"
-
-int auth_node(char *local, char *foreign)
-{
-	// replace this with some kind of public/private 
-	// key mechanism in the // future
-	return 0;
-}
+#include "commands.h"
 
 int verify_local(char *local, char *foreign)
 {
@@ -27,38 +22,54 @@ int verify_local(char *local, char *foreign)
 	return r;
 }
 
+int check_if_stop(char *first)
+{
+	return strcmp(first, "stop") == 0;
+}
+
+int check_if_ping(char *first)
+{
+	return strcmp(first, "ping") == 0;
+}
+
+int check_if_list(char *first)
+{
+	return strcmp(first, "list") == 0;
+}
+
 char *run_command(char *cmd)
 {
 	char *r	= NULL;
 	char *first = strtok(cmd, " ");
 	if (cmd) {
-		if (strcmp(first, "stop") == 0) {
-			if (config->verbosity) {
-				printf("Received stop command. Goodbye.\n");
-			}
-			terminate_config();		
-			exit(0);
-		} else if (strcmp(first, "ping") == 0) {
-			printf("pong\n");
-			r = "pong";
-		} else if (strcmp(first, "list") == 0) {
-			r = nodelist_list(head);
-		}
+		if (check_if_stop(first)) kill_daemon();
+		if (check_if_ping(first)) r = pong();
+		if (check_if_list(first)) r = nodelist_list(head);
 	}
 	return r;
 }
 
-char *try_broadcast(char *dest, char *buf) {
+void print_try_broadcast(char *dest, char *buf)
+{
 	if (config->verbosity) {
 		printf("Trying to broadcast %s to %s\n", buf, dest);
 	}
-	char *r 	= NULL;
-	r  		= broadcast_command(dest, buf);
-	if (r == NULL) {
-		if (config->verbosity) {
-			printf("Couldn't reach %s", dest);
-		}
+}
+
+void print_failed_broadcast(char *dest)
+{
+	if (config->verbosity) {
+		printf("Couldn't reach %s", dest);
 	}
+}
+
+// try to broadcast buf to destination dest
+char *try_broadcast(char *dest, char *buf) {
+	print_try_broadcast(dest, buf);
+
+	char *r 	= broadcast_command(dest, buf);
+
+	if (r == NULL) print_failed_broadcast(dest);
 	return r;
 }
 
@@ -168,93 +179,150 @@ char *broadcast_to_remote(char *rmt, char *buf) {
 	return r;
 }
 
-char *check_command(struct nli *nl)
+// check if command is not the placeholder
+int chck_na_cmd(struct nli* nl)
 {
-	if (nl->info->command == NULL || strcmp(nl->info->command, na) == 0) {
-		return NULL;
-	}
+	return strcmp(nl->info->command, na) == 0;
+}
+
+// check if command is not NULL
+int chck_no_cmd(struct nli *nl)
+{
+	return nl->info->command == NULL;
+}
+
+// check if the node matches the authorization criteria
+// to contact this node
+int auth_nli(struct nli *nl)
+{
 	struct nodeinfo *nfo;
 	nfo = nl->info;
-	if (auth_node(nfo->identifier, config->identifier) > 0) {
-		return NULL;
+	// do something with public and private keys
+	// here in the future
+//	return auth_node(nfo->identifier, config->identifier) > 0;
+	return 0;
+}
+
+// check if identifier matches, then run command
+char *run_local(struct nli *nli, char *cmd)
+{
+	char *r;
+	if (verify_local(nli->info->identifier, config->identifier)) {
+		r = strdup("your client ident doesn't match the server");
+	} else {
+		r = run_command(cmd);
 	}
+	return r;
+}
 
-	// put incoming options into array
-	int ac 		= 0;
-	int *acp 	= &ac;
-	char **av 	= explode(nfo->command, " ", acp); 
-
-	char *rmt 	= NULL;
-	rmt 		= filter_specified_remote(ac, av, 0);
-	int who		= filter_who(ac, av, 0, rmt);
-
-
-	char *buf 	= NULL;
-	buf		= sanitize_command(ac, av, 0);
-	char *cbuf	= strdup(buf);
-	if (buf == NULL) {
-		return "no command";
-	}
-
-	// destroy array from explode
-	int i;
-	if (av) {
-		for (i = 0; i < ac ; i++) {
-			if (av[i]) free(av[i]);
+// check if this node is the specified node
+// otherwise, send it to that node
+char *run_remote(char *rmt, char *buf, char *cmd)
+{
+	char *r;
+	if ( strcmp(rmt, head->info->hostname) == 0 ||
+	     strcmp(rmt, head->info->internalhost) == 0 ||
+	    (strcmp(na, head->info->externalhost) != 0 &&
+	     strcmp(rmt, head->info->externalhost) == 0)) {
+		r = run_command(cmd);
+	} else {
+		// contact rmt specified node
+		r = broadcast_to_remote(rmt, buf);
+		if (r == NULL) {
+			r = strdup("can not reach remote node");
 		}
-		free(av);
 	}
+	return r;
+}
 
-	ac 		= 0;
-	av		= explode(buf, " ", acp);
-	if (buf) free(buf);
-	char *cmd	= NULL;
-	cmd 		= filter_command(ac, av, 0);
+char *run_all(char *cmd)
+{
+	char *r;
+	// send the command to all nodes
 
+	// run the command locally as well
+	run_command(cmd);
+	r = strdup("Ran command aimed at all nodes");
+	return r;
+}
+
+// run the command or send it to the right nodes
+char *route_command(struct nli *nli, int who, char *rmt, char *cmd, char *buf)
+{
 	char *r		= NULL;
 	switch (who) {
 		// run local
 		case 0:
-			// check if identifier matches
-			if (verify_local(nfo->identifier, config->identifier)) {
-				r = "your client ident doesn't match the server";
-			} else {
-				r = run_command(cmd);
-			}
+			r = run_local(nli, cmd);
 			break;
 		// run on specified remote
 		case 1:
-			// check if this node is the specified node
-			// otherwise, send it to that node
-			if ( strcmp(rmt, head->info->hostname) == 0 ||
-			     strcmp(rmt, head->info->internalhost) == 0 ||
-		  	    (strcmp(na, head->info->externalhost) != 0 &&
-			     strcmp(rmt, head->info->externalhost) == 0)) {
-				r = run_command(cmd);
-			} else {
-				// contact rmt specified node
-				r = broadcast_to_remote(rmt, cbuf);
-				if (r == NULL) {
-					r = "can not reach remote node";
-				}
-			}
+			r = run_remote(rmt, buf, cmd);
 			break;
 		// run on all
 		case 2: 
-			// send the command to all nodes
-
-			// run the command locally as well
-			run_command(cmd);
-			r = "Ran command aimed at all nodes";
+			r = run_all(cmd);
 			break;
 	}
-	if (cbuf) free(cbuf);
+	return r;
+}
 
-	for (i = 0; i < ac ; i++) {
-		if (av[i]) free(av[i]);
+// test is the incomming command looks like a command and then
+// calls route_command to send it to the right node
+int check_command(struct nli *nli)
+{
+	// return NULL if no command is present in the node list item
+	if (chck_no_cmd(nli)) 	return 0;
+	if (chck_na_cmd(nli)) 	return 0;
+
+	// return NULL if node list item can't be authenticated
+	if (auth_nli(nli) > 0) 	return 0; 
+
+	return 1;
+}
+
+char *dispatch_command(struct nli *nli)
+{
+
+	// put incoming command into array
+	int ac 		= 0;
+	int *acp 	= &ac;
+	char **av 	= explode(nli->info->command, " ", acp); 
+
+	char *rmt 	= NULL;
+	rmt 		= filter_specified_remote(ac, av, 0);
+
+	// find out what group the command needs to be sent to
+	int who		= filter_who(ac, av, 0, rmt);
+
+
+	// put the incoming command in the expected order
+	char *buf 	= NULL;
+	buf		= sanitize_command(ac, av, 0);
+	if (buf == NULL) {
+		return "no command";
 	}
-	if (av) free(av);
 
+	// free all memory of the first explode array
+	destroy_array(av, ac);
+
+	// put sanitized command into array
+	ac 		= 0;
+	av		= explode(buf, " ", acp);
+
+	// filter the destination out of the command
+	char *cmd	= NULL;
+	cmd 		= filter_command(ac, av, 0);
+
+	// free all memory of the second explode array
+	destroy_array(av, ac);
+
+	// run the command or 
+	// send it to the right nodes
+	char *r;
+	r = route_command(nli, who, rmt, cmd, buf);
+
+	if (buf) free(buf);
 	if (cmd) free(cmd);
 
 	return r;
@@ -290,6 +358,20 @@ void join_incoming(struct nli *nl)
 	print_local_nodelist();
 }
 
+char *create_response_buf(char *r)
+{
+	struct nli *rnli;
+	struct nodeinfo *rnfo;
+	rnli = create_self();
+	rnfo = rnli->info;
+	set_node_element(&rnfo->command, strdup(r));
+	if (r) free (r);
+
+	char *res 	= NULL;
+	res		= serialize(rnli);
+	destroy_nodelist(rnli);
+}
+
 // the function to process incoming data
 char *incoming_callback(char *buf)
 {
@@ -298,23 +380,14 @@ char *incoming_callback(char *buf)
 	nli = deserialize(buf);
 	join_incoming(nli);
 
-	r = check_command(nli);
-	if (r == NULL && config->verbosity) {
+	if (check_command(nli) && config->verbosity) {
 		printf("Declined incoming command\n");
+	} else {
+		r = dispatch_command(nli);
 	}
-
 	destroy_nodelist(nli);
 
-	struct nli *rnli;
-	struct nodeinfo *rnfo;
-	rnli = create_self();
-	rnfo = rnli->info;
-	set_node_element(&rnfo->command, strdup(r));
-
-	char *res 	= NULL;
-	res		= serialize(rnli);
-	destroy_nodelist(rnli);
-	return res;
+	return create_response_buf(r);
 }
 
 // receive data from other nodes

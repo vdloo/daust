@@ -59,7 +59,7 @@ char *response_callback(char *buf)
 	struct nodeinfo *nfo;
 	nl 		= deserialize(buf);
 	nfo 		= nl->info;
-	res		= nfo->command;
+	res		= strdup(nfo->command);
 	return res;
 }
 

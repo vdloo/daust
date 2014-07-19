@@ -123,7 +123,7 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 	if (n > 0) {
 		res 	= cb(rbuf);
 	} else {
-		res 	= "Server closed the connection. Goodbye";
+		res 	= strdup("Server closed the connection. Goodbye");
 	}
 
 	close(sh);

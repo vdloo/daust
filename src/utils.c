@@ -47,6 +47,7 @@ char **array_of_segments(char *buf, char *dl, int i)
 	char *sg 	= NULL;
 	char **a;
 	int j = 0;
+	char *cbuf	= strdup(buf);
 	a		= malloc(i * sizeof(char *));
 	sg		= strtok(buf, dl);
 	do {
@@ -55,6 +56,7 @@ char **array_of_segments(char *buf, char *dl, int i)
 		}
 		++j;
 	} while (sg = strtok(NULL, dl));
+	if (cbuf) free(cbuf);
 	return a;
 }
 
@@ -64,4 +66,16 @@ char **explode(char *buf, char *dl, int *acp)
 	int i = count_delim(buf, dl);
 	*acp = i;
 	return array_of_segments(buf, dl, i);
+}
+
+void destroy_array(char **av, int ac)
+{
+	int i;
+	char *el;
+	if (av) {
+		for (i = 0; i < ac; i++) {
+			el = av[i];
+			if (el) free(el);
+		}
+	}
 }
