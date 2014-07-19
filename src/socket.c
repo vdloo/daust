@@ -105,7 +105,7 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 
 	// catch return packet
 	unsigned short dli = 0, prev_dli = 0;
-	int m_siz = 0;
+	int m_siz = 1;
 	char *rbuf = NULL;
 	do {
 		n = read(sh, &dli, sizeof(unsigned short));
