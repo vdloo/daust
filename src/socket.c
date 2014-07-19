@@ -163,7 +163,7 @@ void process_incoming(int sh, char *(*cb)(char *param))
 	struct pack *pkt = malloc(sizeof(struct pack));
 	pkt->res = rbuf;
 	pkt->d = NULL;
-	if (pkt) {
+	if (pkt && pkt->res) {
 		do {
 			pkt->dli = get_dli(pkt->res);
 			forge_packet(pkt);

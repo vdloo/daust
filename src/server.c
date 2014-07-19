@@ -358,18 +358,25 @@ void join_incoming(struct nli *nl)
 	print_local_nodelist();
 }
 
+// create string to be broadcast back to client
 char *create_response_buf(char *r)
 {
-	struct nli *rnli;
-	struct nodeinfo *rnfo;
-	rnli = create_self();
-	rnfo = rnli->info;
-	set_node_element(&rnfo->command, strdup(r));
+	struct nli *nli;
+	nli = create_self();
+	set_node_element(&nli->info->command, r);
 	if (r) free (r);
 
 	char *res 	= NULL;
-	res		= serialize(rnli);
-	destroy_nodelist(rnli);
+	res		= serialize(nli);
+	destroy_nodelist(nli);
+	return res;
+}
+
+void print_declined_incoming()
+{
+	if (config->verbosity) {
+		printf("Declined incoming command\n");
+	}
 }
 
 // the function to process incoming data
@@ -380,12 +387,13 @@ char *incoming_callback(char *buf)
 	nli = deserialize(buf);
 	join_incoming(nli);
 
-	if (check_command(nli) && config->verbosity) {
-		printf("Declined incoming command\n");
-	} else {
+	if (check_command(nli)) {
 		r = dispatch_command(nli);
+	} else {
+		print_declined_incoming();
 	}
 	destroy_nodelist(nli);
+	printf("R  is %s\n", r);
 
 	return create_response_buf(r);
 }
