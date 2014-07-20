@@ -2,13 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "serialize.h"
 #include "node_data.h"
 #include "utils.h"
 
-char st[] = "|start_of_block|";
-char ed[] = "|end_of_block|";
-char dl[] = "\n";
+char st[] 	= "|_start_of_block_|";
+char ed[] 	= "|_end_of_block_|";
+char dl[] 	= "\n";
+char dlr[] 	= "|_NEWLINE_|";
 
 // serializes from pointer to item, to end of list. 
 // returns pointer to new buffer.
@@ -26,12 +28,29 @@ char *serialize(struct nli *node)
 		{
 			nfo = node->info;
 			buf = asdtobfp(buf, mp, st, dl);
-			buf = asdtobfp(buf, mp, nfo->hostname, dl);
-			buf = asdtobfp(buf, mp, nfo->keynode, dl);
-			buf = asdtobfp(buf, mp, nfo->internalhost, dl);
-			buf = asdtobfp(buf, mp, nfo->externalhost, dl);
+
+			char *hn = str_replace(dl, dlr, nfo->hostname);
+			buf = asdtobfp(buf, mp, hn, dl);
+			free(hn);
+
+			char *kn = str_replace(dl, dlr, nfo->keynode);
+			buf = asdtobfp(buf, mp, kn, dl);
+			free(kn);
+
+			char *ih = str_replace(dl, dlr, nfo->internalhost);
+			buf = asdtobfp(buf, mp, ih, dl);
+			free(ih);
+
+			char *eh = str_replace(dl, dlr, nfo->externalhost);
+			buf = asdtobfp(buf, mp, eh, dl);
+			free(eh);
+
 			buf = asdtobfp(buf, mp, nfo->identifier, dl);
-			buf = asdtobfp(buf, mp, nfo->command, dl);
+
+			char *cm = str_replace(dl, dlr, nfo->command);
+			buf = asdtobfp(buf, mp, cm, dl);
+			free(cm);
+
 			buf = asdtobfp(buf, mp, ed, dl);
 		} while (node = node->next);
 		buf = asdtobfp(buf, mp, ed, '\0');
@@ -51,6 +70,7 @@ struct nli *deserialize(char *buf)
 	int nest = 0, el = 0;
 	char *sg = strtok(buf, dl);
 	char *hn, *kn, *ih, *eh, *id, *cd;
+	hn = kn = ih = eh = id = cd = NULL;
 	do {
 		if (strstr(sg, st)) {
 			el = 0;
@@ -79,22 +99,22 @@ struct nli *deserialize(char *buf)
 						np = create_nodelist();
 						node = np;
 					}
-					hn = strdup(sg);
+					hn = hn ? hn : str_replace(dlr, dl, sg);
 					break;
 				case 1: 
-					kn = strdup(sg);
+					kn = kn ? kn : str_replace(dlr, dl, sg);
 					break;
 				case 2: 
-					ih = strdup(sg);
+					ih = ih ? ih : str_replace(dlr, dl, sg);
 					break;
 				case 3:
-					eh = strdup(sg);
+					eh = eh ? eh : str_replace(dlr, dl, sg);
 					break;
 				case 4:
-					id = strdup(sg);
+					id = id ? id : strdup(sg);
 					break;
 				case 5:
-					cd = strdup(sg);
+					cd = cd ? cd : str_replace(dlr, dl, sg);
 					break;
 			}
 			el++;

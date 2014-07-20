@@ -38,12 +38,6 @@ struct nli *create_self()
 void init_nodelist()
 {
 	head 		= create_self();
-	if (config->verbosity) {
-		char *list 	= NULL;
-		list 		= nodelist_list(head);
-		printf("initialized nodelist\n%s\n", list);
-		free(list);
-	}
 }
 
 // clean memory assigned to local nodelist

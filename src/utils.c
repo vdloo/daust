@@ -80,3 +80,34 @@ void destroy_array(char **av, int ac)
 		free(av);
 	}
 }
+
+// copy the haystack into a new block of memory and 
+// replace the needle with the replace value and return
+// the pointer
+char *str_replace(char *needle, char *replace, char *haystack)
+{
+	char *r = NULL;
+	char *p = NULL;
+	if (p = strstr(haystack, needle)) {
+		int strlenneedle = strlen(needle);
+		int strlenreplace = strlen(replace);
+
+		int neelen 	= strlen(needle);
+		int prelen 	= p - haystack; // characters until needle
+		int replen 	= strlen(replace);
+		// characters from needle until nullterm of haystack
+		int poslen 	= haystack + strlen(haystack) - p - neelen;
+
+		int hl  	= prelen + replen + poslen + 1;
+
+		r = malloc(hl * sizeof(char));
+		int strlenhay = strlen(haystack);
+		memcpy(r, haystack, prelen);
+		memcpy(r + prelen, replace, replen);
+		memcpy(r + prelen + replen, haystack + prelen + neelen, poslen);
+		r[hl - 1] = '\0'; 
+	} else {
+		r = strdup(haystack);
+	}
+	return r;
+}
