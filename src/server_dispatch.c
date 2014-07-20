@@ -297,7 +297,7 @@ char *server_dispatch(struct nli *nli)
 	char *buf 	= NULL;
 	buf		= sanitize_command(ac, av, 0);
 	if (buf == NULL) {
-		return "no command";
+		return strdup("no command");
 	}
 
 	// free all memory of the first explode array

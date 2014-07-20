@@ -49,7 +49,7 @@ char **array_of_segments(char *buf, char *dl, int i)
 	int j = 0;
 	char *cbuf	= strdup(buf);
 	a		= malloc(i * sizeof(char *));
-	sg		= strtok(buf, dl);
+	sg		= strtok(cbuf, dl);
 	do {
 		if (j < i) {
 			a[j] = strdup(sg);
