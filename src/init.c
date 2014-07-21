@@ -47,15 +47,46 @@ void terminate_nodelist()
 	destroy_nodelist(head);
 }
 
+void print_received_nodelist(struct nli *nl)
+{
+	if (config->verbosity) {
+		printf("received the following nodelist: \n");
+		char *fbuf      = NULL;
+		fbuf            = nodelist_list(nl);
+		printf("%s\n", fbuf);
+		free(fbuf);
+	}
+}
+
+void print_local_nodelist()
+{
+	if (config->verbosity) {
+		printf("local nodelist is now: \n");
+		char *lbuf      = NULL;
+		lbuf            = nodelist_list(head);
+		printf("%s\n", lbuf);
+		free(lbuf);
+	}
+}
+
+void join_incoming(struct nli *nl)
+{
+	print_received_nodelist(nl);
+	join_lists(head, nl);
+	print_local_nodelist();
+}
+
 char *response_callback(char *buf)
 {
 	char *res	= NULL;
-	struct nli *nl;
+	struct nli *nli;
 	struct nodeinfo *nfo;
-	nl 		= deserialize(buf);
-	nfo 		= nl->info;
+	nli 		= deserialize(buf);
+	join_incoming(nli);
+
+	nfo 		= nli->info;
 	res		= strdup(nfo->command);
-	destroy_nodelist(nl);
+	destroy_nodelist(nli);
 	return res;
 }
 

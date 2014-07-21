@@ -11,36 +11,6 @@
 #include "serialize.h"
 #include "socket.h"
 
-void print_received_nodelist(struct nli *nl)
-{
-	if (config->verbosity) {
-		printf("received the following nodelist: \n");
-		char *fbuf 	= NULL;
-		fbuf 		= nodelist_list(nl);
-		printf("%s\n", fbuf);
-		free(fbuf);
-	}
-}
-
-void print_local_nodelist()
-{
-	if (config->verbosity) {
-		printf("local nodelist is now: \n");
-		char *lbuf	= NULL;
-		lbuf		= nodelist_list(head);
-		printf("%s\n", lbuf);
-		free(lbuf);
-	}
-}
-
-// join incoming with local
-void join_incoming(struct nli *nl)
-{
-	print_received_nodelist(nl);
-	join_lists(head, nl);
-	print_local_nodelist();
-}
-
 // create string to be broadcast back to client
 char *create_response_buf(char *r)
 {

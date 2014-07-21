@@ -30,6 +30,8 @@ char *asdtobfp(char *buf, int *mp, char *str1, char *str2)
 int count_delim(char *buf, char *dl)
 {
 	int i 		= 1;
+	int lb = strlen(buf);
+	buf[lb - 1] = (buf[lb - 1] == ' ') ? '\0' : buf[lb - 1];
 	if (buf && dl != NULL) {
 		char *cbuf = strdup(buf);
 		char *sg   = cbuf;

@@ -7,6 +7,7 @@ void init_server();
 struct nli *create_self();
 void terminate_nodelist();
 extern struct nli *head;
+void join_incoming(struct nli *nl);
 char *response_callback(char *buf);
 char *broadcast_command(char *dest, char *command);
 #endif

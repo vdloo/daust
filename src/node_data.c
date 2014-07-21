@@ -135,6 +135,7 @@ char *nodelist_list(struct nli *node)
 		int *mp = &ms;
 		do
 		{
+			if (buf) buf = asdtobfp(buf, mp, " ", "\n");
 			nfo = node->info;
 			buf = astobfp(buf, mp, nfo->hostname);
 			buf = astobfp(buf, mp, ": internal ip ");
@@ -145,12 +146,12 @@ char *nodelist_list(struct nli *node)
 			buf = astobfp(buf, mp, nfo->keynode);
 			buf = astobfp(buf, mp, ", command ");
 			buf = astobfp(buf, mp, nfo->command);
-			buf = asdtobfp(buf, mp, " ", "\n");
 		} while (node = node->next);
 		buf = astobfp(buf, mp, NULL);
 	}
 	return buf;
 }
+
 // tries to find node based on identifier to the end of
 // the list, then returns pointer to that node.
 struct nli *node_by_identifier(char *ident, struct nli *node)

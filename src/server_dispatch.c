@@ -8,6 +8,7 @@
 #include "node_data.h"
 #include "filter.h"
 #include "utils.h"
+#include "socket.h"
 #include "commands.h"
 
 int verify_local(char *local, char *foreign)
@@ -56,7 +57,7 @@ void print_try_broadcast(char *dest, char *buf)
 void print_failed_broadcast(char *dest)
 {
 	if (config->verbosity) {
-		printf("Couldn't reach %s", dest);
+		printf("Couldn't reach %s\n", dest);
 	}
 }
 
@@ -232,14 +233,51 @@ char *run_remote(char *rmt, char *buf, char *cmd)
 	return r;
 }
 
-char *run_all(char *cmd)
+// send the command to all nodes, 
+// skip first to not send to self
+char *broadcast_to_all(struct nli *nli, char *buf)
+{
+	char *rbuf;
+	char *hn = NULL;
+	int m_siz = 0;
+	int *mp = &m_siz;
+
+	char *r = NULL;
+	while (nli = nli->next)
+	{
+		hn = nli->info->hostname;
+		r = asdtobfp(r, mp, hn, ":\n");
+		rbuf = broadcast_to_remote(hn, buf);
+		r = asdtobfp(r, mp, rbuf, "\n");
+		free(rbuf);
+		r = astobfp(r, mp, NULL);
+	}
+	return r;
+}
+
+// broadcast command to all available nodes, then
+// run the command locally. All output appended to buffer r
+char *run_all(struct nli *nli, char *cmd, char *buf)
 {
 	char *r;
-	// send the command to all nodes
+	int m_siz = 0;
+	int *mp = &m_siz;
+	char *rbuf;
 
-	// run the command locally as well
-	run_command(cmd);
-	r = strdup("Ran command aimed at all nodes");
+	// send the command to all other known nodes
+	rbuf = broadcast_to_all(head, buf);
+	if (rbuf) {
+		r = astobfp(r, mp, rbuf);
+		free(rbuf);
+	}
+
+	// run the command locally
+	r = asdtobfp(r, mp, head->info->hostname, " responded:\n");
+	rbuf = run_local(nli, cmd);
+	r = astobfp(r, mp, rbuf);
+	free(rbuf);
+
+	r = astobfp(r, mp, NULL);
 	return r;
 }
 
@@ -258,7 +296,7 @@ char *route_command(struct nli *nli, int who, char *rmt, char *cmd, char *buf)
 			break;
 		// run on all
 		case 2: 
-			r = run_all(cmd);
+			r = run_all(nli, cmd, buf);
 			break;
 	}
 	return r;

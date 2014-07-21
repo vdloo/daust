@@ -220,8 +220,6 @@ char *hostname()
 	return hn;
 }
 
-// don't free this, inet_ntoa uses static buffer that
-// gets overwritten every time the function is called
 char *internalhost()
 {
 	struct ifreq ifr;
