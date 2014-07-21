@@ -60,8 +60,11 @@ void init_server()
 	init_nodelist();
 	rec_head = add_node_to_list(NULL);
 	rec_head->info = create_node();
+
 	char *recl = strdup("Top of the received command list\n"); 
 	set_node_element(&rec_head->info->command, recl);
+	free(recl);
+
 	rec_tail = rec_head;
 	if (config->verbosity) {
 		printf("initialized nodelist: \n");

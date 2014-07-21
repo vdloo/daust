@@ -22,7 +22,8 @@ char *gen_uuid()
 		"abcdefghijklmnopqrstuvwxyz"
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	int i;
-	for (i = 0; i < (sz - 2); ++i) {
+	int j = sz - 1;
+	for (i = 0; i < j; ++i) {
 		buf[i] = an[rand() % (sizeof(an) - 1)];
 	}
 	buf[sz - 1] 	= '\0';

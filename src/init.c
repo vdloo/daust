@@ -82,7 +82,7 @@ char *response_callback(char *buf)
 	struct nli *nli;
 	struct nodeinfo *nfo;
 	nli 		= deserialize(buf);
-	join_incoming(nli);
+	if (head) join_incoming(nli);
 
 	nfo 		= nli->info;
 	res		= strdup(nfo->command);

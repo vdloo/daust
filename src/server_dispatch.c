@@ -273,7 +273,9 @@ char *run_all(struct nli *nli, char *cmd, char *buf)
 	}
 
 	// run the command locally
-	r = asdtobfp(r, mp, head->info->hostname, " responded:\n");
+	char *m = strdup(" responded:\n");	
+	r = asdtobfp(r, mp, head->info->hostname, m);
+	free(m);
 	rbuf = run_local(nli, cmd);
 	r = astobfp(r, mp, rbuf);
 	free(rbuf);

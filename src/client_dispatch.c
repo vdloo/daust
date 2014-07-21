@@ -31,6 +31,7 @@ void broadcast_to_local(char *cmd)
 
 void client_dispatch(int ac, char *av[], int o)
 {
+	head		= NULL;
 	char *rmt 	= filter_specified_remote(ac, av, o);
 	int who		= rmt ? 1 : filter_specified_all(ac, av, o);
 	char *buf 	= filter_command(ac, av, o);
