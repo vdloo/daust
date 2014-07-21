@@ -25,6 +25,7 @@ extern char na[];
 struct nli *add_node_to_list(struct nli *node);
 struct nli *create_nodelist();
 struct nodeinfo *create_node();
+struct nodeinfo *dup_nodeinfo(struct nodeinfo *nfo);
 char *set_node_element(char **el, char *buf);
 char *nodelist_list(struct nli *node);
 struct nli *node_by_identifier(char *ident, struct nli *node);

@@ -39,6 +39,25 @@ struct nodeinfo *create_node()
 	return node;
 }
 
+// copy nodeinfo struct into a new block of memory
+// and return a pointer to that block
+struct nodeinfo *dup_nodeinfo(struct nodeinfo *nfo)
+{
+	struct nodeinfo *dnfo = NULL;
+	if (nfo) {
+		dnfo = malloc(sizeof(struct nodeinfo));
+		dnfo->hostname		= strdup(nfo->hostname);
+		dnfo->internalhost	= strdup(nfo->internalhost);
+		dnfo->keynode		= strdup(nfo->keynode);
+		dnfo->externalhost	= strdup(nfo->externalhost);
+		dnfo->identifier	= strdup(nfo->identifier);
+		dnfo->command		= strdup(nfo->command);
+		dnfo->timestamp		= nfo->timestamp;
+	}
+	return dnfo;
+}
+
+
 // clears memory of nodeinfo struct pointed to by argument
 void destroy_node(struct nodeinfo *nfo)
 {
