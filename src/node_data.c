@@ -35,6 +35,7 @@ struct nodeinfo *create_node()
 	//node->neighbour[0] 	= strdup(na);
 	//node->neighbour[1] 	= strdup(na);
 	node->command		= strdup(na);
+	node->unique		= gen_uuid();
 	update_node_timestamp(node);
 	return node;
 }
@@ -52,6 +53,7 @@ struct nodeinfo *dup_nodeinfo(struct nodeinfo *nfo)
 		dnfo->externalhost	= strdup(nfo->externalhost);
 		dnfo->identifier	= strdup(nfo->identifier);
 		dnfo->command		= strdup(nfo->command);
+		dnfo->unique		= strdup(nfo->unique);
 		dnfo->timestamp		= nfo->timestamp;
 	}
 	return dnfo;
@@ -68,6 +70,7 @@ void destroy_node(struct nodeinfo *nfo)
 		if (nfo->identifier) free(nfo->identifier);
 		if (nfo->command) free(nfo->command);
 		if (nfo->externalhost) free(nfo->externalhost);
+		if (nfo->unique) free(nfo->unique);
 		free(nfo);
 	}
 }
@@ -217,12 +220,39 @@ char *internalhost_by_hostname(char *hostname, struct nli *node)
 	return nl ? nl->info->internalhost: NULL;
 }
 
+// check if identifier and command are the same, if so return pointer
+// to n2, else NULL
+struct nli *compare_nodes(struct nli *n1, struct nli *n2)
+{
+	struct nli *match = NULL;
+	if (	strcmp(	n1->info->identifier, n2->info->identifier) == 0 &&
+		strcmp( n1->info->unique, n2->info->unique) == 0 &&
+		strcmp( n1->info->command, n2->info->command) == 0) {
+		match = n2;
+	}
+
+	return match;
+}
+
+// find nli needle in nodelist haystack and return pointer
+struct nli *find_node(struct nli *needle, struct nli *haystack)
+{
+	struct nli *match = NULL;
+	if (needle) {
+		do
+		{
+			if (!match) match = compare_nodes(needle, haystack);
+		} while (haystack = haystack->next);
+	}
+	return match;
+}
+
 struct nli *join_lists(struct nli *local, struct nli *foreign)
 {
 	if (foreign) {
 		struct nli *match = NULL;
 		struct nodeinfo *nfo;
-		char *hn, *kn, *ih, *eh, *id;
+		char *hn, *kn, *ih, *eh, *id, *uq;
 		int i = 0;
 		do
 		{
@@ -231,6 +261,7 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 			ih = foreign->info->internalhost;
 			eh = foreign->info->externalhost;
 			id = foreign->info->identifier;
+			uq = foreign->info->unique;
 
 			// update nodeinfo from broadcasting node,
 			// add other nodes if it they don't locally
@@ -247,6 +278,7 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 			set_node_element(&nfo->internalhost, 	ih);
 			set_node_element(&nfo->externalhost, 	eh);
 			set_node_element(&nfo->identifier, 	id);
+			set_node_element(&nfo->unique, 		uq);
 			update_node_timestamp(nfo);
 
 			i++;

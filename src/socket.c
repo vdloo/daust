@@ -156,7 +156,7 @@ void process_incoming(void *ta)
 		}
 	}
 	unsigned short dli = 0, prev_dli = 0;
-	int m_siz = 0;
+	int m_siz = 1;
 	char *buf = NULL;
 	do {
 		n = read(nsh, &dli, sizeof(unsigned short));

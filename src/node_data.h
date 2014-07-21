@@ -8,9 +8,10 @@ struct nodeinfo {
 	char *keynode;		// node that introduced this node to the cluster
 	char *internalhost;	// local ip of node
 	char *externalhost;	// public facing ip of the node
-	char *identifier;	// unique identifier
+	char *identifier;	// unique identifier for the node
 	char *neighbour[2];	// nodes that this node talks to
 	char *command;		// daust option request for other machine
+	char *unique;		// unique identifier for this specific nodeinfo struct
 	time_t timestamp;
 };
 
@@ -32,5 +33,7 @@ struct nli *node_by_identifier(char *ident, struct nli *node);
 struct nli *node_by_hostname(char *hostname, struct nli *node);
 char *externalhost_by_hostname(char *hostname, struct nli *node);
 char *internalhost_by_hostname(char *hostname, struct nli *node);
+struct nli *compare_nodes(struct nli *n1, struct nli *n2);
+struct nli *find_node(struct nli *needle, struct nli *haystack);
 
 #endif

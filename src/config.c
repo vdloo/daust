@@ -1,30 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 #include <sys/stat.h>
 #include "config.h"
 #include "node_data.h"
 
 #define PATH_MAX 4096
 
-char *gen_ident() 
+char *gen_uuid() 
 {
 	char *buf;
 	int sz  = 512;
 	buf 	= NULL;
 	buf     = malloc(sz * sizeof(char));
-	srand(time(NULL));
-	--sz;
-	buf[sz] 	= '\0';
+	struct timeval t;
+	gettimeofday(&t, NULL);
+	srand(t.tv_usec * t.tv_sec);
 	static const char an[] =
 		"0123456789"
 		"abcdefghijklmnopqrstuvwxyz"
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	while (sz > -1) {
-		buf[sz] = an[rand() % (sizeof(an) - 1)];
-		--sz;
+	int i;
+	for (i = 0; i < (sz - 2); ++i) {
+		buf[i] = an[rand() % (sizeof(an) - 1)];
 	}
+	buf[sz - 1] 	= '\0';
 	return buf;
 }
 
@@ -81,7 +82,7 @@ void *new_ident()
 {
 	char *buf;
 	buf = NULL;
-	buf = gen_ident();
+	buf = gen_uuid();
 	write_ident(buf);
 	return buf;
 }

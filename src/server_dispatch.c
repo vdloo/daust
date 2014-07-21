@@ -376,11 +376,16 @@ char *server_dispatch(struct nli *nli)
 	// free all memory of the second explode array
 	destroy_array(av, ac);
 
+	// if nli->info isn't in rec_head nodelist
 	// run the command or 
 	// send it to the right nodes
 	char *r;
-	append_to_received_command_list(nli->info);
-	r = route_command(nli, who, rmt, cmd, buf);
+	if (find_node(nli, rec_head) == NULL) {
+		append_to_received_command_list(nli->info);
+		r = route_command(nli, who, rmt, cmd, buf);
+	} else {
+		r = strdup("already have this command"); 	
+	}
 
 	if (rmt) free(rmt);
 	if (buf) free(buf);

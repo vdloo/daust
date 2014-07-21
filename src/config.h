@@ -13,6 +13,7 @@ struct conf{
 	char *identifier;
 };
 
+char *gen_uuid();
 void init_config();
 void terminate_config();
 void inc_tc();

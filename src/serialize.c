@@ -51,6 +51,8 @@ char *serialize(struct nli *node)
 			buf = asdtobfp(buf, mp, cm, dl);
 			free(cm);
 
+			buf = asdtobfp(buf, mp, nfo->unique, dl);
+
 			buf = asdtobfp(buf, mp, ed, dl);
 		} while (node = node->next);
 		buf = asdtobfp(buf, mp, ed, '\0');
@@ -69,8 +71,8 @@ struct nli *deserialize(char *buf)
 	int l = strlen(buf);
 	int nest = 0, el = 0;
 	char *sg = strtok(buf, dl);
-	char *hn, *kn, *ih, *eh, *id, *cd;
-	hn = kn = ih = eh = id = cd = NULL;
+	char *hn, *kn, *ih, *eh, *id, *cd, *uq;
+	hn = kn = ih = eh = id = cd = uq = NULL;
 	do {
 		if (strstr(sg, st)) {
 			el = 0;
@@ -86,6 +88,7 @@ struct nli *deserialize(char *buf)
 				set_node_element(&nfo->externalhost, 	eh);
 				set_node_element(&nfo->identifier, 	id);
 				set_node_element(&nfo->command, 	cd);
+				set_node_element(&nfo->unique, 		uq);
 			}
 		       	if (nest > 0) --nest;
 		}
@@ -116,6 +119,9 @@ struct nli *deserialize(char *buf)
 				case 5:
 					cd = cd ? cd : str_replace(dlr, dl, sg);
 					break;
+				case 6:
+					uq = uq ? uq : strdup(sg);
+					break;
 			}
 			el++;
 		}
@@ -126,5 +132,6 @@ struct nli *deserialize(char *buf)
 	if (eh) free(eh);
 	if (id) free(id);
 	if (cd) free(cd);
+	if (uq) free(uq);
 	return np;
 }
