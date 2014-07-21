@@ -143,19 +143,11 @@ void process_incoming(void *ta)
 {
 	struct thread_args *d;
 	d = (struct thread_args *) ta;
-	int sh = d->sh;
+	int nsh = d->sh;
 	char *(*cb)(char *param) = d->cb;
 
-	int nsh, n;
-	struct sockaddr_in cla;
-	socklen_t cl = sizeof(cla);
-	nsh = accept(sh, (struct sockaddr *) &cla, &cl);
-	if (nsh < 0) {
-		if (config->verbosity) {
-			perror("ERROR accepting socket");
-		}
-	}
 	unsigned short dli = 0, prev_dli = 0;
+	int n;
 	int m_siz = 1;
 	char *buf = NULL;
 	do {
@@ -222,14 +214,27 @@ int receive_packets(int port, char *(*cb)(char *param))
 	pthread_t nt;
 	struct thread_args ta;
 	while(1) {
-		ta.sh = sh;
+		int nsh;
+		struct sockaddr_in cla;
+		socklen_t cl = sizeof(cla);
+		printf("waiting for accept\n");
+		nsh = accept(sh, (struct sockaddr *) &cla, &cl);
+		printf("accepted\n");
+		if (nsh < 0) {
+			if (config->verbosity) {
+				perror("ERROR accepting socket");
+			}
+		}
+
+		ta.sh = nsh;
 		ta.cb = cb;
 		while (config->threadcount > config->maxthreads) {
 			sleep(1);
 		}
 		inc_tc();
+		printf("creating thread\n");
 		pthread_create(&nt, NULL, (void *) &process_incoming, (void *) &ta);
-		pthread_join(nt, NULL);
+		printf("continued after thread\n");
 	}
 	close(sh);
 	return 0;
