@@ -8,3 +8,6 @@ DAUSTD_CFILES	= daustd.c server.c server_dispatch.c commands.c
 DAUSTD_HFILES	= daustd.h server.h server_dispatch.h commands.h
 daust_SOURCES	= $(DAUST_CFILES) $(DAUST_HFILES) $(SHARED_CFILES) $(SHARED_HFILES)
 daustd_SOURCES	= $(DAUSTD_CFILES) $(DAUSTD_HFILES) $(SHARED_CFILES) $(SHARED_HFILES)
+LDADD		= -lpthread
+DAUST_CFLAGS	= -pthread
+DAUSTD_CFLAGS	= -pthread

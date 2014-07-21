@@ -6,6 +6,8 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <arpa/inet.h>
+#include <pthread.h> 
+
 #include "socket.h"
 #include "config.h"
 
@@ -131,8 +133,19 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 	return res;
 }
 
-void process_incoming(int sh, char *(*cb)(char *param))
+struct thread_args
 {
+	int sh;
+	char *(*cb)(char *param);
+};
+
+void process_incoming(void *ta)
+{
+	struct thread_args *d;
+	d = (struct thread_args *) ta;
+	int sh = d->sh;
+	char *(*cb)(char *param) = d->cb;
+
 	int nsh, n;
 	struct sockaddr_in cla;
 	socklen_t cl = sizeof(cla);
@@ -185,8 +198,8 @@ void process_incoming(int sh, char *(*cb)(char *param))
 	if (pkt) free(pkt);
 	if (rbuf) free(rbuf);
 	close(nsh);
+	dec_tc();
 }
-
 
 int receive_packets(int port, char *(*cb)(char *param))
 {
@@ -206,7 +219,18 @@ int receive_packets(int port, char *(*cb)(char *param))
 		perror("ERROR on binding");
 	}
 	listen(sh, 5);
-	while(1) process_incoming(sh, cb);
+	pthread_t nt;
+	struct thread_args ta;
+	while(1) {
+		ta.sh = sh;
+		ta.cb = cb;
+		while (config->threadcount > config->maxthreads) {
+			sleep(1);
+		}
+		inc_tc();
+		pthread_create(&nt, NULL, (void *) &process_incoming, (void *) &ta);
+		pthread_join(nt, NULL);
+	}
 	close(sh);
 	return 0;
 }

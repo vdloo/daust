@@ -96,20 +96,21 @@ char *get_ident()
 	return buf;
 }
 
-void *init_config()
+void init_config()
 {
 	config = NULL;
 	config = malloc(sizeof(struct conf));
 	config->daemon 			= 0;
+	config->threadcount		= 1;
+	config->maxthreads		= 4;
 	config->identifier 		= get_ident();
 	config->keynode                 = strdup(na);
 	config->publicface              = strdup(na);
 	config->verbosity               = 0;
 	config->logfile			= strdup(na);
-	return config;
 }
 
-void *terminate_config()
+void terminate_config()
 {
 	if (config) {
 		if (config->identifier)		free(config->identifier);
@@ -118,4 +119,30 @@ void *terminate_config()
 		if (config->publicface) 	free(config->publicface);
 		free(config);
 	}
+}
+
+void print_inc_tc()
+{
+	if (config->verbosity) {
+		printf("Increased threadcount to %d\n", config->threadcount);
+	}
+}
+
+void inc_tc()
+{
+	++config->threadcount;
+	print_inc_tc();
+}
+
+void print_dec_tc()
+{
+	if (config->verbosity) {
+		printf("Decreased threadcount to %d\n", config->threadcount);
+	}
+}
+
+void dec_tc()
+{
+	--config->threadcount;
+	print_dec_tc();
 }
