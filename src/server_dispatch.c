@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
+// for sleep
+#include <unistd.h>
+
 #include "server.h"
 #include "config.h"
 #include "init.h"
@@ -36,6 +39,19 @@ int check_if_list(char *first)
 	return strcmp(first, "list") == 0;
 }
 
+// debug function, remove later
+// use this to test blocking socket threads
+int check_if_block(char *first)
+{
+	return strcmp(first, "block") == 0;
+}
+
+char *block()
+{
+	sleep(5);
+	return strdup("slept for 5 seconds");
+}
+
 char *run_command(char *cmd)
 {
 	char *r	= NULL;
@@ -44,6 +60,7 @@ char *run_command(char *cmd)
 		if (check_if_stop(first)) kill_daemon();
 		if (check_if_ping(first)) r = pong();
 		if (check_if_list(first)) r = nodelist_list(head);
+		if (check_if_block(first)) r = block();
 	}
 	return r;
 }
