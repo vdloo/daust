@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "server.h"
 #include "config.h"
 #include "init.h"
 #include "node_data.h"
@@ -316,6 +317,29 @@ int check_command(struct nli *nli)
 	return 1;
 }
 
+// nodelist of received and accepted commands
+void print_received_command_list()
+{
+	if (config->verbosity) {
+		printf("Appended incoming command to received list: \n");
+		char *lbuf      = NULL;
+		lbuf            = nodelist_list(rec_head->next);
+		printf("%s\n", lbuf);
+		free(lbuf);
+	}
+}
+
+void append_to_received_command_list(struct nodeinfo *nfo)
+{
+	int rl = count_nodelist(rec_head);
+	if (rl > 9) {
+		remove_node_from_list(rec_head->next);
+	}
+	rec_tail = add_node_to_list(rec_tail);
+	rec_tail->info = dup_nodeinfo(nfo);
+	print_received_command_list();
+}
+
 char *server_dispatch(struct nli *nli)
 {
 
@@ -355,6 +379,7 @@ char *server_dispatch(struct nli *nli)
 	// run the command or 
 	// send it to the right nodes
 	char *r;
+	append_to_received_command_list(nli->info);
 	r = route_command(nli, who, rmt, cmd, buf);
 
 	if (rmt) free(rmt);

@@ -36,28 +36,6 @@ void print_declined_incoming()
 struct nli *rec_head;
 struct nli *rec_tail;
 
-void print_received_command_list()
-{
-	if (config->verbosity) {
-		printf("Appended incoming command to received list: \n");
-		char *lbuf	= NULL;
-		lbuf		= nodelist_list(rec_head->next);
-		printf("%s\n", lbuf);
-		free(lbuf);
-	}
-}
-
-void append_to_received_command_list(struct nodeinfo *nfo)
-{
-	int rl = count_nodelist(rec_head);
-	if (rl > 9) {
-		remove_node_from_list(rec_head->next);
-	}
-	rec_tail = add_node_to_list(rec_tail);
-	rec_tail->info = dup_nodeinfo(nfo);
-	print_received_command_list();
-}
-
 // the function to process incoming data
 char *incoming_callback(char *buf)
 {
@@ -67,7 +45,6 @@ char *incoming_callback(char *buf)
 	join_incoming(nli);
 
 	if (check_command(nli)) {
-		append_to_received_command_list(nli->info);
 		r = server_dispatch(nli);
 	} else {
 		print_declined_incoming();
