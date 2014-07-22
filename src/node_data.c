@@ -155,6 +155,8 @@ char *nodelist_list(struct nli *node)
 		struct nodeinfo *nfo;
 		int ms = 0;
 		int *mp = &ms;
+		int dif, difs;
+		char *da;
 		do
 		{
 			if (buf) buf = asdtobfp(buf, mp, " ", "\n");
@@ -162,14 +164,20 @@ char *nodelist_list(struct nli *node)
 			buf = astobfp(buf, mp, nfo->hostname);
 			buf = astobfp(buf, mp, ": internal ip ");
 			buf = astobfp(buf, mp, nfo->internalhost);
-//			buf = astobfp(buf, mp, ", public ip ");
-//			buf = astobfp(buf, mp, nfo->externalhost);
+			buf = astobfp(buf, mp, ", public ip ");
+			buf = astobfp(buf, mp, nfo->externalhost);
+			buf = astobfp(buf, mp, ", last seen ");
+			dif = time(NULL) - nfo->timestamp;
+			difs = snprintf(NULL, 0, "%d", dif);
+			da = malloc((difs + 1) * sizeof(char));
+			sprintf(da, "%d", dif);
+			buf = asdtobfp(buf, mp, da, " seconds ago");
 //			buf = astobfp(buf, mp, ", keynode ip ");
 //			buf = astobfp(buf, mp, nfo->keynode);
 //			buf = astobfp(buf, mp, ", command ");
 //			buf = astobfp(buf, mp, nfo->command);
-			buf = astobfp(buf, mp, ", unique ");
-			buf = astobfp(buf, mp, nfo->unique);
+//			buf = astobfp(buf, mp, ", unique ");
+//			buf = astobfp(buf, mp, nfo->unique);
 		} while (node = node->next);
 		buf = astobfp(buf, mp, NULL);
 	}
