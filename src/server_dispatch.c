@@ -397,7 +397,6 @@ char *server_dispatch(struct nli *nli)
 	destroy_array(av, ac);
 
 	char *uq = strdup(nli->info->unique);
-	printf("routing unique is %s\n", uq);
 
 	// if nli->info isn't in rec_head nodelist
 	// run the command or 

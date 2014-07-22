@@ -176,6 +176,8 @@ char *nodelist_list(struct nli *node)
 //			buf = astobfp(buf, mp, nfo->keynode);
 //			buf = astobfp(buf, mp, ", command ");
 //			buf = astobfp(buf, mp, nfo->command);
+//			buf = astobfp(buf, mp, ", identifier ");
+//			buf = astobfp(buf, mp, nfo->identifier);
 //			buf = astobfp(buf, mp, ", unique ");
 //			buf = astobfp(buf, mp, nfo->unique);
 		} while (node = node->next);
@@ -259,8 +261,8 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 {
 	if (foreign) {
 		char *z = nodelist_list(foreign);
-		printf("FOREIGN LIST IS \n%s\n", z);
 		free(z);
+		struct nli *head_local = local;
 		struct nli *match = NULL;
 		struct nodeinfo *nfo;
 		char *hn, *kn, *ih, *eh, *id, *uq;
@@ -278,7 +280,7 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 			// update nodeinfo from broadcasting node,
 			// add other nodes if it they don't locally
 			// exist yet
-			match 	= node_by_identifier(id, local);
+			match 	= node_by_identifier(id, head_local);
 			if (match) {
 				nfo 	= match->info;	
 			} else if (!match){
