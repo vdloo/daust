@@ -250,6 +250,9 @@ struct nli *find_node(struct nli *needle, struct nli *haystack)
 struct nli *join_lists(struct nli *local, struct nli *foreign)
 {
 	if (foreign) {
+		char *z = nodelist_list(foreign);
+		printf("FOREIGN LIST IS \n%s\n", z);
+		free(z);
 		struct nli *match = NULL;
 		struct nodeinfo *nfo;
 		char *hn, *kn, *ih, *eh, *id, *uq;

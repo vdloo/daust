@@ -16,6 +16,8 @@ char dlr[] 	= "|_NEWLINE_|";
 // returns pointer to new buffer.
 char *serialize(struct nli *node)
 {
+	char *z = nodelist_list(node);
+	free(z);
 	char *buf;
 	buf = NULL;
 	if (node) {
@@ -23,31 +25,32 @@ char *serialize(struct nli *node)
 		int m_siz = 0;
 		int *mp = &m_siz;
 
+		char *hn, *kn, *ih, *eh, *cm;
 		buf = asdtobfp(buf, mp, st, dl);
 		do
 		{
 			nfo = node->info;
 			buf = asdtobfp(buf, mp, st, dl);
 
-			char *hn = str_replace_all(dl, dlr, nfo->hostname);
+			hn = str_replace_all(dl, dlr, nfo->hostname);
 			buf = asdtobfp(buf, mp, hn, dl);
 			free(hn);
 
-			char *kn = str_replace_all(dl, dlr, nfo->keynode);
+			kn = str_replace_all(dl, dlr, nfo->keynode);
 			buf = asdtobfp(buf, mp, kn, dl);
 			free(kn);
 
-			char *ih = str_replace_all(dl, dlr, nfo->internalhost);
+			ih = str_replace_all(dl, dlr, nfo->internalhost);
 			buf = asdtobfp(buf, mp, ih, dl);
 			free(ih);
 
-			char *eh = str_replace_all(dl, dlr, nfo->externalhost);
+			eh = str_replace_all(dl, dlr, nfo->externalhost);
 			buf = asdtobfp(buf, mp, eh, dl);
 			free(eh);
 
 			buf = asdtobfp(buf, mp, nfo->identifier, dl);
 
-			char *cm = str_replace_all(dl, dlr, nfo->command);
+			cm = str_replace_all(dl, dlr, nfo->command);
 			buf = asdtobfp(buf, mp, cm, dl);
 			free(cm);
 
@@ -102,25 +105,32 @@ struct nli *deserialize(char *buf)
 						np = create_nodelist();
 						node = np;
 					}
-					hn = hn ? hn : str_replace_all(dlr, dl, sg);
+					if (hn) free(hn);
+					hn = str_replace_all(dlr, dl, sg);
 					break;
 				case 1: 
-					kn = kn ? kn : str_replace_all(dlr, dl, sg);
+					if (kn) free(kn);
+					kn = str_replace_all(dlr, dl, sg);
 					break;
 				case 2: 
-					ih = ih ? ih : str_replace_all(dlr, dl, sg);
+					if (ih) free(ih);
+					ih = str_replace_all(dlr, dl, sg);
 					break;
 				case 3:
-					eh = eh ? eh : str_replace_all(dlr, dl, sg);
+					if (eh) free(eh);
+					eh = str_replace_all(dlr, dl, sg);
 					break;
 				case 4:
-					id = id ? id : strdup(sg);
+					if (id) free(id);
+					id = strdup(sg);
 					break;
 				case 5:
-					cd = cd ? cd : str_replace_all(dlr, dl, sg);
+					if (cd) free(cd);
+					cd = str_replace_all(dlr, dl, sg);
 					break;
 				case 6:
-					uq = uq ? uq : strdup(sg);
+					if (uq) free(uq);
+					uq = strdup(sg);
 					break;
 			}
 			el++;
