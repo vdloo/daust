@@ -80,10 +80,10 @@ void print_failed_broadcast(char *dest)
 }
 
 // try to broadcast buf to destination dest
-char *try_broadcast(char *dest, char *buf) {
+char *try_broadcast(char *dest, char *buf, char *unique) {
 	print_try_broadcast(dest, buf);
 
-	char *r 	= broadcast_command(dest, buf);
+	char *r 	= forward_command(dest, buf, unique);
 
 	if (r == NULL) print_failed_broadcast(dest);
 	return r;
@@ -128,11 +128,11 @@ void print_failed_address()
 
 // if internalhost is found matching a hostname,
 // try connecting to this address
-char *try_internal(char *d, char *buf)
+char *try_internal(char *d, char *buf, char *uq)
 {
 	char *r = NULL;
 	if (d && strcmp(d, na) != 0) {
-		r = try_broadcast(d, buf);
+		r = try_broadcast(d, buf, uq);
 		if (r == NULL) {
 			print_try_external();
 		} else {
@@ -146,11 +146,11 @@ char *try_internal(char *d, char *buf)
 
 // if externalhost is found matching a hostname,
 // try connecting to this address
-char *try_external(char *d, char *buf)
+char *try_external(char *d, char *buf, char *uq)
 {
 	char *r = NULL;
 	if (d && strcmp(d, na) != 0) {
-		r = try_broadcast(d, buf);
+		r = try_broadcast(d, buf, uq);
 		if (r == NULL) {
 			print_try_address();
 		} else {
@@ -163,10 +163,10 @@ char *try_external(char *d, char *buf)
 }
 
 // try connecting using the buf as the address
-char *try_address(char *d, char *buf)
+char *try_address(char *d, char *buf, char *uq)
 {
 	char *r = NULL;
-	r = try_broadcast(d, buf);
+	r = try_broadcast(d, buf, uq);
 	if (r == NULL) {
 		print_failed_address();
 	} 
@@ -180,17 +180,17 @@ char *try_address(char *d, char *buf)
 // as the address. So first time connecting with 
 // 	$ daust remote 192.168.50.3 
 // will result in directly connecting to that node by ip address
-char *broadcast_to_remote(char *rmt, char *buf) {
+char *broadcast_to_remote(char *rmt, char *buf, char *uq) {
 	char *r = NULL;
 	char *d = NULL;
 	d = internalhost_by_hostname(rmt, head);
-	r = try_internal(d, buf);
+	r = try_internal(d, buf, uq);
 	if (r == NULL) {
 		d = externalhost_by_hostname(rmt, head);
-		r = try_external(d, buf);
+		r = try_external(d, buf, uq);
 	}
 	if (r == NULL) {
-		r = try_address(rmt, buf);	
+		r = try_address(rmt, buf, uq);	
 	}
 	return r;
 }
@@ -233,7 +233,7 @@ char *run_local(struct nli *nli, char *cmd)
 
 // check if this node is the specified node
 // otherwise, send it to that node
-char *run_remote(char *rmt, char *buf, char *cmd)
+char *run_remote(char *rmt, char *buf, char *cmd, char *uq)
 {
 	char *r;
 	if ( strcmp(rmt, head->info->hostname) == 0 ||
@@ -243,7 +243,7 @@ char *run_remote(char *rmt, char *buf, char *cmd)
 		r = run_command(cmd);
 	} else {
 		// contact rmt specified node
-		r = broadcast_to_remote(rmt, buf);
+		r = broadcast_to_remote(rmt, buf, uq);
 		if (r == NULL) {
 			r = strdup("can not reach remote node");
 		}
@@ -253,7 +253,7 @@ char *run_remote(char *rmt, char *buf, char *cmd)
 
 // send the command to all nodes, 
 // skip first to not send to self
-char *broadcast_to_all(struct nli *nli, char *buf)
+char *broadcast_to_all(struct nli *nli, char *buf, char *uq)
 {
 	char *rbuf;
 	char *hn = NULL;
@@ -264,26 +264,27 @@ char *broadcast_to_all(struct nli *nli, char *buf)
 	while (nli = nli->next)
 	{
 		hn = nli->info->hostname;
-		r = asdtobfp(r, mp, hn, ":\n");
-		rbuf = broadcast_to_remote(hn, buf);
-		r = asdtobfp(r, mp, rbuf, "\n");
+		rbuf = broadcast_to_remote(hn, buf, uq);
+		if (strcmp(rbuf, "Already have it") != 0) {
+			r = asdtobfp(r, mp, rbuf, "\n\n");
+			r = astobfp(r, mp, NULL);
+		}
 		free(rbuf);
-		r = astobfp(r, mp, NULL);
 	}
 	return r;
 }
 
 // broadcast command to all available nodes, then
 // run the command locally. All output appended to buffer r
-char *run_all(struct nli *nli, char *cmd, char *buf)
+char *run_all(struct nli *nli, char *cmd, char *buf, char *uq)
 {
-	char *r;
+	char *r = NULL;
 	int m_siz = 0;
 	int *mp = &m_siz;
 	char *rbuf;
 
 	// send the command to all other known nodes
-	rbuf = broadcast_to_all(head, buf);
+	rbuf = broadcast_to_all(head, buf, uq);
 	if (rbuf) {
 		r = astobfp(r, mp, rbuf);
 		free(rbuf);
@@ -293,16 +294,15 @@ char *run_all(struct nli *nli, char *cmd, char *buf)
 	char *m = strdup(" responded:\n");	
 	r = asdtobfp(r, mp, head->info->hostname, m);
 	free(m);
-	rbuf = run_local(nli, cmd);
+	rbuf = run_command(cmd);
 	r = astobfp(r, mp, rbuf);
 	free(rbuf);
-
 	r = astobfp(r, mp, NULL);
 	return r;
 }
 
 // run the command or send it to the right nodes
-char *route_command(struct nli *nli, int who, char *rmt, char *cmd, char *buf)
+char *route_command(struct nli *nli, int who, char *rmt, char *cmd, char *buf, char *uq)
 {
 	char *r		= NULL;
 	switch (who) {
@@ -312,11 +312,11 @@ char *route_command(struct nli *nli, int who, char *rmt, char *cmd, char *buf)
 			break;
 		// run on specified remote
 		case 1:
-			r = run_remote(rmt, buf, cmd);
+			r = run_remote(rmt, buf, cmd, uq);
 			break;
 		// run on all
 		case 2: 
-			r = run_all(nli, cmd, buf);
+			r = run_all(nli, cmd, buf, uq);
 			break;
 	}
 	return r;
@@ -380,6 +380,7 @@ char *server_dispatch(struct nli *nli)
 	if (buf == NULL) {
 		return strdup("no command");
 	}
+	set_node_element(&nli->info->command, buf);
 
 	// free all memory of the first explode array
 	destroy_array(av, ac);
@@ -395,17 +396,21 @@ char *server_dispatch(struct nli *nli)
 	// free all memory of the second explode array
 	destroy_array(av, ac);
 
+	char *uq = strdup(nli->info->unique);
+	printf("routing unique is %s\n", uq);
+
 	// if nli->info isn't in rec_head nodelist
 	// run the command or 
 	// send it to the right nodes
 	char *r;
 	if (find_node(nli, rec_head) == NULL) {
 		append_to_received_command_list(nli->info);
-		r = route_command(nli, who, rmt, cmd, buf);
+		r = route_command(nli, who, rmt, cmd, buf, uq);
 	} else {
-		r = strdup("already have this command"); 	
+		r = strdup("Already have it"); 	
 	}
 
+	if (uq) free(uq);
 	if (rmt) free(rmt);
 	if (buf) free(buf);
 	if (cmd) free(cmd);

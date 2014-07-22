@@ -217,9 +217,7 @@ int receive_packets(int port, char *(*cb)(char *param))
 		int nsh;
 		struct sockaddr_in cla;
 		socklen_t cl = sizeof(cla);
-		printf("waiting for accept\n");
 		nsh = accept(sh, (struct sockaddr *) &cla, &cl);
-		printf("accepted\n");
 		if (nsh < 0) {
 			if (config->verbosity) {
 				perror("ERROR accepting socket");
@@ -232,9 +230,7 @@ int receive_packets(int port, char *(*cb)(char *param))
 			sleep(1);
 		}
 		inc_tc();
-		printf("creating thread\n");
 		pthread_create(&nt, NULL, (void *) &process_incoming, (void *) &ta);
-		printf("continued after thread\n");
 	}
 	close(sh);
 	return 0;

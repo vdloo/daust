@@ -108,8 +108,17 @@ char *str_replace(char *needle, char *replace, char *haystack)
 		memcpy(r + prelen, replace, replen);
 		memcpy(r + prelen + replen, haystack + prelen + neelen, poslen);
 		r[hl - 1] = '\0'; 
-	} else {
-		r = strdup(haystack);
 	}
 	return r;
+}
+
+char *str_replace_all(char *needle, char *replace, char *haystack)
+{
+	char *buf = NULL;
+	char *str = strdup(haystack);
+	while (buf = str_replace(needle, replace, str)){
+		if (str) free(str);
+		str = buf;
+	}
+	return str;
 }

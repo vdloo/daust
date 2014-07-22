@@ -162,12 +162,14 @@ char *nodelist_list(struct nli *node)
 			buf = astobfp(buf, mp, nfo->hostname);
 			buf = astobfp(buf, mp, ": internal ip ");
 			buf = astobfp(buf, mp, nfo->internalhost);
-			buf = astobfp(buf, mp, ", public ip ");
-			buf = astobfp(buf, mp, nfo->externalhost);
-			buf = astobfp(buf, mp, ", keynode ip ");
-			buf = astobfp(buf, mp, nfo->keynode);
+//			buf = astobfp(buf, mp, ", public ip ");
+//			buf = astobfp(buf, mp, nfo->externalhost);
+//			buf = astobfp(buf, mp, ", keynode ip ");
+//			buf = astobfp(buf, mp, nfo->keynode);
 			buf = astobfp(buf, mp, ", command ");
 			buf = astobfp(buf, mp, nfo->command);
+			buf = astobfp(buf, mp, ", unique ");
+			buf = astobfp(buf, mp, nfo->unique);
 		} while (node = node->next);
 		buf = astobfp(buf, mp, NULL);
 	}
@@ -225,9 +227,7 @@ char *internalhost_by_hostname(char *hostname, struct nli *node)
 struct nli *compare_nodes(struct nli *n1, struct nli *n2)
 {
 	struct nli *match = NULL;
-	if (	strcmp(	n1->info->identifier, n2->info->identifier) == 0 &&
-		strcmp( n1->info->unique, n2->info->unique) == 0 &&
-		strcmp( n1->info->command, n2->info->command) == 0) {
+	if (strcmp( n1->info->unique, n2->info->unique) == 0) {
 		match = n2;
 	}
 

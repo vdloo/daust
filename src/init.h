@@ -9,5 +9,6 @@ void terminate_nodelist();
 extern struct nli *head;
 void join_incoming(struct nli *nl);
 char *response_callback(char *buf);
+char *forward_command(char *dest, char *command, char *unique);
 char *broadcast_command(char *dest, char *command);
 #endif

@@ -29,25 +29,25 @@ char *serialize(struct nli *node)
 			nfo = node->info;
 			buf = asdtobfp(buf, mp, st, dl);
 
-			char *hn = str_replace(dl, dlr, nfo->hostname);
+			char *hn = str_replace_all(dl, dlr, nfo->hostname);
 			buf = asdtobfp(buf, mp, hn, dl);
 			free(hn);
 
-			char *kn = str_replace(dl, dlr, nfo->keynode);
+			char *kn = str_replace_all(dl, dlr, nfo->keynode);
 			buf = asdtobfp(buf, mp, kn, dl);
 			free(kn);
 
-			char *ih = str_replace(dl, dlr, nfo->internalhost);
+			char *ih = str_replace_all(dl, dlr, nfo->internalhost);
 			buf = asdtobfp(buf, mp, ih, dl);
 			free(ih);
 
-			char *eh = str_replace(dl, dlr, nfo->externalhost);
+			char *eh = str_replace_all(dl, dlr, nfo->externalhost);
 			buf = asdtobfp(buf, mp, eh, dl);
 			free(eh);
 
 			buf = asdtobfp(buf, mp, nfo->identifier, dl);
 
-			char *cm = str_replace(dl, dlr, nfo->command);
+			char *cm = str_replace_all(dl, dlr, nfo->command);
 			buf = asdtobfp(buf, mp, cm, dl);
 			free(cm);
 
@@ -102,22 +102,22 @@ struct nli *deserialize(char *buf)
 						np = create_nodelist();
 						node = np;
 					}
-					hn = hn ? hn : str_replace(dlr, dl, sg);
+					hn = hn ? hn : str_replace_all(dlr, dl, sg);
 					break;
 				case 1: 
-					kn = kn ? kn : str_replace(dlr, dl, sg);
+					kn = kn ? kn : str_replace_all(dlr, dl, sg);
 					break;
 				case 2: 
-					ih = ih ? ih : str_replace(dlr, dl, sg);
+					ih = ih ? ih : str_replace_all(dlr, dl, sg);
 					break;
 				case 3:
-					eh = eh ? eh : str_replace(dlr, dl, sg);
+					eh = eh ? eh : str_replace_all(dlr, dl, sg);
 					break;
 				case 4:
 					id = id ? id : strdup(sg);
 					break;
 				case 5:
-					cd = cd ? cd : str_replace(dlr, dl, sg);
+					cd = cd ? cd : str_replace_all(dlr, dl, sg);
 					break;
 				case 6:
 					uq = uq ? uq : strdup(sg);

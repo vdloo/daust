@@ -11,7 +11,7 @@
 char *gen_uuid() 
 {
 	char *buf;
-	int sz  = 512;
+	int sz  = 10;
 	buf 	= NULL;
 	buf     = malloc(sz * sizeof(char));
 	struct timeval t;
@@ -104,7 +104,7 @@ void init_config()
 	config = malloc(sizeof(struct conf));
 	config->daemon 			= 0;
 	config->threadcount		= 1;
-	config->maxthreads		= 4;
+	config->maxthreads		= 8;
 	config->identifier 		= get_ident();
 	config->keynode                 = strdup(na);
 	config->publicface              = strdup(na);
@@ -126,7 +126,7 @@ void terminate_config()
 void print_inc_tc()
 {
 	if (config->verbosity) {
-		printf("Increased threadcount to %d\n", config->threadcount);
+//		printf("Increased threadcount to %d\n", config->threadcount);
 	}
 }
 
@@ -139,7 +139,7 @@ void inc_tc()
 void print_dec_tc()
 {
 	if (config->verbosity) {
-		printf("Decreased threadcount to %d\n", config->threadcount);
+//		printf("Decreased threadcount to %d\n", config->threadcount);
 	}
 }
 

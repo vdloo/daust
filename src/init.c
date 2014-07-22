@@ -50,10 +50,10 @@ void terminate_nodelist()
 void print_received_nodelist(struct nli *nl)
 {
 	if (config->verbosity) {
-		printf("received the following nodelist: \n");
+	//	printf("received the following nodelist from %s: \n", nl->info->hostname);
 		char *fbuf      = NULL;
 		fbuf            = nodelist_list(nl);
-		printf("%s\n", fbuf);
+//		printf("%s\n", fbuf);
 		free(fbuf);
 	}
 }
@@ -61,7 +61,7 @@ void print_received_nodelist(struct nli *nl)
 void print_local_nodelist()
 {
 	if (config->verbosity) {
-		printf("local nodelist is now: \n");
+		//printf("local nodelist is now: \n");
 		char *lbuf      = NULL;
 		lbuf            = nodelist_list(head);
 		printf("%s\n", lbuf);
@@ -97,6 +97,24 @@ void broadcast_nodelist(char *dest)
 	buf = serialize(head);
 	send_packets(dest, 4040, buf, response_callback);
 	free(buf);
+}
+
+char *forward_command(char *dest, char *command, char *unique)
+{
+	struct nli *nli;
+	nli = create_self();
+	set_node_element(&nli->info->command, command);
+	set_node_element(&nli->info->unique, unique);
+	
+
+	char *buf;
+	buf = serialize(nli);
+	destroy_nodelist(nli);
+
+	char *r = NULL;
+	r = send_packets(dest, 4040, buf, response_callback);
+	if (buf) free(buf);
+	return r;
 }
 
 char *broadcast_command(char *dest, char *command)
