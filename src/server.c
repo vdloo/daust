@@ -14,14 +14,13 @@
 // create string to be broadcast back to client
 char *create_response_buf(char *r)
 {
-	struct nli *nli;
-	nli = create_self();
-	set_node_element(&nli->info->command, r);
+	set_node_element(&head->info->command, r);
 	if (r) free (r);
-
+	char *uq = gen_uuid();
+	set_node_element(&head->info->unique, uq);
+	free(uq);
 	char *res 	= NULL;
-	res		= serialize(nli);
-	destroy_nodelist(nli);
+	res		= serialize(head);
 	return res;
 }
 

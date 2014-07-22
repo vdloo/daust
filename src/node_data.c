@@ -166,8 +166,8 @@ char *nodelist_list(struct nli *node)
 //			buf = astobfp(buf, mp, nfo->externalhost);
 //			buf = astobfp(buf, mp, ", keynode ip ");
 //			buf = astobfp(buf, mp, nfo->keynode);
-			buf = astobfp(buf, mp, ", command ");
-			buf = astobfp(buf, mp, nfo->command);
+//			buf = astobfp(buf, mp, ", command ");
+//			buf = astobfp(buf, mp, nfo->command);
 			buf = astobfp(buf, mp, ", unique ");
 			buf = astobfp(buf, mp, nfo->unique);
 		} while (node = node->next);
