@@ -257,6 +257,7 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 		do
 		{
 			hn = foreign->info->hostname;
+			printf("trying to join %s\n", hn);
 			kn = foreign->info->keynode;
 			ih = foreign->info->internalhost;
 			eh = foreign->info->externalhost;
