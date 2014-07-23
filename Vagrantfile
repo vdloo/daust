@@ -20,4 +20,16 @@ Vagrant.configure("2") do |config|
 		node3.vm.provision :shell, :inline => "sudo apt-get -y update && sudo apt-get -y install make"
 		node3.vm.provision :shell, :inline => "cd /vagrant && sudo make install && su vagrant -c \"daustd -d; daust remote 192.168.50.2 ping\""
 	end
+	config.vm.define "node4" do |node4|
+		node4.vm.hostname = "daust-node4"
+		node4.vm.network "private_network", ip: "192.168.50.5"
+		node4.vm.provision :shell, :inline => "sudo apt-get -y update && sudo apt-get -y install make"
+		node4.vm.provision :shell, :inline => "cd /vagrant && sudo make install && su vagrant -c \"daustd -d; daust remote 192.168.50.2 ping\""
+	end
+	config.vm.define "node5" do |node5|
+		node5.vm.hostname = "daust-node5"
+		node5.vm.network "private_network", ip: "192.168.50.6"
+		node5.vm.provision :shell, :inline => "sudo apt-get -y update && sudo apt-get -y install make"
+		node5.vm.provision :shell, :inline => "cd /vagrant && sudo make install && su vagrant -c \"daustd -d; daust remote 192.168.50.2 ping\""
+	end
 end
