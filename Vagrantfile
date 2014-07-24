@@ -4,12 +4,9 @@ Vagrant.configure("2") do |config|
 	config.vm.hostname = "daust-testenv"
 	config.vm.network "private_network", ip: "192.168.50.2"
 	config.vm.provision :shell, :inline => "sudo apt-get -y update && sudo apt-get -y install build-essential autoconf automake"
-	config.vm.provision :shell, :inline => "cd /vagrant; ./bootstrap && ./configure && make && make install"
 	config.vm.provision :shell, :inline => "curl -s https://get.docker.io/ubuntu/ | sudo sh"
-	config.vm.provision :shell, :inline => "cd /vagrant; docker build -t daust ."
 	
 	# run the daust daemon on the vagrant vm
-	config.vm.provision :shell, :inline => "su vagrant -c \"daustd -d\""
+	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\ncd /vagrant; ./bootstrap && ./configure; make uninstall; make clean; make && make install\ndocker build -t daust .\nsu vagrant -c \"daustd -d\"\nfor ((i=0; i < 10; i++)); do docker run -d daust; done' > rundaust.sh; chmod u+x rundaust.sh; ./rundaust.sh"
 	# run the daust daemon in n docker containers
-	config.vm.provision :shell, :inline => "for ((i=0; i < 10; i++)); do docker run -d daust; done"
 end
