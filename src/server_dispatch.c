@@ -39,6 +39,11 @@ int check_if_list(char *first)
 	return strcmp(first, "list") == 0;
 }
 
+int check_if_trace(char *first)
+{
+	return strcmp(first, "trace") == 0;
+}
+
 // debug function, remove later
 // use this to test blocking socket threads
 int check_if_block(char *first)
@@ -61,6 +66,7 @@ char *run_command(char *cmd)
 		if (check_if_ping(first)) r = pong();
 		if (check_if_list(first)) r = nodelist_list(head);
 		if (check_if_block(first)) r = block();
+		if (check_if_trace(first)) r = trace();
 	}
 	return r;
 }
@@ -261,15 +267,20 @@ char *broadcast_to_all(struct nli *nli, char *buf, char *uq)
 	int *mp = &m_siz;
 
 	char *r = NULL;
+
+	do
 	while (nli = nli->next)
 	{
 		hn = nli->info->hostname;
+		rbuf = NULL;
 		rbuf = broadcast_to_remote(hn, buf, uq);
-		if (strcmp(rbuf, "Already have it") != 0) {
-			r = asdtobfp(r, mp, rbuf, "\n\n");
-			r = astobfp(r, mp, NULL);
+		if (rbuf) {
+			if (strcmp(rbuf, "Already have it") != 0) {
+				r = asdtobfp(r, mp, rbuf, "\n\n");
+				r = astobfp(r, mp, NULL);
+			}
+			free(rbuf);
 		}
-		free(rbuf);
 	}
 	return r;
 }
