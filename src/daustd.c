@@ -39,7 +39,9 @@ int main(int argc, char *argv[])
 {
 	init_config();
 
-	if (check_if_running()) {
+	char *r;
+	if (r = check_if_running()) {
+		free(r);
 		printf("daustd is already running\n");
 		return 1;
 	}

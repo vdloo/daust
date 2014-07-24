@@ -5,6 +5,9 @@
 #include <string.h>
 
 #include "config.h"
+#include "utils.h"
+#include "init.h"
+#include "node_data.h"
 
 void print_kill_daemon()
 {
@@ -31,4 +34,14 @@ char *pong()
 {
 	print_pong();
 	return strdup("pong");
+}
+
+char *trace()
+{
+	int m_siz = 0;
+	int *mp = &m_siz;
+	char *r;
+	r = asdtobfp(r, mp, "->", head->info->hostname);
+	r = astobfp(r, mp, NULL);
+	return r;
 }

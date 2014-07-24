@@ -50,6 +50,10 @@ char *incoming_callback(char *buf)
 	}
 	destroy_nodelist(nli);
 
+	if (!r) {
+		r = strdup("failed to foward command");
+	}
+
 	return create_response_buf(r);
 }
 

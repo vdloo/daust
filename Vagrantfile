@@ -9,4 +9,6 @@ Vagrant.configure("2") do |config|
 	
 	# run the daust daemon on the vagrant vm
 	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\ncd /vagrant; ./bootstrap && ./configure; make uninstall; make clean; make && make install\ndocker build -t daust .\nsu vagrant -c \"daustd -d\"\nfor ((i=0; i < 10; i++)); do docker run -d daust; done' > rundaust.sh; chmod u+x rundaust.sh; ./rundaust.sh"
+	# script to run the host's daust instance in valgrind
+	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\nsudo killall daustd; valgrind --leak-check=full --track-origins=yes daustd -v & sudo bash rundaust.sh;fg' > restart.sh; chmod u+x invalgrind.sh; chmod 777 restart.sh;"
 end

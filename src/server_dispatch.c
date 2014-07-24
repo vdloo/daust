@@ -406,20 +406,20 @@ char *server_dispatch(struct nli *nli)
 	// free all memory of the second explode array
 	destroy_array(av, ac);
 
-	char *uq = strdup(nli->info->unique);
 
 	// if nli->info isn't in rec_head nodelist
 	// run the command or 
 	// send it to the right nodes
-	char *r;
+	char *r, *uq;
 	if (find_node(nli, rec_head) == NULL) {
 		append_to_received_command_list(nli->info);
+		uq = strdup(nli->info->unique);
 		r = route_command(nli, who, rmt, cmd, buf, uq);
+		free(uq);
 	} else {
 		r = strdup("Already have it"); 	
 	}
 
-	if (uq) free(uq);
 	if (rmt) free(rmt);
 	if (buf) free(buf);
 	if (cmd) free(cmd);

@@ -88,7 +88,7 @@ struct nli *add_node_to_list(struct nli *node)
 		}
 		node->next 			= np;
 	}
-	np->prev 			= node;
+	np->prev 				= node;
 	return np;
 }
 
@@ -128,9 +128,6 @@ void destroy_nodelist(struct nli *node)
 		// previous node list items left in the list
 		do {
 			node = remove_node_from_list(node);
-			if (node) {
-				node = node->prev;
-			}
 		} while (node);
 	}
 }
@@ -172,6 +169,7 @@ char *nodelist_list(struct nli *node)
 			da = malloc((difs + 1) * sizeof(char));
 			sprintf(da, "%d", dif);
 			buf = asdtobfp(buf, mp, da, " seconds ago");
+			free(da);
 //			buf = astobfp(buf, mp, ", keynode ip ");
 //			buf = astobfp(buf, mp, nfo->keynode);
 //			buf = astobfp(buf, mp, ", command ");

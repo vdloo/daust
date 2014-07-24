@@ -3,4 +3,5 @@
 #define COMMANDS_H
 void kill_daemon();
 char *pong();
+char *trace();
 #endif
