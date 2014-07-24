@@ -268,7 +268,6 @@ char *broadcast_to_all(struct nli *nli, char *buf, char *uq)
 
 	char *r = NULL;
 
-	do
 	while (nli = nli->next)
 	{
 		hn = nli->info->hostname;
