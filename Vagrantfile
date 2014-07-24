@@ -1,35 +1,15 @@
-Vagrant.configure("2") do |config|
-	config.vm.box = "precise64"
-	config.vm.box_url = 'http://files.vagrantup.com/precise64.box'
-
-	config.vm.define "node1" do |node1|
-		node1.vm.hostname = "daust-node1"
-		node1.vm.network "private_network", ip: "192.168.50.2"
-		node1.vm.provision :shell, :inline => "sudo apt-get -y update && sudo apt-get -y install build-essential autoconf automake"
-		node1.vm.provision :shell, :inline => "cd /vagrant; ./bootstrap && ./configure && make && make install && su vagrant -c \"daustd -d\""
-	end
-	config.vm.define "node2" do |node2|
-		node2.vm.hostname = "daust-node2"
-		node2.vm.network "private_network", ip: "192.168.50.3"
-		node2.vm.provision :shell, :inline => "sudo apt-get -y update && sudo apt-get -y install make"
-		node2.vm.provision :shell, :inline => "cd /vagrant && sudo make install && su vagrant -c \"daustd -d; daust remote 192.168.50.2 ping\""
-	end
-	config.vm.define "node3" do |node3|
-		node3.vm.hostname = "daust-node3"
-		node3.vm.network "private_network", ip: "192.168.50.4"
-		node3.vm.provision :shell, :inline => "sudo apt-get -y update && sudo apt-get -y install make"
-		node3.vm.provision :shell, :inline => "cd /vagrant && sudo make install && su vagrant -c \"daustd -d; daust remote 192.168.50.2 ping\""
-	end
-	config.vm.define "node4" do |node4|
-		node4.vm.hostname = "daust-node4"
-		node4.vm.network "private_network", ip: "192.168.50.5"
-		node4.vm.provision :shell, :inline => "sudo apt-get -y update && sudo apt-get -y install make"
-		node4.vm.provision :shell, :inline => "cd /vagrant && sudo make install && su vagrant -c \"daustd -d; daust remote 192.168.50.2 ping\""
-	end
-	config.vm.define "node5" do |node5|
-		node5.vm.hostname = "daust-node5"
-		node5.vm.network "private_network", ip: "192.168.50.6"
-		node5.vm.provision :shell, :inline => "sudo apt-get -y update && sudo apt-get -y install make"
-		node5.vm.provision :shell, :inline => "cd /vagrant && sudo make install && su vagrant -c \"daustd -d; daust remote 192.168.50.2 ping\""
-	end
+Vagrant.configure("2") do |config| 
+	config.vm.box = "phusion-open-ubuntu-12.04-amd64"
+	config.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/latest/ubuntu-12.04-amd64-vbox.box"
+	config.vm.hostname = "daust-testenv"
+	config.vm.network "private_network", ip: "192.168.50.2"
+	config.vm.provision :shell, :inline => "sudo apt-get -y update && sudo apt-get -y install build-essential autoconf automake"
+	config.vm.provision :shell, :inline => "cd /vagrant; ./bootstrap && ./configure && make && make install"
+	config.vm.provision :shell, :inline => "curl -s https://get.docker.io/ubuntu/ | sudo sh"
+	config.vm.provision :shell, :inline => "cd /vagrant; docker build -t daust ."
+	
+	# run the daust daemon on the vagrant vm
+	config.vm.provision :shell, :inline => "su vagrant -c \"daustd -d\""
+	# run the daust daemon in n docker containers
+	config.vm.provision :shell, :inline => "for ((i=0; i < 10; i++)); do docker run -d daust; done"
 end
