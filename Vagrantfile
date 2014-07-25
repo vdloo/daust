@@ -7,8 +7,18 @@ Vagrant.configure("2") do |config|
 	config.vm.provision :shell, :inline => "sudo apt-get -y install gdb valgrind"
 	config.vm.provision :shell, :inline => "curl -s https://get.docker.io/ubuntu/ | sudo sh"
 	
-	# run the daust daemon on the vagrant vm
-	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\ncd /vagrant; ./bootstrap && ./configure; make uninstall; make clean; make && make install\ndocker build -t daust .\nsu vagrant -c \"daustd -d\"\nfor ((i=0; i < 10; i++)); do docker run -d daust; done' > rundaust.sh; chmod u+x rundaust.sh; ./rundaust.sh"
-	# script to run the host's daust instance in valgrind
-	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\nsudo killall daustd; valgrind --leak-check=full --track-origins=yes daustd -v & sudo bash rundaust.sh;fg' > restart.sh; chmod u+x invalgrind.sh; chmod 777 restart.sh;"
+	# define scripts for building from shared folder
+	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\ncd /vagrant; ./bootstrap && ./configure; sudo make uninstall; make clean; make && sudo make install' > build_bin.sh; chmod u+x build_bin.sh; chmod 777 build_bin.sh;"
+	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\ncd /vagrant; sudo docker build -t daust .' > build_container.sh; chmod u+x build_container.sh; chmod 777 build_container.sh;"
+	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\n(echo r; cat) | gdb --args daustd -v' > run_bin_gdb.sh; chmod u+x run_bin_gdb.sh; chmod 777 run_bin_gdb.sh;"
+	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\ndaustd -v' > run_bin.sh; chmod u+x run_bin.sh; chmod 777 run_bin.sh;"
+	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\nvalgrind --leak-check=full --track-origins=yes daustd -v' > run_valgrind.sh; chmod u+x run_valgrind.sh; chmod 777 run_valgrind.sh;"
+	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\nfor ((i=0; i < 10; i++)); do sudo docker run -d daust; done' > run_container.sh; chmod u+x run_container.sh; chmod 777 run_container.sh;"
+
+	# scripts for starting the program normally, with gdb or with vagrand. don't run as shell script, instead source the files (. start) so that job control is available
+	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\nsudo killall daustd; ./build_bin.sh; ./build_container.sh; ./run_bin.sh& ./run_container.sh; fg' > start.sh"
+	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\nsudo killall daustd; ./build_bin.sh; ./build_container.sh; ./run_bin_gdb.sh& ./run_container.sh; fg' > start_gdb.sh"
+	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\nsudo killall daustd; ./build_bin.sh; ./build_container.sh; ./run_bin_valgrind.sh& ./run_container.sh; fg' > start_valgrind.sh"
+	config.vm.provision :shell, :inline => "echo -e 'start script to start the program on the vm and in docker containers,\nstart_gdb does the same but runs the non-docker instance in gdb etc.\ndon't run as shell scripts, instead source the files (. start)' > README"
+
 end
