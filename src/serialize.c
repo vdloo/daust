@@ -85,7 +85,6 @@ struct nli *deserialize(char *buf)
 		}
 		if (strstr(sg, ed)) {
 			if (nest == 2) {
-				node->info = create_node();
 				nfo = node->info;
 				set_node_element(&nfo->hostname,	hn);
 				set_node_element(&nfo->keynode, 	kn);
