@@ -114,6 +114,7 @@ char *str_replace(char *needle, char *replace, char *haystack)
 
 char *str_replace_all(char *needle, char *replace, char *haystack)
 {
+	if (!haystack) return NULL;
 	char *buf = NULL;
 	char *str = strdup(haystack);
 	while (buf = str_replace(needle, replace, str)){

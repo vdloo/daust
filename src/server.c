@@ -39,22 +39,25 @@ struct nli *rec_tail;
 char *incoming_callback(char *buf)
 {
 	char *r = NULL;
-	struct nli *nli;
-	nli = deserialize(buf);
-	join_incoming(nli);
+	if (buf) {
+		struct nli *nli;
+		nli = deserialize(buf);
+		if (!nli) return NULL;
+		join_incoming(nli);
 
-	if (check_command(nli)) {
-		r = server_dispatch(nli);
-	} else {
-		print_declined_incoming();
+		if (check_command(nli)) {
+			r = server_dispatch(nli);
+		} else {
+			print_declined_incoming();
+		}
+		destroy_nodelist(nli);
+
+		if (!r) {
+			r = strdup("failed to forward command");
+		}
+		r = create_response_buf(r);
 	}
-	destroy_nodelist(nli);
-
-	if (!r) {
-		r = strdup("failed to foward command");
-	}
-
-	return create_response_buf(r);
+	return r;
 }
 
 // receive data from other nodes

@@ -294,20 +294,22 @@ char *run_all(struct nli *nli, char *cmd, char *buf, char *uq)
 	char *rbuf;
 
 	// send the command to all other known nodes
-	rbuf = broadcast_to_all(head, buf, uq);
-	if (rbuf) {
+	if (head->next) {
+		rbuf = broadcast_to_all(head->next, buf, uq);
+		if (rbuf) {
+			r = astobfp(r, mp, rbuf);
+			free(rbuf);
+		}
+
+		// run the command locally
+		char *m = strdup(" responded:\n");	
+		r = asdtobfp(r, mp, head->info->hostname, m);
+		free(m);
+		rbuf = run_command(cmd);
 		r = astobfp(r, mp, rbuf);
 		free(rbuf);
+		r = astobfp(r, mp, NULL);
 	}
-
-	// run the command locally
-	char *m = strdup(" responded:\n");	
-	r = asdtobfp(r, mp, head->info->hostname, m);
-	free(m);
-	rbuf = run_command(cmd);
-	r = astobfp(r, mp, rbuf);
-	free(rbuf);
-	r = astobfp(r, mp, NULL);
 	return r;
 }
 
@@ -350,10 +352,10 @@ int check_command(struct nli *nli)
 void print_received_command_list()
 {
 	if (config->verbosity) {
-		printf("Appended incoming command to received list: \n");
+	//	printf("Appended incoming command to received list: \n");
 		char *lbuf      = NULL;
 		lbuf            = nodelist_list(rec_head->next);
-		printf("%s\n", lbuf);
+	//	printf("%s\n", lbuf);
 		free(lbuf);
 	}
 }

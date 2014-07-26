@@ -79,6 +79,7 @@ void destroy_node(struct nodeinfo *nfo)
 struct nli *add_node_to_list(struct nli *node)
 {
 	struct nli *np 	= malloc(sizeof(struct nli));
+	np->info	= NULL;
 	np->next 	= NULL;
 	np->prev	= NULL;
 	if (node) {
@@ -258,8 +259,6 @@ struct nli *find_node(struct nli *needle, struct nli *haystack)
 struct nli *join_lists(struct nli *local, struct nli *foreign)
 {
 	if (foreign) {
-		char *z = nodelist_list(foreign);
-		free(z);
 		struct nli *head_local = local;
 		struct nli *match = NULL;
 		struct nodeinfo *nfo;
@@ -268,7 +267,6 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 		do
 		{
 			hn = foreign->info->hostname;
-			printf("trying to join %s\n", hn);
 			kn = foreign->info->keynode;
 			ih = foreign->info->internalhost;
 			eh = foreign->info->externalhost;

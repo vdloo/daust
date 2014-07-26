@@ -16,6 +16,7 @@ char dlr[] 	= "|_NEWLINE_|";
 // returns pointer to new buffer.
 char *serialize(struct nli *node)
 {
+	if (!node) return NULL;
 	char *z = nodelist_list(node);
 	free(z);
 	char *buf;
@@ -76,6 +77,7 @@ struct nli *deserialize(char *buf)
 	char *sg = strtok(buf, dl);
 	char *hn, *kn, *ih, *eh, *id, *cd, *uq;
 	hn = kn = ih = eh = id = cd = uq = NULL;
+
 	do {
 		if (strstr(sg, st)) {
 			el = 0;
@@ -105,6 +107,7 @@ struct nli *deserialize(char *buf)
 						np = create_nodelist();
 						node = np;
 					}
+					node->info = create_node();
 					if (hn) free(hn);
 					hn = str_replace_all(dlr, dl, sg);
 					break;
@@ -122,7 +125,7 @@ struct nli *deserialize(char *buf)
 					break;
 				case 4:
 					if (id) free(id);
-					id = strdup(sg);
+					id = sg ? strdup(sg) : sg;
 					break;
 				case 5:
 					if (cd) free(cd);
@@ -130,7 +133,7 @@ struct nli *deserialize(char *buf)
 					break;
 				case 6:
 					if (uq) free(uq);
-					uq = strdup(sg);
+					uq = sg ? strdup(sg) : sg;
 					break;
 			}
 			el++;

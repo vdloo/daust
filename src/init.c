@@ -50,7 +50,6 @@ void terminate_nodelist()
 void print_received_nodelist(struct nli *nl)
 {
 	if (config->verbosity) {
-		printf("received the following nodelist from %s: \n", nl->info->hostname);
 		char *fbuf      = NULL;
 		fbuf            = nodelist_list(nl);
 		printf("%s\n", fbuf);
@@ -79,14 +78,17 @@ void join_incoming(struct nli *nl)
 char *response_callback(char *buf)
 {
 	char *res	= NULL;
-	struct nli *nli;
-	struct nodeinfo *nfo;
-	nli 		= deserialize(buf);
-	if (head) join_incoming(nli);
-
-	nfo 		= nli->info;
-	res		= strdup(nfo->command);
-	destroy_nodelist(nli);
+	if (buf) {
+		struct nli *nli;
+		struct nodeinfo *nfo;
+		nli 		= deserialize(buf);
+		if (nli) {
+			if (head) join_incoming(nli);
+			nfo 		= nli->info;
+			res		= strdup(nfo->command);
+			destroy_nodelist(nli);
+		}
+	}
 	return res;
 }
 
@@ -95,8 +97,10 @@ void broadcast_nodelist(char *dest)
 {
 	char *buf;
 	buf = serialize(head);
-	send_packets(dest, 4040, buf, response_callback);
-	free(buf);
+	if (buf) {
+		send_packets(dest, 4040, buf, response_callback);
+		free(buf);
+	}
 }
 
 char *forward_command(char *dest, char *command, char *unique)
@@ -123,7 +127,10 @@ char *broadcast_command(char *dest, char *command)
 	buf = serialize(nli);
 	destroy_nodelist(nli);
 
-	char *r = send_packets(dest, 4040, buf, response_callback);
+	char *r = NULL;
+	if (buf) {
+		r = send_packets(dest, 4040, buf, response_callback);
+	}
 	if (buf) free(buf);
 	return r;
 }

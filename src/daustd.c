@@ -6,6 +6,7 @@
 #include <getopt.h>
 #include "config.h"
 #include "messages.h"
+#include "init.h"
 #include "server.h"
 
 static const char *os = "dhk:l:p:vV";
@@ -22,9 +23,9 @@ static const struct option lo[] = {
 
 struct conf *config;
 
-int check_if_running()
+char *check_if_running()
 {
-	int r		= 0;
+	char *r		= NULL;
 	char *dest 	= NULL;
 	dest		= strdup("127.0.0.1");
 	char *cmd	= NULL;
