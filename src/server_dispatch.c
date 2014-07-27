@@ -24,23 +24,27 @@ int verify_local(char *local, char *foreign)
 	return r;
 }
 
-int check_if_stop(char *first)
+int check_if_stop(char *cmd)
 {
+	char *first = strtok(cmd, " ");
 	return strcmp(first, "stop") == 0;
 }
 
-int check_if_ping(char *first)
+int check_if_ping(char *cmd)
 {
+	char *first = strtok(cmd, " ");
 	return strcmp(first, "ping") == 0;
 }
 
-int check_if_list(char *first)
+int check_if_list(char *cmd)
 {
+	char *first = strtok(cmd, " ");
 	return strcmp(first, "list") == 0;
 }
 
-int check_if_trace(char *first)
+int check_if_trace(char *cmd)
 {
+	char *first = strtok(cmd, " ");
 	return strcmp(first, "trace") == 0;
 }
 
@@ -60,13 +64,12 @@ char *block()
 char *run_command(char *cmd)
 {
 	char *r	= NULL;
-	char *first = strtok(cmd, " ");
 	if (cmd) {
-		if (check_if_stop(first)) kill_daemon();
-		if (check_if_ping(first)) r = pong();
-		if (check_if_list(first)) r = nodelist_list(head);
-		if (check_if_block(first)) r = block();
-		if (check_if_trace(first)) r = trace();
+		if (check_if_stop(cmd)) kill_daemon();
+		if (check_if_ping(cmd)) r = pong();
+		if (check_if_list(cmd)) r = nodelist_list(head);
+		if (check_if_block(cmd)) r = block();
+		if (check_if_trace(cmd)) r = trace();
 	}
 	return r;
 }
@@ -259,9 +262,10 @@ char *run_remote(char *rmt, char *buf, char *cmd, char *uq)
 
 // send the command to all nodes, 
 // skip first to not send to self
-char *broadcast_to_all(struct nli *nli, char *buf, char *uq)
+char *broadcast_to_all(struct nli *nli, char *buf, char *uq, char *cmd)
 {
 	char *rbuf;
+	char *temp; 
 	char *hn = NULL;
 	int m_siz = 0;
 	int *mp = &m_siz;
@@ -274,10 +278,15 @@ char *broadcast_to_all(struct nli *nli, char *buf, char *uq)
 		rbuf = NULL;
 		rbuf = broadcast_to_remote(hn, buf, uq);
 		if (rbuf) {
-			if (	strcmp(rbuf, "Already have it") != 0
-			   ) {
-				r = asdtobfp(r, mp, rbuf, "\n");
-				r = astobfp(r, mp, NULL);
+			if (strcmp(rbuf, "Already have it") != 0) {
+				if (check_if_trace(cmd)) {
+					temp = str_replace("|__", "  |__", rbuf);
+					r = asdtobfp(r, mp, temp, NULL);
+					free(temp);
+				} else {
+					r = asdtobfp(r, mp, hn, " responded:\n");
+					r = asdtobfp(r, mp, rbuf, NULL);
+				}
 			}
 			free(rbuf);
 		}
@@ -292,23 +301,28 @@ char *run_all(struct nli *nli, char *cmd, char *buf, char *uq)
 	char *r = NULL;
 	int m_siz = 0;
 	int *mp = &m_siz;
-	char *rbuf;
 
 	// send the command to all other known nodes
 	if (head->next) {
-		rbuf = broadcast_to_all(head->next, buf, uq);
-		if (rbuf) {
-			r = astobfp(r, mp, rbuf);
-			free(rbuf);
-		}
+		char *rbuf;
+		rbuf = broadcast_to_all(head->next, buf, uq, cmd);
 
 		// run the command locally
 	//	char *m = strdup(" responded:\n");	
 	//	r = asdtobfp(r, mp, head->info->hostname, m);
 	//	free(m);
-		rbuf = run_command(cmd);
-		r = astobfp(r, mp, rbuf);
-		free(rbuf);
+		char *lbuf;
+		lbuf = run_command(cmd);
+		if (check_if_trace(cmd)) {
+			r = asdtobfp(r, mp, "|", lbuf);
+		} else {
+			r = asdtobfp(r, mp, lbuf, "\n");
+		}
+		free(lbuf);
+		if (rbuf) {
+			r = astobfp(r, mp, rbuf);
+			free(rbuf);
+		}
 		r = astobfp(r, mp, NULL);
 	}
 	return r;

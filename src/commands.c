@@ -41,7 +41,7 @@ char *trace()
 	int m_siz = 0;
 	int *mp = &m_siz;
 	char *r;
-	r = asdtobfp(r, mp, "_ ", head->info->hostname);
-	r = astobfp(r, mp, NULL);
+	r = asdtobfp(r, mp, "__ ", head->info->hostname);
+	r = asdtobfp(r, mp, "\n", NULL);
 	return r;
 }
