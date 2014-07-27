@@ -83,43 +83,79 @@ void destroy_array(char **av, int ac)
 	}
 }
 
-// copy the haystack into a new block of memory and 
-// replace the needle with the replace value and return
-// the pointer
+int count_occurence(char *needle, char *haystack)
+{
+	int nlen = strlen(needle);
+	int i = 0;
+	int offset = 0;
+	if (nlen) {
+		// count the occurences of the needle by using strstr, 
+		// skip ahead the length of the needle every match
+		while (haystack = strstr(haystack + offset, needle)) {
+			++i;
+			if (i) offset = nlen;
+		}
+	}
+	return i;
+}
+
 char *str_replace(char *needle, char *replace, char *haystack)
 {
-	char *r = NULL;
-	char *p = NULL;
-	if (p = strstr(haystack, needle)) {
-		int strlenneedle = strlen(needle);
-		int strlenreplace = strlen(replace);
-
-		int neelen 	= strlen(needle);
-		int prelen 	= p - haystack; // characters until needle
-		int replen 	= strlen(replace);
-		// characters from needle until nullterm of haystack
-		int poslen 	= haystack + strlen(haystack) - p - neelen;
-
-		int hl  	= prelen + replen + poslen + 1;
-
-		r = malloc(hl * sizeof(char));
-		int strlenhay = strlen(haystack);
-		memcpy(r, haystack, prelen);
-		memcpy(r + prelen, replace, replen);
-		memcpy(r + prelen + replen, haystack + prelen + neelen, poslen);
-		r[hl - 1] = '\0'; 
-	}
-	return r;
-}
-
-char *str_replace_all(char *needle, char *replace, char *haystack)
-{
 	if (!haystack) return NULL;
-	char *buf = NULL;
-	char *str = strdup(haystack);
-	while (buf = str_replace(needle, replace, str)){
-		if (str) free(str);
-		str = buf;
+	char *match 	= NULL;
+	char *r 	= NULL;
+
+	int dif = 0;
+	int talloc = 1;
+	int nlen = strlen(needle);
+	int rlen = strlen(replace);
+	char *ohp = haystack + strlen(haystack);
+	int prev = 0;
+	while (haystack && (match = strstr(haystack, needle))) {
+		dif = match - haystack;
+		talloc = dif + rlen + talloc;
+		r = realloc(r, talloc);	
+		memcpy(r + prev, haystack, dif);
+		memcpy(r + dif + prev, replace, rlen);
+		prev = rlen + dif + prev;
+		haystack = match + nlen;
+		haystack = haystack < ohp ? haystack : NULL;
 	}
-	return str;
+	if (haystack) {
+		int res = strlen(haystack);
+		talloc = res + talloc;
+		r = realloc(r, talloc);
+		memcpy(r + prev, haystack, res);
+	}
+	r[talloc - 1] 	= '\0';
+	return r;
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

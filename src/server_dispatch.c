@@ -276,7 +276,7 @@ char *broadcast_to_all(struct nli *nli, char *buf, char *uq)
 		if (rbuf) {
 			if (	strcmp(rbuf, "Already have it") != 0
 			   ) {
-				r = asdtobfp(r, mp, rbuf, "\n\n");
+				r = asdtobfp(r, mp, rbuf, "\n");
 				r = astobfp(r, mp, NULL);
 			}
 			free(rbuf);
@@ -303,9 +303,9 @@ char *run_all(struct nli *nli, char *cmd, char *buf, char *uq)
 		}
 
 		// run the command locally
-		char *m = strdup(" responded:\n");	
-		r = asdtobfp(r, mp, head->info->hostname, m);
-		free(m);
+	//	char *m = strdup(" responded:\n");	
+	//	r = asdtobfp(r, mp, head->info->hostname, m);
+	//	free(m);
 		rbuf = run_command(cmd);
 		r = astobfp(r, mp, rbuf);
 		free(rbuf);
