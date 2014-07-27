@@ -186,10 +186,9 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 			if (dli > MAX_DATA_LENGTH) dli = MAX_DATA_LENGTH;
 			if (dli) {
 				m_siz = m_siz + (dli * sizeof(char));
-				rbuf = realloc(rbuf, m_siz + 2);
-				memset(rbuf+prev_dli, '\0', ((dli) * sizeof(char)));
+				rbuf = realloc(rbuf, m_siz + 1);
+				memset(rbuf+prev_dli, '\0', ((dli + 1) * sizeof(char)));
 				n = read(sh, rbuf + prev_dli, (dli * sizeof(char)));
-				buf[m_siz] = '\0';
 				prev_dli = prev_dli + dli;
 			}
 		} else{
@@ -233,10 +232,9 @@ void process_incoming(void *ta)
 			if (dli > MAX_DATA_LENGTH) dli = MAX_DATA_LENGTH;
 			if (dli) {
 				m_siz = m_siz + (dli * sizeof(char));
-				buf = realloc(buf, m_siz + 2);
-				memset(buf+prev_dli, '\0', ((dli) * sizeof(char)));
+				buf = realloc(buf, m_siz + 1);
+				memset(buf+prev_dli, '\0', ((dli + 1) * sizeof(char)));
 				n = read(nsh, buf + prev_dli, (dli * sizeof(char)));
-				buf[m_siz] = '\0'; 
 				prev_dli = prev_dli + dli;
 			}
 		} else {

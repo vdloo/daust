@@ -84,7 +84,14 @@ struct nli *deserialize(char *buf)
 			if (nest < 2) ++nest;	
 		}
 		if (strstr(sg, ed)) {
-			if (nest == 2) {
+			if (nest == 2 && hn && kn && ih && eh && id && cd && uq) {
+				if (node) {
+					node = add_node_to_list(node);
+				} else {
+					np = create_nodelist();
+					node = np;
+				}
+				node->info = create_node();
 				nfo = node->info;
 				set_node_element(&nfo->hostname,	hn);
 				set_node_element(&nfo->keynode, 	kn);
@@ -93,6 +100,14 @@ struct nli *deserialize(char *buf)
 				set_node_element(&nfo->identifier, 	id);
 				set_node_element(&nfo->command, 	cd);
 				set_node_element(&nfo->unique, 		uq);
+				if (hn) free(hn);
+				if (kn) free(kn);
+				if (ih) free(ih);
+				if (eh) free(eh);
+				if (id) free(id);
+				if (cd) free(cd);
+				if (uq) free(uq);
+				hn = kn = ih = eh = id = cd = uq = NULL;
 			}
 		       	if (nest > 0) --nest;
 		}
@@ -100,13 +115,6 @@ struct nli *deserialize(char *buf)
 		if (nest == 2) {
 			switch(el) {
 				case 0: 
-					if (node) {
-						node = add_node_to_list(node);
-					} else {
-						np = create_nodelist();
-						node = np;
-					}
-					node->info = create_node();
 					if (hn) free(hn);
 					hn = str_replace_all(dlr, dl, sg);
 					break;

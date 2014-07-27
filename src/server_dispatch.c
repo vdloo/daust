@@ -274,7 +274,8 @@ char *broadcast_to_all(struct nli *nli, char *buf, char *uq)
 		rbuf = NULL;
 		rbuf = broadcast_to_remote(hn, buf, uq);
 		if (rbuf) {
-			if (strcmp(rbuf, "Already have it") != 0) {
+			if (	strcmp(rbuf, "Already have it") != 0
+			   ) {
 				r = asdtobfp(r, mp, rbuf, "\n\n");
 				r = astobfp(r, mp, NULL);
 			}
