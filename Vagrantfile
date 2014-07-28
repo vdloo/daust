@@ -1,8 +1,6 @@
 Vagrant.configure("2") do |config| 
 	config.vm.box = "phusion-open-ubuntu-12.04-amd64"
 	config.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/latest/ubuntu-12.04-amd64-vbox.box"
-	config.vm.hostname = "daust-testenv"
-	config.vm.network "private_network", ip: "192.168.50.2"
 	config.vm.provision :shell, :inline => "sudo apt-get -y update && sudo apt-get -y install build-essential autoconf automake"
 	config.vm.provision :shell, :inline => "sudo apt-get -y install gdb valgrind"
 	config.vm.provision :shell, :inline => "curl -s https://get.docker.io/ubuntu/ | sudo sh"
