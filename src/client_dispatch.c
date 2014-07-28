@@ -15,7 +15,7 @@ void print_broadcast_response(char *r)
 	} else if (strcmp(r, na) == 0) {
 		print_daust_usage();
 	} else {
-		printf("%s\n", r);
+		printf("%s", r);
 	}
 }
 
