@@ -103,8 +103,10 @@ void init_config()
 	config = NULL;
 	config = malloc(sizeof(struct conf));
 	config->daemon 			= 0;
+	config->deadend			= 0;
 	config->threadcount		= 1;
 	config->maxthreads		= 8;
+	config->iface			= strdup("eth0");
 	config->identifier 		= get_ident();
 	config->keynode                 = strdup(na);
 	config->publicface              = strdup(na);
@@ -119,6 +121,7 @@ void terminate_config()
 		if (config->keynode) 		free(config->keynode);
 		if (config->logfile) 		free(config->logfile);
 		if (config->publicface) 	free(config->publicface);
+		if (config->iface) 		free(config->iface);
 		free(config);
 	}
 }

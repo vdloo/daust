@@ -7,6 +7,8 @@ struct conf{
 	int daemon;
 	int threadcount;
 	int maxthreads;
+	int deadend; // daustd instance is passive (doesn't forward anything)
+	char *iface;
 	char *logfile;
 	char *keynode;
 	char *publicface;

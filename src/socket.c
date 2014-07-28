@@ -339,7 +339,7 @@ char *internalhost()
 	struct ifreq ifr;
 	int sh = socket(AF_INET, SOCK_DGRAM, 0);
 	ifr.ifr_addr.sa_family = AF_INET;
-	strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);
+	strncpy(ifr.ifr_name, config->iface, IFNAMSIZ-1);
 	ioctl(sh, SIOCGIFADDR, &ifr);
 	close(sh);
 	char *iaddr = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);

@@ -33,7 +33,7 @@ void print_pong()
 char *pong()
 {
 	print_pong();
-	return strdup("pong");
+	return strdup("pong\n");
 }
 
 char *trace()

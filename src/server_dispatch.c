@@ -277,19 +277,23 @@ char *broadcast_to_all(struct nli *nli, char *buf, char *uq, char *cmd)
 		hn = nli->info->hostname;
 		rbuf = NULL;
 		rbuf = broadcast_to_remote(hn, buf, uq);
+		printf("rbuf is %s\n", rbuf);
 		if (rbuf) {
 			if (strcmp(rbuf, "Already have it") != 0) {
 				if (check_if_trace(cmd)) {
-					temp = str_replace("|__", "  |__", rbuf);
-					r = asdtobfp(r, mp, temp, NULL);
+					temp = str_replace("|__", "|   |__", rbuf);
+					r = astobfp(r, mp, temp);
 					free(temp);
 				} else {
 					r = asdtobfp(r, mp, hn, " responded:\n");
-					r = asdtobfp(r, mp, rbuf, NULL);
+					r = astobfp(r, mp, rbuf);
 				}
 			}
 			free(rbuf);
 		}
+	}
+	if (r) {
+		r = astobfp(r, mp, NULL);
 	}
 	return r;
 }
@@ -304,8 +308,10 @@ char *run_all(struct nli *nli, char *cmd, char *buf, char *uq)
 
 	// send the command to all other known nodes
 	if (head->next) {
-		char *rbuf;
-		rbuf = broadcast_to_all(head->next, buf, uq, cmd);
+		char *rbuf = NULL;
+		if (!config->deadend) {
+			rbuf = broadcast_to_all(head, buf, uq, cmd);
+		}
 
 		// run the command locally
 	//	char *m = strdup(" responded:\n");	
@@ -344,6 +350,12 @@ char *route_command(struct nli *nli, int who, char *rmt, char *cmd, char *buf, c
 		// run on all
 		case 2: 
 			r = run_all(nli, cmd, buf, uq);
+			if (check_if_trace(cmd)) {
+				char *tmp = NULL;
+				tmp = str_replace("\n|", "\n ", r);
+				if (r) free(r);
+				r = tmp;
+			}
 			break;
 	}
 	return r;

@@ -180,7 +180,7 @@ char *nodelist_list(struct nli *node)
 //			buf = astobfp(buf, mp, ", unique ");
 //			buf = astobfp(buf, mp, nfo->unique);
 		} while (node = node->next);
-		buf = astobfp(buf, mp, NULL);
+		buf = asdtobfp(buf, mp, "\n", NULL);
 	}
 	return buf;
 }
@@ -272,6 +272,12 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 			eh = foreign->info->externalhost;
 			id = foreign->info->identifier;
 			uq = foreign->info->unique;
+			if (strcmp(hn, na) == 0) hn = NULL;
+			if (strcmp(kn, na) == 0) kn = NULL;
+			if (strcmp(ih, na) == 0) ih = NULL;
+			if (strcmp(eh, na) == 0) eh = NULL;
+			if (strcmp(id, na) == 0) id = NULL;
+			if (strcmp(uq, na) == 0) uq = NULL;
 
 			// update nodeinfo from broadcasting node,
 			// add other nodes if it they don't locally
@@ -283,12 +289,24 @@ struct nli *join_lists(struct nli *local, struct nli *foreign)
 				local = add_node_to_list(local);
 				nfo = local->info = create_node();
 			}
-			set_node_element(&nfo->hostname,	hn);
-			set_node_element(&nfo->keynode, 	kn);
-			set_node_element(&nfo->internalhost, 	ih);
-			set_node_element(&nfo->externalhost, 	eh);
-			set_node_element(&nfo->identifier, 	id);
-			set_node_element(&nfo->unique, 		uq);
+			if (hn) {
+				set_node_element(&nfo->hostname,	hn);
+			}
+			if (kn) {
+				set_node_element(&nfo->keynode, 	kn);
+			}
+			if (ih) {
+				set_node_element(&nfo->internalhost, 	ih);
+			}
+			if (eh) {
+				set_node_element(&nfo->externalhost, 	eh);
+			}
+			if (id) {
+				set_node_element(&nfo->identifier, 	id);
+			}
+			if (uq) {
+				set_node_element(&nfo->unique, 		uq);
+			}
 			update_node_timestamp(nfo);
 
 			i++;

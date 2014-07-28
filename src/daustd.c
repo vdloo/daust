@@ -9,13 +9,15 @@
 #include "init.h"
 #include "server.h"
 
-static const char *os = "dhk:l:p:vV";
+static const char *os = "dhk:l:p:vVi:e";
 static const struct option lo[] = {
 	{ "daemon", no_argument, NULL, 'd' },
 	{ "help", no_argument, NULL, 'h' },
 	{ "keynode", required_argument, NULL, 'k' },
 	{ "logfile", required_argument, NULL, 'l' },
 	{ "publicface", required_argument, NULL, 'p' },
+	{ "deadend", required_argument, NULL, 'e' },
+	{ "iface", required_argument, NULL, 'i' },
 	{ "verbose", no_argument, NULL, 'v' },
 	{ "version", no_argument, NULL, 'V' },
 	{ NULL, no_argument, NULL, 0 }
@@ -54,13 +56,23 @@ int main(int argc, char *argv[])
 			case 'd':
 				config->daemon++;
 				break;
+			case 'e':
+				config->deadend++;
+				break;
 			case 'k':
+				free(config->keynode);
 				config->keynode 	= strdup(optarg);
 				break;
+			case 'i':
+				free(config->iface);
+				config->iface 		= strdup(optarg);
+				break;
 			case 'l':
+				free(config->logfile);
 				config->logfile 	= strdup(optarg);
 				break;
 			case 'p':
+				free(config->publicface);
 				config->publicface 	= strdup(optarg);
 				break;
 			case 'v':

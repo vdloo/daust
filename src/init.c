@@ -122,6 +122,7 @@ char *broadcast_command(char *dest, char *command)
 	struct nli *nli;
 	nli = create_self();
 	set_node_element(&nli->info->command, command);
+	set_node_element(&nli->info->internalhost, strdup(na));
 
 	char *buf;
 	buf = serialize(nli);

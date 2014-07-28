@@ -14,6 +14,7 @@ static const struct option lo[] = {
 	{ "keynode", required_argument, NULL, 'k' },
 	{ "logfile", required_argument, NULL, 'l' },
 	{ "publicface", required_argument, NULL, 'p' },
+	{ "iface", required_argument, NULL, 'i' },
 	{ "verbose", no_argument, NULL, 'v' },
 	{ "version", no_argument, NULL, 'V' },
 	{ NULL, no_argument, NULL, 0 }
