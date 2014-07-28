@@ -21,4 +21,13 @@ Vagrant.configure("2") do |config|
 	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\nsudo killall daustd; ./build_bin.sh; ./build_container.sh; ./run_bin_valgrind.sh& ./run_container.sh; fg' > start_valgrind.sh"
 	config.vm.provision :shell, :inline => "echo -e 'start script to start the program on the vm and in docker containers,\nstart_gdb does the same but runs the non-docker instance in gdb etc.\ndo not run as shell scripts, instead source the files (. start)' > README"
 
+	config.vm.define "node1" do |node1|
+		node1.vm.hostname = "daust-testenv1"
+		node1.vm.network "private_network", ip: "192.168.50.2"
+	end
+	config.vm.define "node2" do |node2|
+		node2.vm.hostname = "daust-testenv2"
+		node2.vm.network "private_network", ip: "192.168.50.3"
+	end
+
 end
