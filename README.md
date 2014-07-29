@@ -36,10 +36,6 @@ node2: internal ip 192.168.1.3, public ip N/A, last seen 15 seconds ago
 
 The commands can also be ran on other nodes by adding the 'remote' option. 
 
-Options can both be prepended and appended to the command. 
-
-Note the position of list in the following example:
-
 ```
 $ daust list remote 192.168.1.3
 node2: internal ip 192.168.1.3, public ip N/A, last seen 0 seconds ago
@@ -64,7 +60,7 @@ The 'trace all' command displays a tree of the network.
 ```
 $ daust trace all
 |__ node1
-|__ node2
+    |__ node2
 ```
 
 On a more expansive network this might look something like this.
@@ -72,13 +68,13 @@ On a more expansive network this might look something like this.
 ```
 $ daust trace all
 |__ hypervisor1
-|__ hypervisor2
-|   |__ vm 4
-|   |__ vm 5
-|   |__ vm 6
-|__ vm 1
-|__ vm 2
-|__ vm 3
+    |__ hypervisor2
+    |   |__ vm 4
+    |   |__ vm 5
+    |   |__ vm 6
+    |__ vm 1
+    |__ vm 2
+    |__ vm 3
 ```
 
 To stop the daemon on all nodes run:
