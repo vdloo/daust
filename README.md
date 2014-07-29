@@ -2,12 +2,14 @@ daust
 =====
 *distributed are you still there*
 
-Never lose track of a vm or docker container again. daust is
-a decentralized phone home system in the form of a Unix daemon. 
+Never lose track of a vm or docker container again. 
+
+daust is a decentralized phone home system in the form of a Unix daemon. 
 
 ## Quick start
 
-Start a daustd instances on two or more machines
+Start a daustd instances on two or more machines.
+
 Imagine two machines with eth0 192.168.1.2 and 192.168.1.3, run
 the following command on both.
 
@@ -16,6 +18,7 @@ $ daustd -d
 ```
 
 Then on one of the machines connect to the other by sending any command.
+
 For example: on the 192.168.1.2 host connect to the daustd instance on
 the machine with 192.168.1.3.
 
@@ -32,8 +35,10 @@ node2: internal ip 192.168.1.3, public ip N/A, last seen 15 seconds ago
 ```
 
 The commands can also be ran on other nodes by adding the 'remote' option. 
-Options can both be prepended and appended to the command. Note the
-position of list in the following example:
+
+Options can both be prepended and appended to the command. 
+
+Note the position of list in the following example:
 
 ```
 $ daust list remote 192.168.1.3
@@ -96,8 +101,7 @@ Then ssh into one of the machines
 $ vagrant ssh node1
 ```
 
-Inside the vm start a couple of docker containers running the daustd
-daemon and connect them to daustd on the vm by running
+Inside the vm start a couple of docker containers running daustd.
 
 ```
 $ . start.sh
