@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
 	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\ncd /vagrant; ./bootstrap && ./configure; sudo make uninstall; make clean; make && sudo make install' > build_bin.sh; chmod u+x build_bin.sh; chmod 777 build_bin.sh;"
 	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\ncd /vagrant; sudo docker build -t daust .' > build_container.sh; chmod u+x build_container.sh; chmod 777 build_container.sh;"
 	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\n(echo r; cat) | gdb --args daustd -v -i eth1' > run_bin_gdb.sh; chmod u+x run_bin_gdb.sh; chmod 777 run_bin_gdb.sh;"
-	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\ndaustd -v -i eth1' > run_bin.sh; chmod u+x run_bin.sh; chmod 777 run_bin.sh;"
+	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\ndaustd -d -i eth1' > run_bin.sh; chmod u+x run_bin.sh; chmod 777 run_bin.sh;"
 	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\nvalgrind --leak-check=full --track-origins=yes daustd -v -i eth1' > run_bin_valgrind.sh; chmod u+x run_bin_valgrind.sh; chmod 777 run_bin_valgrind.sh;"
 	config.vm.provision :shell, :inline => "echo -e '#!/bin/bash\nfor ((i=0; i < 10; i++)); do sudo docker run -d daust; done' > run_container.sh; chmod u+x run_container.sh; chmod 777 run_container.sh;"
 
