@@ -45,3 +45,10 @@ char *trace()
 	r = asdtobfp(r, mp, "\n", NULL);
 	return r;
 }
+
+char *list()
+{
+	char *r = NULL;
+	r = nodelist_list(head);
+	return r;
+}

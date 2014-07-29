@@ -189,13 +189,14 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 				rbuf = realloc(rbuf, m_siz + 1);
 				memset(rbuf+prev_dli, '\0', ((dli + 1) * sizeof(char)));
 				n = read(sh, rbuf + prev_dli, (dli * sizeof(char)));
-				prev_dli = prev_dli + dli;
+				prev_dli = prev_dli + dli - 1;
 			}
 		} else{
 			dli = 0;
 		}
 	} while (dli == MAX_DATA_LENGTH);
 	char *res 	= NULL;
+//	printf("rbuf after receiving is %s\n", rbuf);
 	if (n > 0) {
 		res 	= cb(rbuf);
 	} else {
@@ -235,7 +236,7 @@ void process_incoming(void *ta)
 				buf = realloc(buf, m_siz + 1);
 				memset(buf+prev_dli, '\0', ((dli + 1) * sizeof(char)));
 				n = read(nsh, buf + prev_dli, (dli * sizeof(char)));
-				prev_dli = prev_dli + dli;
+				prev_dli = prev_dli + dli - 1;
 			}
 		} else {
 			dli = 0;

@@ -65,11 +65,11 @@ char *run_command(char *cmd)
 {
 	char *r	= NULL;
 	if (cmd) {
-		if (check_if_stop(cmd)) kill_daemon();
-		if (check_if_ping(cmd)) r = pong();
-		if (check_if_list(cmd)) r = nodelist_list(head);
-		if (check_if_block(cmd)) r = block();
-		if (check_if_trace(cmd)) r = trace();
+		if (check_if_stop(cmd)) 	kill_daemon();
+		if (check_if_ping(cmd)) 	r = pong();
+		if (check_if_list(cmd)) 	r = list();
+		if (check_if_block(cmd)) 	r = block();
+		if (check_if_trace(cmd))	r = trace();
 	}
 	return r;
 }
@@ -277,7 +277,6 @@ char *broadcast_to_all(struct nli *nli, char *buf, char *uq, char *cmd)
 		hn = nli->info->hostname;
 		rbuf = NULL;
 		rbuf = broadcast_to_remote(hn, buf, uq);
-		printf("rbuf is %s\n", rbuf);
 		if (rbuf) {
 			if (strcmp(rbuf, "Already have it") != 0) {
 				if (check_if_trace(cmd)) {
@@ -312,10 +311,6 @@ char *run_all(struct nli *nli, char *cmd, char *buf, char *uq)
 			rbuf = broadcast_to_all(head, buf, uq, cmd);
 		}
 
-		// run the command locally
-	//	char *m = strdup(" responded:\n");	
-	//	r = asdtobfp(r, mp, head->info->hostname, m);
-	//	free(m);
 		char *lbuf;
 		lbuf = run_command(cmd);
 		if (check_if_trace(cmd)) {
@@ -358,6 +353,7 @@ char *route_command(struct nli *nli, int who, char *rmt, char *cmd, char *buf, c
 			}
 			break;
 	}
+	printf("route command is returning %s\n", r);
 	return r;
 }
 

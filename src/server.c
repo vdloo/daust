@@ -53,7 +53,7 @@ char *incoming_callback(char *buf)
 		destroy_nodelist(nli);
 
 		if (!r) {
-			r = strdup("failed to forward command");
+			r = strdup("failed to forward command, possibly no other nodes available\n");
 		}
 		r = create_response_buf(r);
 	}

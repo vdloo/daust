@@ -4,4 +4,5 @@
 void kill_daemon();
 char *pong();
 char *trace();
+char *list();
 #endif
