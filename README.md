@@ -6,7 +6,7 @@ Never lose track of a vm or docker container again.
 
 daust is a decentralized phone home system in the form of a Unix daemon. 
 
-## Quick start
+## Example
 
 Start a daustd instances on two or more machines.
 
