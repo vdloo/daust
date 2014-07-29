@@ -353,7 +353,6 @@ char *route_command(struct nli *nli, int who, char *rmt, char *cmd, char *buf, c
 			}
 			break;
 	}
-	printf("route command is returning %s\n", r);
 	return r;
 }
 
