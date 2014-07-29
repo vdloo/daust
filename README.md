@@ -2,9 +2,7 @@ daust
 =====
 *distributed are you still there*
 
-Never lose track of a vm or docker container again. 
-
-daust is a decentralized phone home system in the form of a Unix daemon. 
+Never lose track of a vm or docker container again. daust is a decentralized phone home system in the form of a Unix daemon. 
 
 ## Example
 
