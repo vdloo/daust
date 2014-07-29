@@ -285,7 +285,6 @@ char *broadcast_to_all(struct nli *nli, char *buf, char *uq, char *cmd)
 					r = astobfp(r, mp, temp);
 					free(temp);
 				} else {
-					r = asdtobfp(r, mp, hn, " responded:\n");
 					r = astobfp(r, mp, rbuf);
 				}
 			}
@@ -322,6 +321,7 @@ char *run_all(struct nli *nli, char *cmd, char *buf, char *uq)
 		if (check_if_trace(cmd)) {
 			r = asdtobfp(r, mp, "|", lbuf);
 		} else {
+			r = asdtobfp(r, mp, head->info->hostname, " responded:\n");
 			r = asdtobfp(r, mp, lbuf, "\n");
 		}
 		free(lbuf);
