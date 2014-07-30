@@ -90,8 +90,8 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 	FD_ZERO(&wfds);
 	FD_SET(sh, &wfds);
 
-	tv.tv_sec = 0;
-	tv.tv_usec = 200;
+	tv.tv_sec = 1;
+	tv.tv_usec = 0;
 	int rv;
 
 	if (config->verbosity) {
@@ -133,7 +133,7 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 	}
 	if (sr != 0) {
 		if (config->verbosity) {
-			perror("ERROR socket timed out (request took longer than 200ms)");
+			perror("ERROR socket timed out (request took longer than 1 second)");
 		}
 		close(sh);
 		return NULL;
