@@ -1,5 +1,4 @@
 *.Po
-*.in
 *.log
 *.m4
 *.o
@@ -10,6 +9,7 @@
 .vagrant
 /*.cache
 Makefile
+Makefile.in
 configure
 scripts/daustify
 depcomp

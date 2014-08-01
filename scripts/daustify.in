@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Run daustd and connect to the ip in the first argument. Do this
+# until the program started by the other arguments exits.
+DADDR=$1;
+shift
+daustd -d && daust remote $DADDR && $@; daust stop
