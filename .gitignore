@@ -11,6 +11,7 @@
 /*.cache
 Makefile
 configure
+scripts/daustify
 depcomp
 install-sh
 missing
