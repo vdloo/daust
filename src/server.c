@@ -26,9 +26,7 @@ char *create_response_buf(char *r)
 
 void print_declined_incoming()
 {
-	if (config->verbosity) {
-		printf("Declined incoming command\n");
-	}
+	print_verbose("Declined incoming command\n");
 }
 
 // nodelist of received and accepted commands

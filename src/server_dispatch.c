@@ -100,39 +100,27 @@ char *try_broadcast(char *dest, char *buf, char *unique) {
 
 void print_try_external()
 {
-	if (config->verbosity) {
-		printf( "Will now try the external host\n");
-	}
+	print_verbose("Will now try the external host\n");
 }
 
 void print_failed_internal()
 {
-	if (config->verbosity) {
-		printf(	"Found no matching internalhost, "
-			"will now try to match for external\n");
-	}
+	print_verbose("Found no matching internalhost, will now try to match for external\n");
 }
 
 void print_try_address()
 {
-	if (config->verbosity) {
-		printf( "Will now try to contact node by address\n");
-	}
+	print_verbose("Will now try to contact node by address\n");
 }
 
 void print_failed_external()
 {
-	if (config->verbosity) {
-		printf(	"Found no matching externalhost, "
-			"will now try to contact node by address\n");
-	}
+	print_verbose(	"Found no matching externalhost, will now try to contact node by address\n");
 }
 
 void print_failed_address()
 {
-	if (config->verbosity) {
-		printf("Could not reach node by address\n");
-	}
+	print_verbose("Could not reach node by address\n");
 }
 
 // if internalhost is found matching a hostname,

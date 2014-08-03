@@ -151,3 +151,10 @@ void dec_tc()
 	--config->threadcount;
 	print_dec_tc();
 }
+
+void print_verbose(char *str)
+{
+	if (config->verbosity) {
+		printf("%s", str);
+	}
+}

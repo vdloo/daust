@@ -20,6 +20,7 @@ void init_config();
 void terminate_config();
 void inc_tc();
 void dec_tc();
+void print_verbose(char *str);
 
 extern struct conf *config;
 #endif
