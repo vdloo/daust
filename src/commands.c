@@ -9,30 +9,16 @@
 #include "init.h"
 #include "node_data.h"
 
-void print_kill_daemon()
-{
-	if (config->verbosity) {
-		printf("Received stop command. Goodbye.\n");
-	}
-}
-
 void kill_daemon()
 {
-	print_kill_daemon();
+	print_v("Received stop command. Goodbye.\n");
 	terminate_config();
 	exit(0);
 }
 
-void print_pong()
-{
-	if (config->verbosity) {
-		printf("pong\n");
-	}
-}
-
 char *pong()
 {
-	print_pong();
+	print_v("pong\n");
 	return strdup("pong\n");
 }
 
