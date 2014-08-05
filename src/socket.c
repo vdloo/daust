@@ -94,7 +94,7 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 	tv.tv_usec = 300;
 	int rv;
 
-	print_v("blocking thread until connected\n");
+	print_verbose("blocking thread until connected\n");
 	rv = select(sh + 1, NULL, &wfds, NULL, &tv);
 	if (rv != 1) {
 		if (config->verbosity) {
@@ -113,7 +113,7 @@ char *send_packets(char *host, int port, char *buf, char *(*cb)(char *param))
 			close(sh);
 			return NULL;
 		} else {
-			print_v("connecting succesful\n");
+			print_verbose("connecting succesful\n");
 		}
 	} 
 
@@ -309,7 +309,7 @@ int receive_packets(int port, char *(*cb)(char *param))
 		ta.sh = nsh;
 		ta.cb = cb;
 		while (config->threadcount > config->maxthreads) {
-			print_v("threadcount threshold met, waiting for one to become available\n");
+			print_verbose("threadcount threshold met, waiting for one to become available\n");
 			sleep(1);
 		}
 		inc_tc();

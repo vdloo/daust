@@ -11,14 +11,14 @@
 
 void kill_daemon()
 {
-	print_v("Received stop command. Goodbye.\n");
+	print_verbose("Received stop command. Goodbye.\n");
 	terminate_config();
 	exit(0);
 }
 
 char *pong()
 {
-	print_v("pong\n");
+	print_verbose("pong\n");
 	return strdup("pong\n");
 }
 
